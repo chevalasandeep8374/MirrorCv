@@ -68,6 +68,26 @@ export default function HomePage() {
 
           <div className="flex items-center space-x-3">
             <button
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  const token = localStorage.getItem('mirrorcv_token');
+                  if (token) {
+                    localStorage.removeItem('mirrorcv_token');
+                    localStorage.removeItem('mirrorcv_user');
+                    window.location.reload();
+                  } else {
+                    router.push('/login');
+                  }
+                }
+              }}
+              className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 border border-slate-200 rounded-lg hover:bg-slate-100 transition"
+            >
+              {typeof window !== 'undefined' && localStorage.getItem('mirrorcv_token')
+                ? 'Sign Out'
+                : 'Sign In'}
+            </button>
+
+            <button
               onClick={handleCreate}
               disabled={creating}
               className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg shadow-sm transition disabled:opacity-50"
