@@ -1,0 +1,186 @@
+{
+  "$defs": {
+    "BulletItem": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "BulletItem",
+      "type": "object"
+    },
+    "ContactLink": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "url"
+      ],
+      "title": "ContactLink",
+      "type": "object"
+    },
+    "HeaderContent": {
+      "properties": {
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        },
+        "email": {
+          "default": "",
+          "title": "Email",
+          "type": "string"
+        },
+        "phone": {
+          "default": "",
+          "title": "Phone",
+          "type": "string"
+        },
+        "location": {
+          "default": "",
+          "title": "Location",
+          "type": "string"
+        },
+        "website": {
+          "default": "",
+          "title": "Website",
+          "type": "string"
+        },
+        "links": {
+          "items": {
+            "$ref": "#/$defs/ContactLink"
+          },
+          "title": "Links",
+          "type": "array"
+        }
+      },
+      "title": "HeaderContent",
+      "type": "object"
+    },
+    "ResumeSection": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "summary",
+            "experience",
+            "skills",
+            "education",
+            "projects",
+            "certifications",
+            "custom"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "visible": {
+          "default": true,
+          "title": "Visible",
+          "type": "boolean"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/SectionItem"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "title"
+      ],
+      "title": "ResumeSection",
+      "type": "object"
+    },
+    "SectionItem": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        },
+        "subtitle": {
+          "default": "",
+          "title": "Subtitle",
+          "type": "string"
+        },
+        "location": {
+          "default": "",
+          "title": "Location",
+          "type": "string"
+        },
+        "dateRange": {
+          "default": "",
+          "title": "Daterange",
+          "type": "string"
+        },
+        "bullets": {
+          "items": {
+            "$ref": "#/$defs/BulletItem"
+          },
+          "title": "Bullets",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "SectionItem",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "header": {
+      "$ref": "#/$defs/HeaderContent"
+    },
+    "sections": {
+      "items": {
+        "$ref": "#/$defs/ResumeSection"
+      },
+      "title": "Sections",
+      "type": "array"
+    }
+  },
+  "title": "ResumeContent",
+  "type": "object"
+}

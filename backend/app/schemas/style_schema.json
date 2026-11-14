@@ -1,0 +1,280 @@
+{
+  "$defs": {
+    "Colors": {
+      "properties": {
+        "accent": {
+          "default": "#2563eb",
+          "title": "Accent",
+          "type": "string"
+        },
+        "text": {
+          "default": "#111827",
+          "title": "Text",
+          "type": "string"
+        },
+        "muted": {
+          "default": "#4b5563",
+          "title": "Muted",
+          "type": "string"
+        },
+        "background": {
+          "default": "#ffffff",
+          "title": "Background",
+          "type": "string"
+        },
+        "sidebarBackground": {
+          "default": "#f8fafc",
+          "title": "Sidebarbackground",
+          "type": "string"
+        },
+        "divider": {
+          "default": "#e5e7eb",
+          "title": "Divider",
+          "type": "string"
+        }
+      },
+      "title": "Colors",
+      "type": "object"
+    },
+    "ColumnLayout": {
+      "properties": {
+        "type": {
+          "default": "single",
+          "enum": [
+            "single",
+            "sidebar_left",
+            "sidebar_right"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "sidebarWidthPercent": {
+          "default": 32.0,
+          "title": "Sidebarwidthpercent",
+          "type": "number"
+        },
+        "sidebarSectionIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sidebarsectionids",
+          "type": "array"
+        },
+        "mainSectionIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Mainsectionids",
+          "type": "array"
+        }
+      },
+      "title": "ColumnLayout",
+      "type": "object"
+    },
+    "FontSizes": {
+      "properties": {
+        "name": {
+          "default": 22.0,
+          "title": "Name",
+          "type": "number"
+        },
+        "headerTitle": {
+          "default": 12.0,
+          "title": "Headertitle",
+          "type": "number"
+        },
+        "contact": {
+          "default": 9.0,
+          "title": "Contact",
+          "type": "number"
+        },
+        "sectionHeading": {
+          "default": 13.0,
+          "title": "Sectionheading",
+          "type": "number"
+        },
+        "itemTitle": {
+          "default": 11.0,
+          "title": "Itemtitle",
+          "type": "number"
+        },
+        "itemSubtitle": {
+          "default": 10.0,
+          "title": "Itemsubtitle",
+          "type": "number"
+        },
+        "body": {
+          "default": 9.5,
+          "title": "Body",
+          "type": "number"
+        },
+        "meta": {
+          "default": 8.5,
+          "title": "Meta",
+          "type": "number"
+        },
+        "unit": {
+          "default": "pt",
+          "enum": [
+            "pt",
+            "px"
+          ],
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "title": "FontSizes",
+      "type": "object"
+    },
+    "Margins": {
+      "properties": {
+        "top": {
+          "default": 36.0,
+          "title": "Top",
+          "type": "number"
+        },
+        "bottom": {
+          "default": 36.0,
+          "title": "Bottom",
+          "type": "number"
+        },
+        "left": {
+          "default": 40.0,
+          "title": "Left",
+          "type": "number"
+        },
+        "right": {
+          "default": 40.0,
+          "title": "Right",
+          "type": "number"
+        },
+        "unit": {
+          "default": "pt",
+          "enum": [
+            "pt",
+            "px"
+          ],
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "title": "Margins",
+      "type": "object"
+    },
+    "Spacing": {
+      "properties": {
+        "sectionSpacing": {
+          "default": 14.0,
+          "title": "Sectionspacing",
+          "type": "number"
+        },
+        "itemSpacing": {
+          "default": 8.0,
+          "title": "Itemspacing",
+          "type": "number"
+        },
+        "bulletSpacing": {
+          "default": 3.0,
+          "title": "Bulletspacing",
+          "type": "number"
+        },
+        "headerBottomSpacing": {
+          "default": 16.0,
+          "title": "Headerbottomspacing",
+          "type": "number"
+        },
+        "unit": {
+          "default": "pt",
+          "enum": [
+            "pt",
+            "px"
+          ],
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "title": "Spacing",
+      "type": "object"
+    },
+    "Typography": {
+      "properties": {
+        "baseFontFamily": {
+          "default": "Inter",
+          "title": "Basefontfamily",
+          "type": "string"
+        },
+        "headingFontFamily": {
+          "default": "Inter",
+          "title": "Headingfontfamily",
+          "type": "string"
+        },
+        "fontSizes": {
+          "$ref": "#/$defs/FontSizes"
+        },
+        "lineHeight": {
+          "default": 1.45,
+          "title": "Lineheight",
+          "type": "number"
+        }
+      },
+      "title": "Typography",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "templateId": {
+      "default": "classic-single-column",
+      "title": "Templateid",
+      "type": "string"
+    },
+    "pageSize": {
+      "default": "A4",
+      "enum": [
+        "A4",
+        "Letter"
+      ],
+      "title": "Pagesize",
+      "type": "string"
+    },
+    "margins": {
+      "$ref": "#/$defs/Margins"
+    },
+    "typography": {
+      "$ref": "#/$defs/Typography"
+    },
+    "spacing": {
+      "$ref": "#/$defs/Spacing"
+    },
+    "colors": {
+      "$ref": "#/$defs/Colors"
+    },
+    "bulletStyle": {
+      "default": "disc",
+      "enum": [
+        "disc",
+        "circle",
+        "square",
+        "dash",
+        "none"
+      ],
+      "title": "Bulletstyle",
+      "type": "string"
+    },
+    "headingStyle": {
+      "default": "bar",
+      "enum": [
+        "underline",
+        "bar",
+        "plain",
+        "caps"
+      ],
+      "title": "Headingstyle",
+      "type": "string"
+    },
+    "layout": {
+      "$ref": "#/$defs/ColumnLayout"
+    }
+  },
+  "title": "ResumeStyle",
+  "type": "object"
+}

@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mirrorcv-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mirrorcv
+      POSTGRES_PASSWORD: mirrorcv_password
+      POSTGRES_DB: mirrorcv_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mirrorcv -d mirrorcv_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mirrorcv-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://mirrorcv:mirrorcv_password@postgres:5432/mirrorcv_db
+      DATABASE_URL_SYNC: postgresql://mirrorcv:mirrorcv_password@postgres:5432/mirrorcv_db
+      FRONTEND_URL: http://frontend:3000
+      JWT_SECRET: dev_super_secret_jwt_key_change_in_production_12345
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 10080
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mirrorcv-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      BACKEND_INTERNAL_URL: http://backend:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
