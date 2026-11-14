@@ -29,10 +29,9 @@ docker compose up --build
 
 ### Option 2: Running Locally
 
-#### 1. Start PostgreSQL
-```bash
-docker compose up postgres -d
-```
+#### 1. Database (PostgreSQL or Local SQLite)
+- **PostgreSQL**: `docker compose up postgres -d`
+- **SQLite (Zero-config local fallback)**: Default fallback when `DATABASE_URL` is omitted; no external container required!
 
 #### 2. Backend Setup
 ```bash
