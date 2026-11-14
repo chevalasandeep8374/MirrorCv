@@ -4,8 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import engine, Base
+from app.models import User, Resume, UploadedTemplate, TailoringJob
 from app.api.auth import router as auth_router
 from app.api.resumes import router as resumes_router
+from app.api.templates import router as templates_router
+from app.api.tailor import router as tailor_router
 
 
 @asynccontextmanager
@@ -39,6 +42,8 @@ app.add_middleware(
 # Include API routers
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(resumes_router, prefix=settings.API_V1_STR)
+app.include_router(templates_router, prefix=settings.API_V1_STR)
+app.include_router(tailor_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/health")
