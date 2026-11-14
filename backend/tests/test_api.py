@@ -157,7 +157,21 @@ async def test_resume_crud_and_json_import_export(client):
     assert import_style_res.status_code == 200
     assert import_style_res.json()["style"]["colors"]["accent"] == "#ff0000"
 
-    # 9. Delete resume
+    # 9. PDF Export Endpoint (mocked service)
+    from unittest.mock import patch
+
+    with patch(
+        "app.services.pdf_export.generate_resume_pdf",
+        return_value=b"%PDF-1.4 fake pdf data",
+    ):
+        pdf_res = await client.get(
+            f"/api/resumes/{resume_id}/export/pdf", headers=headers
+        )
+        assert pdf_res.status_code == 200
+        assert pdf_res.headers["content-type"] == "application/pdf"
+        assert b"%PDF-1.4" in pdf_res.content
+
+    # 10. Delete resume
     del_res = await client.delete(f"/api/resumes/{resume_id}", headers=headers)
     assert del_res.status_code == 204
 

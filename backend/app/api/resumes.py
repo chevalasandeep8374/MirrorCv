@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -232,3 +232,52 @@ async def import_style_json(
     await db.commit()
     await db.refresh(resume)
     return resume
+
+
+@router.get("/{resume_id}/export/pdf")
+async def export_pdf(
+    resume_id: str,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Generates and downloads PDF using Playwright headless Chromium."""
+    stmt = select(Resume).where(
+        Resume.id == resume_id, Resume.user_id == current_user.id
+    )
+    result = await db.execute(stmt)
+    resume = result.scalars().first()
+    if not resume:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Resume not found"
+        )
+
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header.replace("Bearer ", "") if "Bearer " in auth_header else ""
+
+    page_size = "A4"
+    if isinstance(resume.style, dict):
+        page_size = resume.style.get("pageSize", "A4")
+
+    try:
+        from app.services.pdf_export import generate_resume_pdf
+
+        pdf_bytes = await generate_resume_pdf(
+            resume_id=resume.id,
+            page_size=page_size,
+            auth_token=token,
+        )
+
+        clean_title = "".join(c for c in resume.title.lower() if c.isalnum() or c in (" ", "_", "-")).strip().replace(" ", "_")
+        filename = f"{clean_title or 'resume'}_{resume.id[:8]}.pdf"
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"PDF rendering failed: {str(exc)}",
+        )
+
