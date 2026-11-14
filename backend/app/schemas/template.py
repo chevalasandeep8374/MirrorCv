@@ -93,3 +93,52 @@ class ParagraphFingerprint(BaseModel):
 class DocxFingerprint(BaseModel):
     document_metadata: DocumentMetadata = Field(default_factory=DocumentMetadata)
     paragraphs: List[ParagraphFingerprint] = Field(default_factory=list)
+
+
+ParagraphRoleType = Literal[
+    "name",
+    "contact",
+    "title",
+    "section_heading",
+    "item_title",
+    "item_subtitle",
+    "item_meta",
+    "bullet",
+    "body",
+    "skill_line",
+    "other",
+]
+
+
+class ParagraphRoleAssignment(BaseModel):
+    role: ParagraphRoleType
+    confidence: float = 1.0
+    rule_matched: str = "default_rule"
+    section_id: Optional[str] = None
+    item_id: Optional[str] = None
+    bullet_id: Optional[str] = None
+    field: Optional[str] = None
+
+
+class SectionHierarchyItem(BaseModel):
+    item_id: str
+    title_para_index: Optional[int] = None
+    subtitle_para_index: Optional[int] = None
+    meta_para_indices: List[int] = Field(default_factory=list)
+    bullet_para_indices: List[int] = Field(default_factory=list)
+    body_para_indices: List[int] = Field(default_factory=list)
+
+
+class SectionHierarchy(BaseModel):
+    section_id: str
+    heading_para_index: int
+    type: str  # summary, experience, skills, education, projects, certifications, custom
+    title: str
+    items: List[SectionHierarchyItem] = Field(default_factory=list)
+
+
+class RoleMap(BaseModel):
+    paragraph_roles: Dict[int, ParagraphRoleAssignment] = Field(default_factory=dict)
+    sections_hierarchy: List[SectionHierarchy] = Field(default_factory=list)
+    content_to_paragraph_indices: Dict[str, List[int]] = Field(default_factory=dict)
+
