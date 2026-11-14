@@ -8,6 +8,45 @@ MirrorCV is an open-source, modern resume builder built with strict separation o
 - **Frontend**: Next.js 14+ (App Router), TypeScript, Tailwind CSS, `@dnd-kit` for drag-and-drop reordering.
 - **Database**: PostgreSQL 16 (JSONB columns for Resume Content and Style Tokens).
 - **Templates**: Data-driven style presets (Classic Single-Column & Modern Two-Column Sidebar).
+- **Phase 2 Tailoring Pipeline**: LangGraph orchestration with in-place XML run editing (`python-docx`/`lxml`), PyMuPDF fit loop, keyword match scoring, and side-by-side PDF comparison.
+
+---
+
+## Phase 2: Template-Preserving Tailoring
+
+Upload your existing DOCX resume and paste any Job Description. MirrorCV produces two coordinated outputs:
+1. **Fidelity Output (Visual Source of Truth)**:
+   - Edits your original master DOCX **in place** at the XML run level so all fonts, sizes, colors, and margins are preserved.
+   - Deep-copy clones paragraph XML (`w:p`) when extra bullets are required; removes unused bullets.
+   - Fit Loop checks page overflow using PyMuPDF / LibreOffice headless and iteratively compresses offending bullets.
+   - Provides direct downloads for tailored `.docx` and `.pdf`, alongside the original `.pdf`.
+2. **Editor Output**:
+   - Classifies paragraph roles and extracts Phase 1 content JSON + style tokens.
+   - Loads tailored content into the interactive `<ResumeDocument>` visual editor with full drag-and-drop support.
+
+### Phase 2 API Endpoints
+- `POST /api/templates/upload`: Upload DOCX (max 5MB), extracts fingerprint and paragraph role map.
+- `GET /api/templates/{id}/analysis`: Retrieve fingerprint summary, detected sections, and extracted style tokens.
+- `POST /api/tailor`: Launch background LangGraph tailoring job with `template_id` and `jd_text`.
+- `GET /api/tailor/{job_id}`: Poll status, change list with reasons, match score before/after, missing skills.
+- `POST /api/tailor/{job_id}/change/{change_id}`: Accept/reject an individual bullet change and recalculate outputs.
+- `GET /api/tailor/{job_id}/docx`: Download tailored high-fidelity DOCX.
+- `GET /api/tailor/{job_id}/pdf`: Download tailored high-fidelity PDF.
+- `GET /api/tailor/{job_id}/original-pdf`: Download original resume PDF for side-by-side preview.
+
+---
+
+## Verification & Testing
+
+MirrorCV includes a comprehensive test suite across single-column, two-column table, and text-box layouts:
+
+```bash
+# Run all unit and integration tests (16 tests)
+py -3.12 -m pytest backend/tests/ -v
+
+# Run live end-to-end integration script against running backend
+py -3.12 backend/tests/verify_e2e.py
+```
 
 ---
 

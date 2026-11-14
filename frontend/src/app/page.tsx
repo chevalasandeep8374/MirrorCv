@@ -67,6 +67,14 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center space-x-3">
+            <Link
+              href="/tailor"
+              className="inline-flex items-center space-x-2 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-lg shadow-sm transition"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Tailor from DOCX</span>
+            </Link>
+
             <button
               onClick={() => {
                 if (typeof window !== 'undefined') {
@@ -105,6 +113,29 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-6 py-10 flex-1 w-full">
+        {/* Phase 2 Banner */}
+        <div className="mb-10 p-6 rounded-2xl bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 text-white shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-1">
+            <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-semibold border border-indigo-500/30">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Phase 2 Feature: Template-Preserving Tailor</span>
+            </div>
+            <h2 className="text-xl font-bold tracking-tight text-white pt-1">
+              Upload your DOCX resume & tailor for any Job Description
+            </h2>
+            <p className="text-sm text-indigo-200 max-w-xl">
+              MirrorCV preserves your exact document formatting in-place (same fonts, sizes, margins, bullets) while tailoring your content and loading it into the visual editor.
+            </p>
+          </div>
+          <Link
+            href="/tailor"
+            className="inline-flex items-center space-x-2 px-5 py-2.5 bg-white text-indigo-950 hover:bg-indigo-50 font-semibold text-sm rounded-xl shadow transition shrink-0"
+          >
+            <span>Start Tailoring</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
         <div className="mb-8">
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
             My Resumes
