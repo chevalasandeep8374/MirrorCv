@@ -144,11 +144,24 @@ def _parse_inline_markdown(text: str) -> List[Dict[str, Any]]:
     return tokens
 
 
-def set_slot_text(p: Paragraph, text_with_markup: str) -> None:
+def set_slot_text(p: Paragraph, text_with_markup: str, literal_prefix: Optional[str] = None) -> None:
     """Replaces text in the given paragraph while preserving run-level styling
-
     (font family, size, color) and applying inline bold/italic/link markup.
+    If literal_prefix is provided or detected, re-attaches it to the front of the text.
     """
+    if literal_prefix is None and p.text:
+        numPr = p._p.find(qn("w:pPr"))
+        has_numpr = numPr is not None and numPr.find(qn("w:numPr")) is not None
+        if not has_numpr:
+            m = re.match(r"^([\u2022\u25E6\u25AA\u25AB\u2013\u2014\-*\uf0b7]\s*)", p.text)
+            if m:
+                literal_prefix = m.group(1)
+
+    if literal_prefix:
+        clean_prefix = literal_prefix.strip()
+        if not text_with_markup.startswith(clean_prefix):
+            text_with_markup = literal_prefix + text_with_markup.lstrip()
+
     if p.text == text_with_markup:
         return
 
@@ -179,9 +192,12 @@ def set_slot_text(p: Paragraph, text_with_markup: str) -> None:
             return
 
     # 3. General path with markdown parsing or multiple runs
-    proto_rPr = None
-    if p.runs and p.runs[0]._r.rPr is not None:
-        proto_rPr = copy.deepcopy(p.runs[0]._r.rPr)
+    # Collect all available prototype rPr elements from original runs before removal
+    proto_rprs: List[etree._Element] = []
+    for r in p.runs:
+        rpr = r._r.find(qn("w:rPr"))
+        if rpr is not None:
+            proto_rprs.append(copy.deepcopy(rpr))
 
     # Clear all existing runs safely from XML
     for r in list(p.runs):
@@ -192,19 +208,50 @@ def set_slot_text(p: Paragraph, text_with_markup: str) -> None:
         if not txt:
             continue
         new_run = p.add_run(txt)
-        if proto_rPr is not None:
+
+        is_bold = bool(t.get("bold"))
+        is_italic = bool(t.get("italic"))
+
+        # Find matching prototype if available
+        matched_proto = None
+        for pr in proto_rprs:
+            b_tag = pr.find(qn("w:b"))
+            has_b = b_tag is not None and b_tag.attrib.get(qn("w:val"), "1") not in ("0", "false", "off")
+            i_tag = pr.find(qn("w:i"))
+            has_i = i_tag is not None and i_tag.attrib.get(qn("w:val"), "1") not in ("0", "false", "off")
+            if has_b == is_bold and has_i == is_italic:
+                matched_proto = copy.deepcopy(pr)
+                break
+
+        if matched_proto is None and proto_rprs:
+            # Copy first prototype and adjust tags directly without adding val="0" pollution
+            matched_proto = copy.deepcopy(proto_rprs[0])
+            b_tag = matched_proto.find(qn("w:b"))
+            if is_bold:
+                if b_tag is None:
+                    matched_proto.insert(0, etree.Element(qn("w:b")))
+            else:
+                if b_tag is not None:
+                    matched_proto.remove(b_tag)
+
+            i_tag = matched_proto.find(qn("w:i"))
+            if is_italic:
+                if i_tag is None:
+                    matched_proto.append(etree.Element(qn("w:i")))
+            else:
+                if i_tag is not None:
+                    matched_proto.remove(i_tag)
+
+        if matched_proto is not None:
             # WordprocessingML (ECMA-376) strictly requires w:rPr before w:t
-            new_run._r.insert(0, copy.deepcopy(proto_rPr))
-
-        if t.get("bold"):
-            new_run.bold = True
-        elif t.get("bold") is False:
-            new_run.bold = False
-
-        if t.get("italic"):
-            new_run.italic = True
-        elif t.get("italic") is False:
-            new_run.italic = False
+            new_run._r.insert(0, matched_proto)
+        elif is_bold or is_italic:
+            new_rpr = etree.Element(qn("w:rPr"))
+            if is_bold:
+                new_rpr.append(etree.Element(qn("w:b")))
+            if is_italic:
+                new_rpr.append(etree.Element(qn("w:i")))
+            new_run._r.insert(0, new_rpr)
 
 
 def clone_slot(prototype_p: Paragraph, insert_after_p: Paragraph, text_with_markup: str) -> Paragraph:
@@ -462,6 +509,10 @@ def write_tailored_docx_repackaged(
                 if getattr(sinfo, "section_id", None):
                     content_to_slot.setdefault(sinfo.section_id, sid)
 
+    slot_objs: Dict[str, Any] = {}
+    if template_profile and getattr(template_profile, "slots", None):
+        slot_objs = {s.slot_id: s for s in template_profile.slots}
+
     # Normalize operations list
     raw_ops = operations.operations if hasattr(operations, "operations") else operations
     norm_ops: List[Dict[str, Any]] = []
@@ -480,7 +531,8 @@ def write_tailored_docx_repackaged(
             sid = op.get("slot_id") or content_to_slot.get(op.get("target_content_id"))
             text = op.get("text")
             if sid and sid in slot_to_elem and text is not None:
-                set_slot_text(slot_to_elem[sid], text)
+                prefix = getattr(slot_objs.get(sid), "literal_prefix", None) if slot_objs else None
+                set_slot_text(slot_to_elem[sid], text, literal_prefix=prefix)
 
     # Phase 2: Paragraph reordering
     for op in norm_ops:

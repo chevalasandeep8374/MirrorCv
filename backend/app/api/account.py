@@ -8,12 +8,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 
 from app.database import get_db
+from app.config import settings
 from app.models.user import User
 from app.models.resume import Document
 from app.models.document_version import DocumentVersion
 from app.models.share import ShareLink, ShareView
 from app.models.user_preset import UserStylePreset
 from app.models.ai_log import AiUsageLog
+from app.models.composition import Composition
 from app.api.deps import get_current_user
 from app.services.auth import (
     hash_password,
@@ -334,12 +336,14 @@ async def delete_my_data(
     # 2. Local Database Cascade Deletions
     await db.execute(delete(AiUsageLog).where(AiUsageLog.user_id == user_id))
     await db.execute(delete(UserStylePreset).where(UserStylePreset.user_id == user_id))
+    await db.execute(delete(Composition).where(Composition.user_id == user_id))
     res = await db.execute(delete(Document).where(Document.user_id == user_id))
     deletion_manifest["database_records_deleted"] += res.rowcount or 0
 
     await db.commit()
 
     return {
+        "status": "success",
         "message": "All personal data, vector embeddings, storage files, and resumes have been permanently purged.",
         "manifest": deletion_manifest,
     }
@@ -363,6 +367,7 @@ async def delete_account(
     # Cascade delete across all tables
     await db.execute(delete(AiUsageLog).where(AiUsageLog.user_id == user_id))
     await db.execute(delete(UserStylePreset).where(UserStylePreset.user_id == user_id))
+    await db.execute(delete(Composition).where(Composition.user_id == user_id))
 
     # Find and delete resumes (which cascades to versions & share links via FK constraints)
     await db.execute(delete(Document).where(Document.user_id == user_id))

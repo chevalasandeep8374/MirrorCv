@@ -178,7 +178,8 @@
             "enum": ["rule", "llm", "user_override"]
           },
           "is_clonable": { "type": "boolean" },
-          "prototype_xml_path": { "type": ["string", "null"] }
+          "prototype_xml_path": { "type": ["string", "null"] },
+          "literal_prefix": { "type": ["string", "null"] }
         },
         "additionalProperties": false
       }

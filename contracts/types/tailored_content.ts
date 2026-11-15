@@ -63,6 +63,7 @@ export interface TailoredChange {
   risk_level?: RiskLevel;
   status: ChangeStatus;
   rejection_reason?: string | null;
+  gates_tripped?: string[];
   generator?: GeneratorMetadata;
 
   // 1.0.0 backward-compatibility fields

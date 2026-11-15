@@ -93,13 +93,13 @@ async def test_live_supabase_compose_store_sign_download_cascade(tmp_path):
     assert len(docx_bytes) > 0
 
     # -------------------------------------------------------------
-    # Step 3: Store to Supabase Storage 'exports' bucket (RLS enforced)
+    # Step 3a: Prove user JWT CANNOT upload directly to 'exports' bucket (403/Forbidden)
     # -------------------------------------------------------------
     storage_subpath = f"{user_id}/{resume_id}/{comp_id}/tailored_resume.docx"
     upload_url = f"{SUPABASE_URL}/storage/v1/object/exports/{storage_subpath}"
 
     async with httpx.AsyncClient(timeout=30.0) as client:
-        upload_resp = await client.post(
+        user_forbidden_resp = await client.post(
             upload_url,
             headers={
                 **user_headers,
@@ -107,7 +107,27 @@ async def test_live_supabase_compose_store_sign_download_cascade(tmp_path):
             },
             content=docx_bytes,
         )
-        assert upload_resp.status_code in (200, 201), f"Storage upload failed: {upload_resp.text}"
+        assert user_forbidden_resp.status_code in (400, 403), (
+            f"Expected user upload to 'exports' to fail RLS with 403 Forbidden, but got: {user_forbidden_resp.status_code}"
+        )
+        assert "row-level security" in user_forbidden_resp.text.lower() or "unauthorized" in user_forbidden_resp.text.lower() or "accessdenied" in user_forbidden_resp.text.lower(), (
+            f"Expected RLS AccessDenied error message, got: {user_forbidden_resp.text}"
+        )
+
+        # -------------------------------------------------------------
+        # Step 3b: Write exports via backend (with backend authority header)
+        # -------------------------------------------------------------
+        backend_headers = {
+            **user_headers,
+            "x-mirrorcv-role": "backend_worker",
+            "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        }
+        upload_resp = await client.post(
+            upload_url,
+            headers=backend_headers,
+            content=docx_bytes,
+        )
+        assert upload_resp.status_code in (200, 201), f"Backend storage upload failed: {upload_resp.text}"
 
         # -------------------------------------------------------------
         # Step 4: Generate Signed Download URL (600s expiry)
@@ -149,11 +169,11 @@ async def test_live_supabase_compose_store_sign_download_cascade(tmp_path):
         assert any(f.get("name") == "tailored_resume.docx" for f in listed_files)
 
         # -------------------------------------------------------------
-        # Step 7: Delete Live Storage Object (RLS storage_delete_own enforced)
+        # Step 7: Delete Storage Object via backend (users cannot delete from exports)
         # -------------------------------------------------------------
         del_storage_resp = await client.delete(
             upload_url,
-            headers=user_headers,
+            headers={**user_headers, "x-mirrorcv-role": "backend_worker"},
         )
         assert del_storage_resp.status_code in (200, 204), f"Storage delete failed: {del_storage_resp.text}"
 

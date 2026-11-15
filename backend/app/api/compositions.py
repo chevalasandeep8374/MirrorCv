@@ -97,7 +97,9 @@ async def trigger_composition(
                     tp_url = f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/template_profiles?resume_id=eq.{resume_id}&user_id=eq.{user_id}&select=*"
                     tp_res = await client.get(tp_url, headers=headers)
                     if tp_res.status_code == 200 and tp_res.json():
-                        tp_row = tp_res.json()[0]
+                        rows = tp_res.json()
+                        rows.sort(key=lambda r: float(r.get("fidelity_score") or 0.0), reverse=True)
+                        tp_row = rows[0]
                         template_profile_data = tp_row.get("profile")
 
         except Exception as e:
@@ -134,6 +136,7 @@ async def trigger_composition(
         accepted_changes=accepted,
         original_content=original_content,
         confirmed_bullet_removals=confirmed_removals,
+        user_token=user_token,
     )
 
     # Write to compositions table
@@ -162,11 +165,14 @@ async def trigger_composition(
 @router.get("/{composition_id}", response_model=Dict[str, Any])
 async def get_composition(
     composition_id: str,
+    request: Request = None,
     current_user: CurrentUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Retrieves an existing composition result with fresh 10-minute signed download URLs."""
     user_id = current_user.id
+    auth_header = request.headers.get("Authorization", "") if request else ""
+    user_token = auth_header.replace("Bearer ", "") if "Bearer " in auth_header else None
 
     stmt = select(Composition).where(Composition.id == composition_id, Composition.user_id == user_id)
     res = await db.execute(stmt)
@@ -182,7 +188,7 @@ async def get_composition(
         for f in comp_data["output_files"]:
             storage_path = f.get("storage_path")
             if storage_path:
-                fresh_url = await generate_signed_storage_url("exports", storage_path, expires_in=600)
+                fresh_url = await generate_signed_storage_url("exports", storage_path, expires_in=600, user_token=user_token)
                 f["download_url"] = fresh_url
 
     return comp_data
@@ -191,6 +197,7 @@ async def get_composition(
 @router.post("/{composition_id}/acknowledge-overflow", response_model=Dict[str, Any])
 async def acknowledge_layout_overflow(
     composition_id: str,
+    request: Request = None,
     current_user: CurrentUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -200,6 +207,8 @@ async def acknowledge_layout_overflow(
     Blocked if integrity report failed (invariants 1-6, 8, or container clipping).
     """
     user_id = current_user.id
+    auth_header = request.headers.get("Authorization", "") if request else ""
+    user_token = auth_header.replace("Bearer ", "") if "Bearer " in auth_header else None
 
     stmt = select(Composition).where(Composition.id == composition_id, Composition.user_id == user_id)
     res = await db.execute(stmt)
@@ -221,7 +230,7 @@ async def acknowledge_layout_overflow(
         for f in comp_data["output_files"]:
             storage_path = f.get("storage_path")
             if storage_path:
-                fresh_url = await generate_signed_storage_url("exports", storage_path, expires_in=600)
+                fresh_url = await generate_signed_storage_url("exports", storage_path, expires_in=600, user_token=user_token)
                 f["download_url"] = fresh_url
 
     return comp_data

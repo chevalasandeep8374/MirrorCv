@@ -20,6 +20,7 @@ from contracts.models.tailored_content import (
 )
 from app.schemas.tailoring import JDAnalysis
 from app.services.skill_taxonomy import skill_taxonomy_service
+from app.services.taxonomy_data import REVIEWED_TECHNICAL_CATEGORIES
 from app.services.resume_inventory import ResumeInventory, build_resume_inventory
 
 
@@ -96,8 +97,13 @@ def compute_match_score(
                 if w_norm.is_mapped and w_norm.category != "Other":
                     master_skill_map[w_norm.canonical_name.lower()] = mi.get("id", "master_item")
 
-    # 1. Required Skill Coverage (40%)
-    req_skills = [s for s in jd.required_skills if s]
+    # 1. Required Skill Coverage (40%) - Restrict to reviewed technical categories
+    vetted_req = [
+        s for s in jd.required_skills
+        if s and skill_taxonomy_service.normalize_term(s).status == "approved"
+        and skill_taxonomy_service.normalize_term(s).category in REVIEWED_TECHNICAL_CATEGORIES
+    ]
+    req_skills = vetted_req if vetted_req else [s for s in jd.required_skills if s]
     matched_req = []
     missing_req = []
 
@@ -154,8 +160,13 @@ def compute_match_score(
 
     req_coverage_score = round(40.0 * (len(matched_req) / max(1, len(req_skills))), 2)
 
-    # 2. Preferred Skill Coverage (15%)
-    pref_skills = [s for s in jd.preferred_skills if s]
+    # 2. Preferred Skill Coverage (15%) - Restrict to reviewed technical categories
+    vetted_pref = [
+        s for s in jd.preferred_skills
+        if s and skill_taxonomy_service.normalize_term(s).status == "approved"
+        and skill_taxonomy_service.normalize_term(s).category in REVIEWED_TECHNICAL_CATEGORIES
+    ]
+    pref_skills = vetted_pref if vetted_pref else [s for s in jd.preferred_skills if s]
     matched_pref = []
     for s in pref_skills:
         s_norm = skill_taxonomy_service.normalize_term(s)

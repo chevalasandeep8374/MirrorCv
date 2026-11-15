@@ -353,3 +353,8 @@ APPROVED_TECHNICAL_TAXONOMY: List[Dict[str, Any]] = [
     {"canonical_name": "Bash Scripting", "aliases": ["shell scripting", "bash script"], "category": "Tools & Methods", "role_families": ["devops", "systems"], "status": "approved"},
     {"canonical_name": "Linux System Administration", "aliases": ["sysadmin", "system administration"], "category": "Operating Systems", "role_families": ["systems"], "status": "approved"},
 ]
+
+# Set of strictly vetted technical categories for match scoring
+REVIEWED_TECHNICAL_CATEGORIES: set[str] = {
+    entry["category"] for entry in APPROVED_TECHNICAL_TAXONOMY if entry.get("status") == "approved"
+}

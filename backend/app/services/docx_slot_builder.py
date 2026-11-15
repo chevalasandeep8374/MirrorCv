@@ -5,6 +5,7 @@ budgets, and item blocks for Agent 3.
 """
 
 import os
+import re
 import uuid
 import logging
 from typing import List, Dict, Optional, Any
@@ -212,6 +213,15 @@ def build_template_profile(
         slot_sec_id = assignment.section_id or "sec-header"
         slot_item_id = assignment.item_id or f"item-{p.index}"
 
+        # Extract literal bullet prefix if not a Word native numPr list
+        literal_prefix = None
+        if p.bullet_info and p.bullet_info.is_bullet and p.bullet_info.num_id is None:
+            bullet_match = re.match(r"^([\u2022\u25E6\u25AA\u25AB\u2013\u2014\-*\uf0b7]\s*)", p.text)
+            if bullet_match:
+                literal_prefix = bullet_match.group(1)
+            elif p.bullet_info.bullet_char:
+                literal_prefix = f"{p.bullet_info.bullet_char} "
+
         slot = Slot(
             slot_id=slot_id,
             section_id=slot_sec_id,
@@ -232,6 +242,7 @@ def build_template_profile(
             classification_source=ClassificationSource.rule,
             is_clonable=is_clonable,
             prototype_xml_path=f"/w:document/w:body/w:p[{p.index + 1}]",
+            literal_prefix=literal_prefix,
         )
         slots.append(slot)
 

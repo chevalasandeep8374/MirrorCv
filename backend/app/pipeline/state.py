@@ -10,6 +10,7 @@ from contracts.models.composition_result import CompositionResult
 class PipelineRunState(TypedDict, total=False):
     run_id: str
     user_id: str
+    user_token: Optional[str]
     resume_id: str
     job_description_id: Optional[str]
     job_description_text: str

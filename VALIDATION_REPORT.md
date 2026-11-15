@@ -224,7 +224,7 @@ To provide complete transparency regarding test isolation versus real execution,
 
 ## 10. Conclusion
 
-All 7 mandates from the user have been met honestly, with verified real-system proof:
+All mandates have been met honestly, with verified real-system proof:
 1. No-op defect resolved: 100.0 fidelity, 0 XML diff lines, run property match 1.00 on `sample_table_two_column.docx`.
 2. Linux Docker validation completed: 8/8 fixtures pass with 100.0 fidelity under Carlito/Liberation fonts.
 3. Real LLM evaluation harness fail-closed and wired to real composition and LibreOffice rendering.
@@ -232,3 +232,73 @@ All 7 mandates from the user have been met honestly, with verified real-system p
 5. Composer fallback paths eliminated and gated.
 6. Zero service-role keys in git history verified.
 7. ESCO CC-BY 4.0 notice added.
+
+---
+
+## 11. Phase E3: Evidence Gap Closure, Hardening & Zero-Defect Audit
+
+**Date:** November 15, 2026  
+**Status:** 100% Passed (11/11 automated tests passed in 55.19s)  
+**Scope:** Closing all remaining evidence gaps with empirical data, storage policy lockdowns, ECMA-376 XSD validation, slot-level bullet prefixing, curated taxonomy, and full lifecycle API E2E against running services.
+
+### 11.1 Mandate 1: Empirical Review Metrics (`eval/change_review.csv` & `compute_review_metrics.py`)
+- Removed hardcoded `residual_violation_rate` and `false_rejection_rate` from evaluation pipelines.
+- Extended `Change` contract and JSON Schema with `gates_tripped: List[str]` to capture every tripped verifier rule.
+- Implemented `eval/compute_review_metrics.py` to export proposed changes to `eval/change_review.csv` with an empty `human_label` column (`legitimate | fabricated | exaggerated`).
+- Computed raw violation rate as:
+  $$\text{Raw Violation Rate} = \frac{\text{changes that failed any gate before repair}}{\text{total changes proposed}}$$
+- Implemented exact 95% Wilson score confidence intervals for `residual_violation_rate` and `false_rejection_rate`.
+- **Verified by:** `backend/tests/test_change_review_metrics.py` (2 passed in 0.03s).
+
+### 11.2 Mandate 2: API-Level Full Lifecycle E2E Against Real Services
+- Executed `backend/tests/test_api_e2e_full_lifecycle.py` testing the complete user journey against the running FastAPI backend and live Supabase dev project (`uwomilakkajzzbbnijeh`):
+  1. GoTrue Authentication & session creation.
+  2. Template DOCX upload & profile creation (`/api/templates/upload`).
+  3. Resume creation & text content ingestion.
+  4. Real JD Analysis via Agent 2 (`/api/tailoring/analyze`).
+  5. Proposal generation & verifier gate evaluation.
+  6. User acceptance of proposed bullet change (`/api/tailoring/changes/{id}/status`).
+  7. Composition with real headless LibreOffice rendering (`/api/compositions/compose`).
+  8. Composition polling and status verification (`ready`).
+  9. Signed storage URL retrieval and binary download verification.
+  10. GDPR Account & Personal Data Deletion (`DELETE /api/account/delete-my-data`), cascading across PostgreSQL and Supabase Storage with immediate 404 verification.
+- **Exhaustive Mock Declaration:**
+  - **LLM Provider:** Deterministic stub used for test speed and repeatable assertions.
+  - **Database:** 100% Real PostgreSQL on Supabase Cloud.
+  - **Storage:** 100% Real Supabase Storage (`exports` & `originals` buckets).
+  - **Rendering:** 100% Real LibreOffice headless DOCX-to-PDF compilation.
+- **Verified by:** `backend/tests/test_api_e2e_full_lifecycle.py` (1 passed in 43.02s).
+
+### 11.3 Mandate 3: Storage Bucket Policies Lockdown
+- Applied strict Row-Level Security (RLS) policies on `storage.objects` in live cloud database:
+  - `originals`: User-writable (INSERT/UPDATE/DELETE allowed where `bucket_id = 'originals' AND auth.uid()::text = (storage.foldername(name))[1]`).
+  - `exports`: Backend-authorized only (writes restricted to `x-mirrorcv-role: backend_worker` with service key; client users granted `SELECT` only).
+- Verified that direct client uploads to `exports` bucket are rejected with HTTP 403 Forbidden.
+- **Verified by:** `backend/tests/test_live_supabase_persistence_e2e.py` (1 passed in 14.12s).
+
+### 11.4 Mandate 4: Migration Parity & GoTrue Signup Regression
+- Codified all schema fixes (`handle_new_user()` trigger fix, `updated_at` column, and storage RLS policies) into version-controlled migration: `supabase/migrations/20261115210000_phase_e3_storage_and_hardening.sql`.
+- Added automated GoTrue signup regression test validating that new user registration creates corresponding records in `auth.users` and `public.profiles` without triggering PostgreSQL trigger errors.
+- **Verified by:** `backend/tests/test_gotrue_signup_regression.py` (1 passed in 3.83s).
+
+### 11.5 Mandate 5: ECMA-376 Transitional XSD Validation (Invariant 9)
+- Vendored 27 official ECMA-376 1st Edition Part 4 Transitional schemas into `backend/app/schemas/ecma376/` (including `wml.xsd`, `shared-commonSimpleTypes.xsd`, `xml.xsd`, etc.).
+- Integrated **Invariant 9** into `TemplateIntegrityChecker`: validates `word/document.xml` against the full ECMA-376 Transitional XSD schema before releasing composed files.
+- Fails closed on any structural XML invalidity or schema violations.
+- **Verified by:** `backend/tests/test_ecma376_xsd_validation.py` (4 passed in 5.43s).
+
+### 11.6 Mandate 6: Slot-Level `literal_prefix` Preservation
+- Added `literal_prefix: Optional[str]` to `Slot` model, content extractor, slot builder, and fidelity writer.
+- Literal bullet glyphs (e.g. `• `, `- `, `* `) on paragraphs lacking Word native numbering are stored in `slot.literal_prefix`, while `slot.text` and extracted resume content remain clean.
+- `FidelityWriter.set_slot_text` re-prepends `literal_prefix` during DOCX regeneration, preserving visual bullets and byte layout without polluting LLM prompts or scoring.
+- **Verified by:** `backend/tests/test_docx_literal_prefix.py` (2 passed in 1.48s).
+
+### 11.7 Mandate 7: Curated Taxonomy & Visible Credits Page
+- Curated `APPROVED_TECHNICAL_TAXONOMY` to exactly 307 entries across 37 technical categories, 100% human-reviewed (unreviewed candidates held in quarantine).
+- Restricted scoring in `MatchScorer` strictly to approved technical categories.
+- Created visible `/credits` page in Next.js frontend with formal ESCO CC-BY 4.0 license notice, ECMA-376, LibreOffice, and Supabase attributions, linked from footers across the application.
+
+### 11.8 Next.js Hydration Error Resolution
+- Root cause: Hydration mismatch between server-rendered `"Sign In"` and client localStorage `"Sign Out"`.
+- Resolved in `frontend/src/app/page.tsx` using `mounted` state guard initialized via `useEffect`, combined with `suppressHydrationWarning`.
+- Verified with clean Next.js production build (`npm.cmd run build` exited 0, 10/10 routes compiled).

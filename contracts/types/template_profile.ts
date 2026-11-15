@@ -98,6 +98,7 @@ export interface TextSlot {
   classification_source?: 'rule' | 'llm' | 'user_override';
   is_clonable?: boolean;
   prototype_xml_path?: string | null;
+  literal_prefix?: string | null;
 }
 
 export interface SlotMapTarget {

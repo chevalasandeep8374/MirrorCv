@@ -281,6 +281,12 @@ class TailorVerifier:
         if change.status == ChangeStatus.accepted:
             change.status = ChangeStatus.proposed
 
+        def _record_failure(res: VerificationResult) -> VerificationResult:
+            if not res.is_valid and res.gate_failed:
+                if res.gate_failed not in change.gates_tripped:
+                    change.gates_tripped.append(res.gate_failed)
+            return res
+
         # hide_item and add_item_from_master_profile are medium risk
         if change.type in (ChangeType.hide_item, ChangeType.add_item_from_master_profile):
             change.risk_level = RiskLevel.medium
@@ -288,23 +294,23 @@ class TailorVerifier:
         # add_item_from_master_profile requires explicit confirmed evidence from master profile
         if change.type == ChangeType.add_item_from_master_profile:
             if not change.evidence_ids:
-                return VerificationResult(
+                return _record_failure(VerificationResult(
                     is_valid=False,
                     rejection_reason="add_item_from_master_profile requires confirmed evidence_ids from master profile.",
                     gate_failed="missing_master_profile_evidence",
                     is_repairable=False,
-                )
+                ))
             if not confirmed_evidence_text:
-                return VerificationResult(
+                return _record_failure(VerificationResult(
                     is_valid=False,
                     rejection_reason="No confirmed master profile items available to corroborate added item.",
                     gate_failed="unconfirmed_master_item",
                     is_repairable=False,
-                )
+                ))
 
         # Handle Reorder Changes (Gate e: Reordering)
         if change.type in (ChangeType.reorder_bullets, ChangeType.reorder_items, ChangeType.reorder_skills):
-            return self._verify_reorder(change)
+            return _record_failure(self._verify_reorder(change))
 
         after_text = str(change.after or "")
         before_text = str(change.before or "")
@@ -312,32 +318,32 @@ class TailorVerifier:
         # 0. Prompt Injection & Adversarial Attack Gate
         injection_result = self._check_prompt_injection(after_text)
         if not injection_result.is_valid:
-            return injection_result
+            return _record_failure(injection_result)
 
         # Gate d1: Disallowed HTML Markup
         markup_result = self._check_markup(after_text)
         if not markup_result.is_valid:
-            return markup_result
+            return _record_failure(markup_result)
 
         # Gate d2: Link URLs authorization
         url_result = self._check_links(after_text, before_text, resume_content, confirmed_evidence_text)
         if not url_result.is_valid:
-            return url_result
+            return _record_failure(url_result)
 
         # Gate f: Elevation & Ownership Verbs / Scope Expansion
         verb_result = self._check_elevation_verbs(after_text, before_text, confirmed_evidence_text)
         if not verb_result.is_valid:
-            return verb_result
+            return _record_failure(verb_result)
 
         # Gate a: Numbers & Metrics Verification
         number_result = self._check_numbers(after_text, before_text, confirmed_evidence_text)
         if not number_result.is_valid:
-            return number_result
+            return _record_failure(number_result)
 
         # Gate d3: Line Budget & Font Measurement
         budget_result = self._check_line_budget(after_text, slot_or_params, max_lines)
         if not budget_result.is_valid:
-            return budget_result
+            return _record_failure(budget_result)
 
         # Gate b & c: Entities and Skills (Job description is NEVER evidence)
         entity_result = self._check_entities_and_skills(
@@ -348,26 +354,26 @@ class TailorVerifier:
             confirmed_evidence_text=confirmed_evidence_text,
         )
         if not entity_result.is_valid:
-            return entity_result
+            return _record_failure(entity_result)
 
         # Gate g1: Scale & Quality Claims Verification
         scale_result = self._check_scale_and_quality_claims(after_text, before_text, resume_content, confirmed_evidence_text)
         if not scale_result.is_valid:
-            return scale_result
+            return _record_failure(scale_result)
 
         # Gate g2: Novel-term gate (Function words + 5 neutral verbs whitelist)
         novelty_result = self._check_novel_terms(after_text, before_text, resume_content, confirmed_evidence_text, source_inventory_skills)
         if not novelty_result.is_valid:
-            return novelty_result
+            return _record_failure(novelty_result)
 
         # Gate e2: Keyword Stuffing (Max 2 newly emphasized keywords)
         if len(change.keywords_touched) > 2:
-            return VerificationResult(
+            return _record_failure(VerificationResult(
                 is_valid=False,
                 rejection_reason=f"Exceeded keyword limit: {len(change.keywords_touched)} touched (max 2 allowed per change).",
                 gate_failed="keyword_stuffing",
                 is_repairable=True,
-            )
+            ))
 
         # Gate h: Secondary LLM Entailment & Exaggeration Check
         entailment_res = self._check_llm_entailment(after_text, before_text, confirmed_evidence_text)
@@ -376,13 +382,13 @@ class TailorVerifier:
             msg = f"LLM Entailment check flagged: {entailment_res.reason}"
             logger.warning(f"Entailment disagreement: {msg}")
             disagreements.append(msg)
-            return VerificationResult(
+            return _record_failure(VerificationResult(
                 is_valid=False,
                 rejection_reason=entailment_res.reason,
                 gate_failed="entailment_check",
                 is_repairable=True,
                 disagreements=disagreements,
-            )
+            ))
 
         return VerificationResult(is_valid=True, disagreements=disagreements)
 

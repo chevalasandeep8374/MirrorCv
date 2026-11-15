@@ -480,20 +480,26 @@ def check_template_integrity(
     edited_slot_ids = set()
     if accepted_changes:
         for c in accepted_changes:
-            sid = getattr(c, "slot_id", None) or getattr(c, "target_content_id", None)
-            if sid:
-                edited_slot_ids.add(sid)
+            if hasattr(c, "slot_id") and c.slot_id:
+                edited_slot_ids.add(c.slot_id)
+            if hasattr(c, "target_content_id") and c.target_content_id:
+                edited_slot_ids.add(c.target_content_id)
+            if hasattr(c, "target_id") and c.target_id:
+                edited_slot_ids.add(c.target_id)
             if isinstance(c, dict):
-                sid = c.get("slot_id") or c.get("target_content_id")
-                if sid:
-                    edited_slot_ids.add(sid)
+                if c.get("slot_id"):
+                    edited_slot_ids.add(c.get("slot_id"))
+                if c.get("target_content_id"):
+                    edited_slot_ids.add(c.get("target_content_id"))
+                if c.get("target_id"):
+                    edited_slot_ids.add(c.get("target_id"))
 
     # Expand edited_slot_ids using slot_map bindings
     if template_profile and template_profile.slot_map:
         for s_id, s_info in template_profile.slot_map.items():
-            b_id = getattr(s_info, "bullet_id", None)
-            i_id = getattr(s_info, "item_id", None)
-            sec_id = getattr(s_info, "section_id", None)
+            b_id = getattr(s_info, "bullet_id", None) or (s_info.get("bullet_id") if isinstance(s_info, dict) else None)
+            i_id = getattr(s_info, "item_id", None) or (s_info.get("item_id") if isinstance(s_info, dict) else None)
+            sec_id = getattr(s_info, "section_id", None) or (s_info.get("section_id") if isinstance(s_info, dict) else None)
             if (b_id and b_id in edited_slot_ids) or (i_id and i_id in edited_slot_ids) or (sec_id and sec_id in edited_slot_ids):
                 edited_slot_ids.add(s_id)
 
@@ -584,6 +590,25 @@ def check_template_integrity(
             name="Container Clipping: Zero clipped text in textboxes/fixed table cells",
             passed=clipping_passed,
             details="Zero clipped container slots" if clipping_passed else "Text box or table cell clipping detected",
+        )
+    )
+
+    # -------------------------------------------------------------
+    # Invariant 9: ECMA-376 Transitional XSD Schema Validation
+    # -------------------------------------------------------------
+    from app.services.docx_schema_validator import validate_docx_document_xml_xsd
+
+    xsd_valid, xsd_errors = validate_docx_document_xml_xsd(tailored_docx_path)
+    if not xsd_valid:
+        violations.append(
+            f"Invariant 9 Failed: ECMA-376 XSD validation failed ({len(xsd_errors)} errors): {'; '.join(xsd_errors[:3])}"
+        )
+
+    checks.append(
+        InvariantCheck(
+            name="Invariant 9: ECMA-376 Transitional XSD validation",
+            passed=xsd_valid,
+            details=f"Valid against ECMA-376 schemas: {xsd_valid} ({len(xsd_errors)} errors)",
         )
     )
 

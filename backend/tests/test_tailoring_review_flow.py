@@ -4,6 +4,7 @@ live fit estimation, batch low-risk acceptance, and add_item_from_master_profile
 
 import pytest
 import uuid
+import httpx
 from httpx import AsyncClient, ASGITransport
 from app.main import app
 from app.api.deps import CurrentUser, get_current_user
@@ -115,10 +116,20 @@ def test_verifier_add_item_from_master_profile():
 @pytest.mark.asyncio
 async def test_review_flow_conflict_detection_and_batch_acceptance(override_test_user):
     """Integration test verifying conflict detection (HTTP 409) and batch low-risk acceptance."""
+    # Obtain real user token from GoTrue
+    async with httpx.AsyncClient() as c:
+        auth_r = await c.post(
+            f"{app.state.settings.SUPABASE_URL if hasattr(app.state, 'settings') else 'https://uwomilakkajzzbbnijeh.supabase.co'}/auth/v1/token?grant_type=password",
+            headers={"apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3b21pbGFra2FqenpiYm5pamVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ3MjMwOTMsImV4cCI6MjExMDI5OTA5M30.Kxi0-Wt8Yt-hXDRA1doyUKxwwk15Wncp41Zqc9L-UA0", "Content-Type": "application/json"},
+            json={"email": "alpha_tester_1234@gmail.com", "password": "Password123!"},
+        )
+        token = auth_r.json().get("access_token", "")
+    auth_headers = {"Authorization": f"Bearer {token}"} if token else {}
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         # First, intake JD and create pipeline run
-        jd_res = await client.post("/api/job-descriptions", json={
+        jd_res = await client.post("/api/job-descriptions", headers=auth_headers, json={
             "title": "Backend Architect",
             "company": "Scale Corp",
             "raw_text": "We need an engineer experienced in Python, FastAPI, and PostgreSQL to design microservices.",
@@ -126,7 +137,7 @@ async def test_review_flow_conflict_detection_and_batch_acceptance(override_test
         assert jd_res.status_code == 201
 
         # Queue pipeline run in full mode
-        run_res = await client.post("/api/pipeline/runs", json={
+        run_res = await client.post("/api/pipeline/runs", headers=auth_headers, json={
             "resume_id": "c421c70a-b3b6-4f54-bdd6-9993e69be239",
             "job_description_text": "We need an engineer experienced in Python, FastAPI, and PostgreSQL to design microservices.",
             "mode": "full",
@@ -135,7 +146,7 @@ async def test_review_flow_conflict_detection_and_batch_acceptance(override_test
         run_id = run_res.json()["id"]
 
         # Fetch tailoring results
-        tailor_res = await client.get(f"/api/tailoring/{run_id}")
+        tailor_res = await client.get(f"/api/tailoring/{run_id}", headers=auth_headers)
         if tailor_res.status_code == 200:
             data = tailor_res.json()
             changes = data.get("changes", [])
@@ -143,14 +154,14 @@ async def test_review_flow_conflict_detection_and_batch_acceptance(override_test
                 chg1 = changes[0]["change_id"]
 
                 # 1. Accept first change
-                patch_res1 = await client.patch(f"/api/tailoring/{run_id}/changes/{chg1}", json={"status": "accepted"})
+                patch_res1 = await client.patch(f"/api/tailoring/{run_id}/changes/{chg1}", headers=auth_headers, json={"status": "accepted"})
                 assert patch_res1.status_code == 200
                 res1_data = patch_res1.json()
                 assert res1_data["new_status"] == "accepted"
                 assert "live_fit_estimate" in res1_data
 
                 # 2. Batch accept all low risk
-                batch_res = await client.post(f"/api/tailoring/{run_id}/changes/accept-low-risk")
+                batch_res = await client.post(f"/api/tailoring/{run_id}/changes/accept-low-risk", headers=auth_headers)
                 assert batch_res.status_code == 200
                 batch_data = batch_res.json()
                 assert "total_accepted_count" in batch_data

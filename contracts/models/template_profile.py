@@ -143,6 +143,7 @@ class Slot(BaseModel):
     classification_source: ClassificationSource | None = None
     is_clonable: bool | None = None
     prototype_xml_path: str | None = None
+    literal_prefix: str | None = None
 
 
 class SlotMap(BaseModel):

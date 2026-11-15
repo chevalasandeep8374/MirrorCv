@@ -60,12 +60,14 @@ export default function HomePage() {
   const [accountModalOpen, setAccountModalOpen] = useState(false);
 
   // Local storage migration state
+  const [mounted, setMounted] = useState(false);
   const [hasLocalResumes, setHasLocalResumes] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [importingLocal, setImportingLocal] = useState(false);
   const [importSuccessMsg, setImportSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
+    setMounted(true);
     setHasLocalResumes(localRepo.hasResumes());
     setIsLoggedIn(Boolean(localStorage.getItem('mirrorcv_token')));
   }, []);
@@ -289,6 +291,7 @@ export default function HomePage() {
             </button>
 
             <button
+              suppressHydrationWarning
               onClick={() => {
                 if (typeof window !== 'undefined') {
                   const token = localStorage.getItem('mirrorcv_token');
@@ -303,7 +306,9 @@ export default function HomePage() {
               }}
               className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 border border-slate-200 rounded-lg hover:bg-slate-100 transition"
             >
-              {isLoggedIn ? 'Sign Out' : 'Sign In'}
+              <span suppressHydrationWarning>
+                {mounted && isLoggedIn ? 'Sign Out' : 'Sign In'}
+              </span>
             </button>
 
             <button
@@ -676,6 +681,17 @@ export default function HomePage() {
           </div>
         )}
       </main>
+
+      {/* Footer with Legal & ESCO Credits */}
+      <footer className="border-t border-slate-200 bg-white py-5 mt-auto">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
+          <div>© 2026 MirrorCV. Master-Template Resume Tailoring with Zero Layout Drift.</div>
+          <div className="flex items-center space-x-4">
+            <Link href="/tailor" className="hover:text-slate-900 transition">Tailor from File</Link>
+            <Link href="/credits" className="font-semibold text-blue-600 hover:text-blue-700 transition">Credits & ESCO Attribution</Link>
+          </div>
+        </div>
+      </footer>
 
       {/* Edit Metadata Modal */}
       {editingResume && (

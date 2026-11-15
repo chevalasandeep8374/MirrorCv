@@ -9,7 +9,7 @@ import shutil
 import uuid
 import logging
 from typing import Optional, Dict, Any, List
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Body, Query, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Body, Query, status, Request
 from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -42,6 +42,7 @@ async def _save_to_supabase_storage(
     resume_id: str,
     file_bytes: bytes,
     file_name: str = "original.docx",
+    user_token: Optional[str] = None,
 ) -> str:
     """Uploads file to Supabase storage bucket 'originals/{user_id}/{resume_id}/{file_name}'."""
     if not settings.SUPABASE_URL or not settings.SUPABASE_KEY:
@@ -49,9 +50,10 @@ async def _save_to_supabase_storage(
 
     storage_path = f"{user_id}/{resume_id}/{file_name}"
     url = f"{settings.SUPABASE_URL.rstrip('/')}/storage/v1/object/originals/{storage_path}"
+    auth_bearer = user_token or settings.SUPABASE_SERVICE_ROLE_KEY or settings.SUPABASE_KEY
     headers = {
         "apikey": settings.SUPABASE_KEY,
-        "Authorization": f"Bearer {settings.SUPABASE_KEY}",
+        "Authorization": f"Bearer {auth_bearer}",
         "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "x-upsert": "true",
     }
@@ -76,15 +78,17 @@ async def _save_template_profile_to_supabase(
     profile_data: Dict[str, Any],
     slot_map_data: Dict[str, Any],
     fidelity_score: float,
+    user_token: Optional[str] = None,
 ) -> None:
-    """Saves template profile directly to public.template_profiles using backend credentials."""
+    """Saves template profile directly to public.template_profiles using user JWT or backend credentials."""
     if not settings.SUPABASE_URL or not settings.SUPABASE_KEY:
         return
 
     url = f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/template_profiles"
+    auth_bearer = user_token or settings.SUPABASE_SERVICE_ROLE_KEY or settings.SUPABASE_KEY
     headers = {
         "apikey": settings.SUPABASE_KEY,
-        "Authorization": f"Bearer {settings.SUPABASE_SERVICE_ROLE_KEY or settings.SUPABASE_KEY}",
+        "Authorization": f"Bearer {auth_bearer}",
         "Content-Type": "application/json",
         "Prefer": "resolution=merge-duplicates",
     }
@@ -115,15 +119,17 @@ async def _save_resume_row_to_supabase(
     content: Dict[str, Any],
     style: Dict[str, Any],
     template_profile_id: str,
+    user_token: Optional[str] = None,
 ) -> None:
     """Inserts a row into public.resumes with source_type='uploaded_docx'."""
     if not settings.SUPABASE_URL or not settings.SUPABASE_KEY:
         return
 
     url = f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/resumes"
+    auth_bearer = user_token or settings.SUPABASE_SERVICE_ROLE_KEY or settings.SUPABASE_KEY
     headers = {
         "apikey": settings.SUPABASE_KEY,
-        "Authorization": f"Bearer {settings.SUPABASE_KEY}",
+        "Authorization": f"Bearer {auth_bearer}",
         "Content-Type": "application/json",
         "Prefer": "return=representation",
     }
@@ -150,6 +156,7 @@ async def _save_resume_row_to_supabase(
 @router.post("/upload", status_code=status.HTTP_201_CREATED)
 async def upload_template(
     file: UploadFile = File(...),
+    request: Request = None,
     current_user: Any = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -168,6 +175,9 @@ async def upload_template(
     validate_docx_bytes(contents, file.filename)
 
     user_id = str(current_user.id)
+    auth_header = request.headers.get("Authorization", "") if request else ""
+    user_token = auth_header.replace("Bearer ", "") if "Bearer " in auth_header else None
+
     resume_id = str(uuid.uuid4())
     template_profile_id = str(uuid.uuid4())
 
@@ -183,7 +193,7 @@ async def upload_template(
         f.write(contents)
 
     # 3. Store untouched original in Supabase storage: originals/{user_id}/{resume_id}/original.docx
-    storage_path = await _save_to_supabase_storage(user_id, resume_id, contents, "original.docx")
+    storage_path = await _save_to_supabase_storage(user_id, resume_id, contents, "original.docx", user_token=user_token)
 
     # 4. Deterministic Analysis Pipeline (Agent 1: Template Guardian)
     try:
@@ -237,16 +247,7 @@ async def upload_template(
     profile_dict = profile.model_dump(mode="json")
     slot_map_dict = {k: v.model_dump(mode="json") for k, v in profile.slot_map.items()}
 
-    # 7. Persist to Supabase through Service Role / RPCs
-    await _save_template_profile_to_supabase(
-        template_profile_id=template_profile_id,
-        user_id=user_id,
-        resume_id=resume_id,
-        profile_data=profile_dict,
-        slot_map_data=slot_map_dict,
-        fidelity_score=fidelity_score,
-    )
-
+    # 7. Persist to Supabase: save resume row first (satisfies foreign key constraint), then template profile
     title = f"{content.header.name or 'Imported'} Resume"
     await _save_resume_row_to_supabase(
         resume_id=resume_id,
@@ -255,6 +256,17 @@ async def upload_template(
         content=content.model_dump(),
         style=style.model_dump(),
         template_profile_id=template_profile_id,
+        user_token=user_token,
+    )
+
+    await _save_template_profile_to_supabase(
+        template_profile_id=template_profile_id,
+        user_id=user_id,
+        resume_id=resume_id,
+        profile_data=profile_dict,
+        slot_map_data=slot_map_dict,
+        fidelity_score=fidelity_score,
+        user_token=user_token,
     )
 
     # 8. Local SQLite fallback persistence for development

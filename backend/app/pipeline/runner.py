@@ -120,7 +120,7 @@ async def execute_pipeline_run(
     # 1. Transition to 'running'
     await _update_run_in_supabase(
         run_id,
-        {"status": "running", "current_stage": "starting", "updated_at": "now()"},
+        {"status": "running", "current_stage": "initialized", "updated_at": "now()"},
         user_token,
     )
 
@@ -132,6 +132,7 @@ async def execute_pipeline_run(
         "mode": mode,
         "content": content,
         "style": style,
+        "user_token": user_token,
         "current_stage": "queued",
         "stage_log": [],
         "status": "running",
@@ -147,9 +148,9 @@ async def execute_pipeline_run(
             graph = build_pipeline_graph()
             final_state: PipelineRunState = await graph.ainvoke(initial_state)
 
-            # 2. Persist Agent 1 TemplateProfile
+            # 2. Persist Agent 1 TemplateProfile (only if not already created/persisted)
             template_profile_id = None
-            if final_state.get("template_profile"):
+            if final_state.get("template_profile") and not final_state.get("template_profile_exists"):
                 template_profile_id = await _insert_template_profile_in_supabase(
                     user_id=user_id,
                     resume_id=resume_id,
@@ -205,7 +206,7 @@ async def execute_pipeline_run(
         run_id,
         {
             "status": "failed",
-            "current_stage": "dead_letter",
+            "current_stage": "failed",
             "error": dead_letter_msg,
             "updated_at": "now()",
         },

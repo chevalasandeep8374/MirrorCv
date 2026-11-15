@@ -355,6 +355,17 @@ export default function NewTailoredResumePage() {
         )}
       </main>
 
+      {/* Footer with Legal & ESCO Credits */}
+      <footer className="border-t border-slate-200 bg-white py-5 mt-auto">
+        <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
+          <div>© 2026 MirrorCV. Master-Template Resume Tailoring with Zero Layout Drift.</div>
+          <div className="flex items-center space-x-4">
+            <Link href="/" className="hover:text-slate-900 transition">Dashboard</Link>
+            <Link href="/credits" className="font-semibold text-blue-600 hover:text-blue-700 transition">Credits & ESCO Attribution</Link>
+          </div>
+        </div>
+      </footer>
+
       {/* Import Report Modal */}
       {showReportModal && templateData && (
         <ImportReportModal

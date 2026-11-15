@@ -262,6 +262,11 @@
           "default": "proposed"
         },
         "rejection_reason": { "type": ["string", "null"] },
+        "gates_tripped": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        },
         "generator": {
           "type": "object",
           "properties": {

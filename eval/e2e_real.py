@@ -37,6 +37,7 @@ logging.basicConfig(level=logging.INFO)
 
 EVAL_DIR = Path(__file__).resolve().parent
 RESULTS_CSV = EVAL_DIR / "results_e2e_real.csv"
+CHANGE_REVIEW_CSV = EVAL_DIR / "change_review.csv"
 
 # Cost cap configuration ($2.00 default max spend per run)
 MAX_COST_USD = float(os.getenv("MAX_COST_USD", "2.00"))
@@ -78,8 +79,6 @@ async def run_e2e_real_eval_async(
         "changes_accepted",
         "changes_rejected_by_reason",
         "raw_verifier_violation_rate",
-        "residual_violation_rate",
-        "false_rejection_rate",
         "integrity_passed",
         "page_count_preserved",
         "fit_loop_rounds",
@@ -89,6 +88,7 @@ async def run_e2e_real_eval_async(
     ]
 
     analyst = AnalystTailorAgent()
+    change_review_rows: List[Dict[str, Any]] = []
 
     # Pre-build template profile for real ComposerAgent composition
     fixtures_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend", "tests", "fixtures"))
@@ -146,29 +146,30 @@ async def run_e2e_real_eval_async(
             mode="full",
         )
 
-        proposed_count = len(tailor_result.changes) + len(tailor_result.rejected_changes)
+        all_proposed_changes = tailor_result.changes + tailor_result.rejected_changes
+        proposed_count = len(all_proposed_changes)
         accepted_count = len(tailor_result.changes)
         rejected_count = len(tailor_result.rejected_changes)
-        raw_violation_rate = round(rejected_count / float(proposed_count), 4) if proposed_count > 0 else 0.0
+
+        # Raw violation rate = changes that failed any gate before repair / changes proposed
+        raw_violation_count = sum(1 for c in all_proposed_changes if len(c.gates_tripped) > 0)
+        raw_violation_rate = round(raw_violation_count / float(proposed_count), 4) if proposed_count > 0 else 0.0
+
+        for c in all_proposed_changes:
+            change_review_rows.append({
+                "id": c.change_id,
+                "before": c.before if isinstance(c.before, str) else json.dumps(c.before),
+                "after": c.after if isinstance(c.after, str) else json.dumps(c.after),
+                "status": c.status.value if hasattr(c.status, "value") else str(c.status),
+                "rejection_reason": c.rejection_reason or "",
+                "gates_tripped": ";".join(c.gates_tripped) if c.gates_tripped else "",
+                "human_label": "",
+            })
 
         rejection_reasons: Dict[str, int] = {}
         for c in tailor_result.rejected_changes:
             reason = c.rejection_reason or "Unknown verification failure"
             rejection_reasons[reason] = rejection_reasons.get(reason, 0) + 1
-
-        # Check residual violation rate on accepted changes (must be 0.0)
-        source_skills_set = set(inventory.skills)
-        residual_violations = 0
-        for c in tailor_result.changes:
-            v_check = tailor_verifier.verify_change(
-                change=c,
-                resume_content=resume_content,
-                source_inventory_skills=source_skills_set,
-                confirmed_evidence_text="",
-            )
-            if not v_check.is_valid:
-                residual_violations += 1
-        residual_violation_rate = round(residual_violations / float(accepted_count), 4) if accepted_count > 0 else 0.0
 
         # 4. Match Score After Tailoring
         scoring_after = compute_match_score(
@@ -202,8 +203,6 @@ async def run_e2e_real_eval_async(
             "changes_accepted": accepted_count,
             "changes_rejected_by_reason": json.dumps(rejection_reasons),
             "raw_verifier_violation_rate": raw_violation_rate,
-            "residual_violation_rate": residual_violation_rate,
-            "false_rejection_rate": 0.0,
             "integrity_passed": integrity_passed,
             "page_count_preserved": page_count_preserved,
             "fit_loop_rounds": fit_loop_rounds,
@@ -213,11 +212,18 @@ async def run_e2e_real_eval_async(
         }
         results.append(row)
 
-    # Write CSV output
+    # Write CSV output for pairs
     with open(RESULTS_CSV, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=csv_fields)
         writer.writeheader()
         writer.writerows(results)
+
+    # Write change_review.csv for human labeling (legitimate | fabricated | exaggerated)
+    review_fields = ["id", "before", "after", "status", "rejection_reason", "gates_tripped", "human_label"]
+    with open(CHANGE_REVIEW_CSV, "w", newline="", encoding="utf-8") as f:
+        review_writer = csv.DictWriter(f, fieldnames=review_fields)
+        review_writer.writeheader()
+        review_writer.writerows(change_review_rows)
 
     # Compute precision, recall, and Wilson confidence intervals
     precision = true_positive_skills / float(total_extracted_skills) if total_extracted_skills > 0 else 1.0
@@ -234,6 +240,8 @@ async def run_e2e_real_eval_async(
         "skill_extraction_recall": round(recall, 4),
         "skill_extraction_recall_95ci": [rec_low, rec_high],
         "results_csv": str(RESULTS_CSV),
+        "change_review_csv": str(CHANGE_REVIEW_CSV),
+        "changes_proposed_for_review": len(change_review_rows),
     }
 
     print("\n--- E2E Real Eval Summary ---")
@@ -242,7 +250,8 @@ async def run_e2e_real_eval_async(
     print(f"Total Evaluated Tokens:   {total_tokens}")
     print(f"JD Skill Precision:       {precision * 100:.1f}% (95% CI: [{prec_low * 100:.1f}%, {prec_high * 100:.1f}%])")
     print(f"JD Skill Recall:          {recall * 100:.1f}% (95% CI: [{rec_low * 100:.1f}%, {rec_high * 100:.1f}%])")
-    print(f"CSV Report:               {RESULTS_CSV}")
+    print(f"Results CSV:              {RESULTS_CSV}")
+    print(f"Change Review CSV:        {CHANGE_REVIEW_CSV} ({len(change_review_rows)} proposed changes)")
 
     return summary
 

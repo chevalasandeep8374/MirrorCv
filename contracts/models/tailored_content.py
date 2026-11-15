@@ -99,6 +99,7 @@ class Change(BaseModel):
     risk_level: RiskLevel = RiskLevel.low
     status: ChangeStatus = ChangeStatus.proposed
     rejection_reason: Optional[str] = None
+    gates_tripped: List[str] = Field(default_factory=list)
     generator: Optional[GeneratorMetadata] = None
 
     # Backward-compatibility fields for 1.0.0 fixtures

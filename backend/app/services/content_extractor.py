@@ -28,15 +28,15 @@ from app.schemas.template import DocxFingerprint, RoleMap, ParagraphFingerprint
 
 
 def _clean_bullet_text(text: str) -> str:
-    """Strips leading bullet glyphs from text."""
-    return re.sub(r"^[\u2022\u25E6\u25AA\u25AB\u2013\u2014\-*]\s*", "", text).strip()
+    """Strips leading bullet glyphs from text, preserving markdown bold/italic."""
+    return re.sub(r"^([\u2022\u25E6\u25AA\u25AB\u2013\u2014\uf0b7]\s*|[-*]\s+)", "", text).strip()
 
 
 def convert_runs_to_markdown(p: ParagraphFingerprint) -> str:
     """Converts runs and inline hyperlinks into safe markdown (**bold**, *italic*, [text](url))."""
-    should_clean = p.bullet_info.num_id is not None
+    is_bullet = bool(p.bullet_info and p.bullet_info.is_bullet)
     if not p.runs:
-        return _clean_bullet_text(p.text) if should_clean else p.text
+        return _clean_bullet_text(p.text) if is_bullet else p.text
 
     hyperlink_map = {h["text"].strip(): h["target"] for h in p.hyperlinks if "text" in h and "target" in h}
 
@@ -73,7 +73,7 @@ def convert_runs_to_markdown(p: ParagraphFingerprint) -> str:
         parts.append(txt)
 
     combined = "".join(parts)
-    return _clean_bullet_text(combined) if should_clean else combined
+    return _clean_bullet_text(combined) if is_bullet else combined
 
 
 def extract_content_and_style(

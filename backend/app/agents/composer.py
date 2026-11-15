@@ -32,18 +32,51 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 
-async def generate_signed_storage_url(bucket: str, storage_path: str, expires_in: int = 600) -> Optional[str]:
-    """Generates a secure signed download URL with ~10-minute expiry (600s).
+async def upload_export_to_supabase_storage(
+    storage_path: str,
+    file_bytes: bytes,
+    content_type: str,
+    user_token: Optional[str] = None,
+) -> bool:
+    """Uploads tailored export file to Supabase Storage 'exports' bucket via backend worker authorization."""
+    if not settings.SUPABASE_URL or not settings.SUPABASE_KEY:
+        return False
+    url = f"{settings.SUPABASE_URL.rstrip('/')}/storage/v1/object/exports/{storage_path}"
+    headers = {
+        "apikey": settings.SUPABASE_KEY,
+        "Authorization": f"Bearer {user_token or settings.SUPABASE_KEY}",
+        "x-mirrorcv-role": "backend_worker",
+        "Content-Type": content_type,
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(url, headers=headers, content=file_bytes)
+            if resp.status_code in (200, 201):
+                return True
+            else:
+                logger.warning(f"Failed to upload export to Supabase storage ({resp.status_code}): {resp.text}")
+    except Exception as e:
+        logger.error(f"Error uploading export to Supabase storage: {e}")
+    return False
 
-    Uses service role credentials to request the signed object URL from Supabase Storage.
+
+async def generate_signed_storage_url(
+    bucket: str,
+    storage_path: str,
+    expires_in: int = 600,
+    user_token: Optional[str] = None,
+) -> Optional[str]:
+    """Generates a secure signed download URL with ~10-minute expiry (600s).
+    Uses authorized JWT or backend credentials to sign the storage URL.
     """
-    if not settings.SUPABASE_URL or not settings.SUPABASE_SERVICE_ROLE_KEY:
+    if not settings.SUPABASE_URL or not settings.SUPABASE_KEY:
         return f"/api/storage/{bucket}/{storage_path}"
 
     url = f"{settings.SUPABASE_URL.rstrip('/')}/storage/v1/object/sign/{bucket}/{storage_path}"
+    auth_bearer = user_token or settings.SUPABASE_SERVICE_ROLE_KEY or settings.SUPABASE_KEY
     headers = {
-        "apikey": settings.SUPABASE_SERVICE_ROLE_KEY,
-        "Authorization": f"Bearer {settings.SUPABASE_SERVICE_ROLE_KEY}",
+        "apikey": settings.SUPABASE_KEY,
+        "Authorization": f"Bearer {auth_bearer}",
         "Content-Type": "application/json",
     }
     payload = {"expiresIn": expires_in}
@@ -81,6 +114,7 @@ class ComposerAgent:
         confirmed_bullet_removals: Optional[List[str]] = None,
         tailored_content: Optional[Any] = None,
         original_style: Optional[Dict[str, Any]] = None,
+        user_token: Optional[str] = None,
         **kwargs,
     ) -> CompositionResult:
         """Executes full composition pipeline (Run 2):
@@ -156,8 +190,25 @@ class ComposerAgent:
         # Strict gating: No output files can be produced without passing integrity check
         output_files: List[OutputFile] = []
         if fit_result.status != Status.failed and fit_result.integrity_report.passed:
-            docx_signed_url = await generate_signed_storage_url("exports", docx_storage_path, expires_in=600)
-            pdf_signed_url = await generate_signed_storage_url("exports", pdf_storage_path, expires_in=600)
+            if os.path.exists(fit_result.docx_path):
+                with open(fit_result.docx_path, "rb") as f:
+                    await upload_export_to_supabase_storage(
+                        docx_storage_path,
+                        f.read(),
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        user_token=user_token,
+                    )
+            if os.path.exists(fit_result.pdf_path):
+                with open(fit_result.pdf_path, "rb") as f:
+                    await upload_export_to_supabase_storage(
+                        pdf_storage_path,
+                        f.read(),
+                        "application/pdf",
+                        user_token=user_token,
+                    )
+
+            docx_signed_url = await generate_signed_storage_url("exports", docx_storage_path, expires_in=600, user_token=user_token)
+            pdf_signed_url = await generate_signed_storage_url("exports", pdf_storage_path, expires_in=600, user_token=user_token)
             output_files = [
                 OutputFile(
                     kind=Kind.tailored,
