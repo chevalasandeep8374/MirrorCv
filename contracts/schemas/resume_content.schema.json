@@ -1,0 +1,147 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mirrorcv.dev/schemas/v1/resume_content.schema.json",
+  "title": "ResumeContent",
+  "description": "Standard schema for resume content with stable UUIDs across headers, sections, items, and bullets.",
+  "type": "object",
+  "required": ["schema_version", "header", "sections"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.0.0"],
+      "default": "1.0.0"
+    },
+    "header": {
+      "type": "object",
+      "required": ["name", "title", "email", "phone", "location", "website", "links"],
+      "properties": {
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "location": { "type": "string" },
+        "website": { "type": "string" },
+        "photoUrl": { "type": "string" },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "label", "url"],
+            "properties": {
+              "id": { "type": "string" },
+              "label": { "type": "string" },
+              "url": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "title", "visible", "items"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": [
+              "summary",
+              "experience",
+              "skills",
+              "education",
+              "projects",
+              "certifications",
+              "custom",
+              "languages",
+              "awards",
+              "publications",
+              "volunteering",
+              "interests",
+              "references",
+              "links"
+            ]
+          },
+          "title": { "type": "string" },
+          "visible": { "type": "boolean" },
+          "pageBreakBefore": { "type": "boolean", "default": false },
+          "order": { "type": "integer" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "title", "subtitle", "location", "dateRange", "bullets"],
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" },
+                "subtitle": { "type": "string" },
+                "location": { "type": "string" },
+                "dateRange": { "type": "string" },
+                "visible": { "type": "boolean", "default": true },
+                "itemType": {
+                  "type": "string",
+                  "enum": ["timeline", "list", "paragraph", "tags"],
+                  "default": "timeline"
+                },
+                "bullets": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["id", "text"],
+                    "properties": {
+                      "id": { "type": "string" },
+                      "text": { "type": "string" },
+                      "level": { "type": "integer", "default": 0 }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "coverLetter": {
+      "type": ["object", "null"],
+      "properties": {
+        "sender": {
+          "$ref": "#/properties/header"
+        },
+        "recipient": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "title": { "type": "string" },
+            "company": { "type": "string" },
+            "address": { "type": "string" },
+            "email": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "date": { "type": "string" },
+        "salutation": { "type": "string" },
+        "paragraphs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "text"],
+            "properties": {
+              "id": { "type": "string" },
+              "text": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "closing": { "type": "string" },
+        "signature": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

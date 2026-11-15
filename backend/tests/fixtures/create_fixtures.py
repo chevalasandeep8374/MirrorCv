@@ -63,7 +63,6 @@ def create_single_column_fixture():
     r_h_exp.font.bold = True
     r_h_exp.font.color.rgb = RGBColor(37, 99, 235)
 
-    # Job 1 Title & Meta
     p_job1_title = doc.add_paragraph()
     p_job1_title.paragraph_format.space_after = Pt(1)
     r_j1 = p_job1_title.add_run("Principal Software Engineer")
@@ -79,7 +78,6 @@ def create_single_column_fixture():
     r_j1_meta.font.italic = True
     r_j1_meta.font.color.rgb = RGBColor(107, 114, 128)
 
-    # Bullets for Job 1
     bullets_job1 = [
         ("Architected high-concurrency document rendering microservices", " processing 4.2M daily export jobs with sub-500ms latency."),
         ("Reduced AWS infrastructure costs by 38%", " ($450K ARR) via intelligent container right-sizing and spot fleet orchestration in EKS."),
@@ -149,7 +147,6 @@ def create_table_two_column_fixture():
     section.left_margin = Pt(36)
     section.right_margin = Pt(36)
 
-    # Header Name across top
     p_name = doc.add_paragraph()
     p_name.paragraph_format.space_after = Pt(2)
     r_name = p_name.add_run("ALEX MERCER")
@@ -164,18 +161,15 @@ def create_table_two_column_fixture():
     r_title.font.bold = True
     r_title.font.color.rgb = RGBColor(75, 85, 99)
 
-    # 1-row, 2-column layout table (borderless)
     table = doc.add_table(rows=1, cols=2)
     table.autofit = False
-
-    # Set column widths: Left column 30%, Right column 70%
     table.columns[0].width = Inches(2.2)
     table.columns[1].width = Inches(5.0)
 
     cell_left = table.cell(0, 0)
     cell_right = table.cell(0, 1)
 
-    # --- LEFT SIDEBAR (Contact, Skills, Education) ---
+    # LEFT SIDEBAR
     p_c_h = cell_left.paragraphs[0]
     p_c_h.paragraph_format.space_after = Pt(3)
     r_c_h = p_c_h.add_run("CONTACT")
@@ -210,7 +204,7 @@ def create_table_two_column_fixture():
     p_edu_txt = cell_left.add_paragraph()
     p_edu_txt.add_run("B.S. Computer Science\nUC Berkeley (2016)").font.size = Pt(8.5)
 
-    # --- RIGHT MAIN COLUMN (Summary, Experience) ---
+    # RIGHT MAIN COLUMN
     p_sum_h = cell_right.paragraphs[0]
     p_sum_h.paragraph_format.space_after = Pt(3)
     r_sum_h = p_sum_h.add_run("SUMMARY")
@@ -264,11 +258,9 @@ def create_text_box_fixture():
     section.top_margin = Pt(36)
     section.bottom_margin = Pt(36)
 
-    # Paragraph with a DrawingML Shape Text Box
     p_box = doc.add_paragraph()
     p_box.paragraph_format.space_after = Pt(12)
 
-    # Inject XML for w:drawing containing a w:txBody text box
     txbox_xml = """
     <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
                xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
@@ -317,7 +309,6 @@ def create_text_box_fixture():
     """
     p_box._p.append(parse_xml(txbox_xml))
 
-    # Standard body content following the text box
     p_h = doc.add_paragraph()
     p_h.paragraph_format.space_before = Pt(8)
     p_h.paragraph_format.space_after = Pt(4)
@@ -341,9 +332,166 @@ def create_text_box_fixture():
     print(f"Created: {out_path}")
 
 
+def create_multi_page_fixture():
+    """Fixture d: Multi-page document with explicit page break."""
+    doc = Document()
+    p0 = doc.add_paragraph()
+    r0 = p0.add_run("Jane MultiPage")
+    r0.font.size = Pt(22)
+    r0.font.bold = True
+
+    p_contact = doc.add_paragraph("jane.multipage@example.com | (555) 019-2834")
+
+    # Section 1
+    doc.add_paragraph("EXPERIENCE")
+    for i in range(1, 4):
+        doc.add_paragraph(f"Role Header {i}")
+        doc.add_paragraph(f"• Bullet detail {i} explaining complex systems.")
+
+    # Page Break
+    doc.add_page_break()
+
+    # Section 2 on Page 2
+    doc.add_paragraph("EDUCATION")
+    doc.add_paragraph("Master of Science in Software Engineering — Stanford University (2018)")
+    doc.add_paragraph("• Published thesis on fault-tolerant distributed consensus protocols.")
+
+    out_path = os.path.join(FIXTURES_DIR, "sample_multi_page.docx")
+    doc.save(out_path)
+    print(f"Created: {out_path}")
+
+
+def create_extended_headings_fixture():
+    """Fixture e: Extended headings (Career Objective, Academic Projects, Strengths, Extracurricular Activities, Positions of Responsibility, Declaration)."""
+    doc = Document()
+    p0 = doc.add_paragraph()
+    r0 = p0.add_run("Vikram Patel")
+    r0.font.size = Pt(22)
+    r0.font.bold = True
+
+    doc.add_paragraph("vikram.patel@example.com | +91 98765 43210")
+
+    doc.add_paragraph("CAREER OBJECTIVE")
+    doc.add_paragraph("Motivated computer science graduate passionate about scalable distributed systems.")
+
+    doc.add_paragraph("ACADEMIC PROJECTS")
+    doc.add_paragraph("Autonomous Drone Navigation System")
+    doc.add_paragraph("• Developed real-time object tracking using computer vision and edge compute.")
+
+    doc.add_paragraph("INTERNSHIPS")
+    doc.add_paragraph("Software Engineering Intern — CloudScale Labs (Summer 2023)")
+    doc.add_paragraph("• Benchmarked Redis cache invalidation strategies under heavy write load.")
+
+    doc.add_paragraph("STRENGTHS")
+    doc.add_paragraph("• Algorithmic problem solving, microservice architecture, API design")
+
+    doc.add_paragraph("EXTRACURRICULAR ACTIVITIES")
+    doc.add_paragraph("• President of University Robotics Club; organized 48-hour national hackathon")
+
+    doc.add_paragraph("POSITIONS OF RESPONSIBILITY")
+    doc.add_paragraph("• Lead Student Ambassador for Open Source Community")
+
+    doc.add_paragraph("DECLARATION")
+    doc.add_paragraph("I hereby declare that all information provided above is true to the best of my knowledge.")
+
+    out_path = os.path.join(FIXTURES_DIR, "sample_extended_headings.docx")
+    doc.save(out_path)
+    print(f"Created: {out_path}")
+
+
+def create_nested_tables_fixture():
+    """Fixture f: Nested table resume layout."""
+    doc = Document()
+    p0 = doc.add_paragraph()
+    r0 = p0.add_run("Elena Rostova")
+    r0.font.size = Pt(20)
+    r0.font.bold = True
+
+    doc.add_paragraph("elena.rostova@example.com | +1 (555) 912-3847")
+
+    # Outer table
+    outer_tbl = doc.add_table(rows=1, cols=2)
+    c0 = outer_tbl.cell(0, 0)
+    c1 = outer_tbl.cell(0, 1)
+
+    c0.paragraphs[0].text = "TECHNICAL SKILLS\n• Python\n• Go\n• AWS"
+
+    c1.paragraphs[0].text = "EXPERIENCE"
+    # Nested table inside c1
+    inner_tbl = c1.add_table(rows=1, cols=1)
+    inner_tbl.cell(0, 0).paragraphs[0].text = "Senior Cloud Architect — InfraStack\n• Designed multi-region Kubernetes clusters."
+
+    out_path = os.path.join(FIXTURES_DIR, "sample_nested_tables.docx")
+    doc.save(out_path)
+    print(f"Created: {out_path}")
+
+
+def create_tabs_and_links_fixture():
+    """Fixture g: Right-aligned tab stop for dates and inline hyperlinks."""
+    doc = Document()
+    p0 = doc.add_paragraph()
+    r0 = p0.add_run("David Chen")
+    r0.font.size = Pt(22)
+    r0.font.bold = True
+
+    doc.add_paragraph("david.chen@example.com | +1 (555) 438-1928")
+
+    doc.add_paragraph("EXPERIENCE")
+
+    p_job = doc.add_paragraph("Lead Systems Engineer\t2019 - Present")
+    pPr = p_job._p.get_or_add_pPr()
+    tabs_elem = OxmlElement("w:tabs")
+    tab_elem = OxmlElement("w:tab")
+    tab_elem.set(qn("w:val"), "right")
+    tab_elem.set(qn("w:pos"), "9360")
+    tabs_elem.append(tab_elem)
+    pPr.append(tabs_elem)
+
+    doc.add_paragraph("• Architected low-latency settlement engine.")
+
+    out_path = os.path.join(FIXTURES_DIR, "sample_tabs_and_links.docx")
+    doc.save(out_path)
+    print(f"Created: {out_path}")
+
+
+def create_aptos_font_fixture():
+    """Fixture h: Proprietary font resume using Aptos (evaluates 8% budget margin)."""
+    doc = Document()
+    p0 = doc.add_paragraph()
+    r0 = p0.add_run("Sarah Aptos")
+    r0.font.name = "Aptos"
+    r0.font.size = Pt(22)
+    r0.font.bold = True
+
+    p_c = doc.add_paragraph("sarah.aptos@example.com | +1 (555) 304-9821")
+    p_c.runs[0].font.name = "Aptos"
+
+    p_h = doc.add_paragraph("PROFESSIONAL SUMMARY")
+    p_h.runs[0].font.name = "Aptos"
+    p_h.runs[0].font.bold = True
+
+    p_s = doc.add_paragraph("Engineering manager with 10+ years scaling SaaS products and engineering teams.")
+    p_s.runs[0].font.name = "Aptos"
+
+    doc.add_paragraph("EXPERIENCE")
+    p_j = doc.add_paragraph("VP of Engineering — Global SaaS")
+    p_j.runs[0].font.name = "Aptos"
+    p_b = doc.add_paragraph("• Scaled engineering organization from 20 to 140 engineers across 3 continents.")
+    p_b.runs[0].font.name = "Aptos"
+
+    out_path = os.path.join(FIXTURES_DIR, "sample_aptos_font.docx")
+    doc.save(out_path)
+    print(f"Created: {out_path}")
+
+
 if __name__ == "__main__":
     os.makedirs(FIXTURES_DIR, exist_ok=True)
     create_single_column_fixture()
     create_table_two_column_fixture()
     create_text_box_fixture()
-    print("All 3 test fixtures successfully created!")
+    create_multi_page_fixture()
+    create_extended_headings_fixture()
+    create_nested_tables_fixture()
+    create_tabs_and_links_fixture()
+    create_aptos_font_fixture()
+    print("All 8 test fixtures (a-h) successfully created!")

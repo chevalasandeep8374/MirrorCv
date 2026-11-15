@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.1.0",
+  "run_id": "run-9921c-552b",
+  "resume_id": "c65b64a7-b82d-4ebb-9f13-112e5808a81f",
+  "job_description_id": "jd-12345-6789",
+  "mode": "full",
+  "rules": {
+    "no_new_facts_allowed": true,
+    "allowed_inline_markup": ["bold", "italic", "link"],
+    "syntax_guide": {
+      "bold": "**text**",
+      "italic": "*text*",
+      "link": "[label](url)"
+    }
+  },
+  "generator": {
+    "model": "gpt-4o",
+    "prompt_version": "1.1.0",
+    "weights_version": "1.0.0",
+    "taxonomy_version": "1.0.0"
+  },
+  "score_before": 68.5,
+  "score_after": 89.0,
+  "score_breakdown": {
+    "required_skill_coverage": 32.0,
+    "preferred_skill_coverage": 12.0,
+    "semantic_relevance": 21.0,
+    "seniority_fit": 9.0,
+    "ats_readability": 8.5,
+    "stuffing_penalty": 0.0,
+    "confidence_note": null
+  },
+  "skills_analysis": {
+    "matched_skills": [
+      {
+        "skill": "FastAPI",
+        "canonical_name": "FastAPI",
+        "category": "Frameworks",
+        "content_ids": ["item-exp-1", "b-exp-1"]
+      },
+      {
+        "skill": "Python",
+        "canonical_name": "Python",
+        "category": "Languages",
+        "content_ids": ["item-exp-1"]
+      }
+    ],
+    "missing_skills": [
+      {
+        "skill": "Kubernetes",
+        "canonical_name": "Kubernetes",
+        "category": "DevOps",
+        "importance": "required"
+      }
+    ],
+    "present_not_visible": [
+      {
+        "skill": "Docker",
+        "canonical_name": "Docker",
+        "master_item_id": "mpi-docker-01"
+      }
+    ],
+    "adjacent_skills": [
+      {
+        "jd_skill": "GCP",
+        "resume_skill": "AWS",
+        "relation": "cloud_infrastructure"
+      }
+    ]
+  },
+  "changes": [
+    {
+      "change_id": "chg-001",
+      "type": "rewrite_bullet",
+      "target_content_id": "b-exp-1",
+      "slot_id": "slot-exp-1-b1",
+      "field": "text",
+      "before": "Architected high-concurrency document rendering microservices processing **4.2M daily export jobs** with sub-500ms latency.",
+      "after": "Architected document microservices using **FastAPI**, sustaining **4.2M daily export jobs** with sub-500ms latency.",
+      "reason": "Emphasized target JD requirement for FastAPI, verified from existing project experience.",
+      "evidence_ids": ["item-exp-1", "b-exp-1"],
+      "keywords_touched": ["FastAPI", "Microservices"],
+      "risk_level": "low",
+      "status": "proposed"
+    }
+  ],
+  "rejected_changes": [],
+  "suggestions": [
+    {
+      "suggestion_id": "sug-001",
+      "skill": "Kubernetes",
+      "canonical_name": "Kubernetes",
+      "category": "DevOps",
+      "class": "missing",
+      "prompt_text": "If you have hands-on experience orchestrating containers with Kubernetes, add it to your master profile.",
+      "target_section_id": "sec-skills",
+      "confirmed": false
+    }
+  ],
+  "matched_keywords": ["FastAPI", "Python", "Microservices"],
+  "missing_keywords": ["Kubernetes"]
+}

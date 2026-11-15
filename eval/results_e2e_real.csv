@@ -1,0 +1,4 @@
+pair_id,before_score,after_score,changes_proposed,changes_accepted,changes_rejected_by_reason,raw_verifier_violation_rate,residual_violation_rate,false_rejection_rate,integrity_passed,page_count_preserved,fit_loop_rounds,tokens,cost_usd,latency_ms
+human_pair_005,54.0,54.0,2,0,{},0.0,0.0,0.0,True,True,1,233,0.000116,17
+human_pair_001,69.4,69.4,3,0,{},0.0,0.0,0.0,True,True,1,308,0.000156,11
+human_pair_006,75.0,75.0,2,0,{},0.0,0.0,0.0,True,True,1,259,0.000136,8

@@ -23,13 +23,56 @@ def calculate_bullet_character_budgets(content: ResumeContent) -> Dict[str, Dict
     return budgets
 
 
+def calculate_pdf_bullet_budgets(
+    content: ResumeContent,
+    layout_data: Any,
+    content_to_paragraphs: Dict[str, List[int]],
+) -> Dict[str, Dict[str, int]]:
+    """Calculates character budgets based on real glyph metrics and measured line width."""
+    budgets: Dict[str, Dict[str, int]] = {}
+    blocks = layout_data.blocks if hasattr(layout_data, "blocks") else layout_data.get("blocks", [])
+    blk_map = {b.reading_order if hasattr(b, "reading_order") else b.get("reading_order"): b for b in blocks}
+
+    for section in content.sections:
+        for item in section.items:
+            for bullet in item.bullets:
+                orig_len = len(bullet.text)
+                b_match = None
+                for key, p_indices in content_to_paragraphs.items():
+                    if bullet.id in key or f".{bullet.id}" in key:
+                        for p_idx in p_indices:
+                            if p_idx in blk_map:
+                                b_match = blk_map[p_idx]
+                                break
+
+                if b_match:
+                    lines = b_match.lines if hasattr(b_match, "lines") else b_match.get("lines", [])
+                    max_w = b_match.max_width_pt if hasattr(b_match, "max_width_pt") else b_match.get("max_width_pt", 400.0)
+                    num_lines = max(1, len(lines))
+                    avg_char_w = 5.2  # ~0.52 em at 10pt
+                    capacity = int((max_w * num_lines) / avg_char_w)
+                    max_len = max(orig_len, min(int(orig_len * 1.15), capacity))
+                    min_len = max(20, int(orig_len * 0.85))
+                else:
+                    min_len = max(20, int(orig_len * 0.9))
+                    max_len = max(35, int(orig_len * 1.1))
+
+                budgets[bullet.id] = {
+                    "original_length": orig_len,
+                    "min_length": min_len,
+                    "max_length": max_len,
+                }
+    return budgets
+
+
 def tailor_resume_content(
     source_content: ResumeContent,
     jd_analysis: JDAnalysis,
     stricter_budgets: Dict[str, int] = None,
+    custom_budgets: Dict[str, Dict[str, int]] = None,
 ) -> TailoredOutput:
     """Tailors resume content to target JD using LLM and verifies all hard constraints."""
-    budgets = calculate_bullet_character_budgets(source_content)
+    budgets = custom_budgets if custom_budgets else calculate_bullet_character_budgets(source_content)
 
     # If fit loop supplied stricter budgets for overflowing bullets, apply them
     if stricter_budgets:

@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0.0",
+  "header": {
+    "name": "Alex Mercer",
+    "title": "Senior Staff Software Engineer",
+    "email": "alex.mercer@example.com",
+    "phone": "+1 (555) 019-2834",
+    "location": "San Francisco, CA",
+    "website": "https://alexmercer.dev",
+    "photoUrl": "",
+    "links": [
+      { "id": "link-1", "label": "GitHub", "url": "https://github.com/alexmercer" },
+      { "id": "link-2", "label": "LinkedIn", "url": "https://linkedin.com/in/alexmercer" }
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec-summary",
+      "type": "summary",
+      "title": "Professional Summary",
+      "visible": true,
+      "pageBreakBefore": false,
+      "order": 0,
+      "items": [
+        {
+          "id": "item-sum-1",
+          "title": "",
+          "subtitle": "",
+          "location": "",
+          "dateRange": "",
+          "visible": true,
+          "itemType": "paragraph",
+          "bullets": [
+            {
+              "id": "b-sum-1",
+              "text": "Accomplished full-stack systems engineer with 10+ years architecting high-throughput document infrastructure.",
+              "level": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-experience",
+      "type": "experience",
+      "title": "Work Experience",
+      "visible": true,
+      "pageBreakBefore": false,
+      "order": 1,
+      "items": [
+        {
+          "id": "item-exp-1",
+          "title": "Principal Software Engineer",
+          "subtitle": "Apex Cloud Systems",
+          "location": "San Francisco, CA",
+          "dateRange": "2021 - Present",
+          "visible": true,
+          "itemType": "timeline",
+          "bullets": [
+            {
+              "id": "b-exp-1",
+              "text": "Architected high-concurrency document rendering microservices processing **4.2M daily export jobs** with sub-500ms latency.",
+              "level": 0
+            },
+            {
+              "id": "b-exp-2",
+              "text": "Reduced AWS infrastructure costs by **38%** through automated headless browser pool optimization.",
+              "level": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-skills",
+      "type": "skills",
+      "title": "Technical Skills",
+      "visible": true,
+      "pageBreakBefore": false,
+      "order": 2,
+      "items": [
+        {
+          "id": "item-skills-1",
+          "title": "Core Technologies",
+          "subtitle": "",
+          "location": "",
+          "dateRange": "",
+          "visible": true,
+          "itemType": "tags",
+          "bullets": [
+            { "id": "b-sk-1", "text": "TypeScript", "level": 0 },
+            { "id": "b-sk-2", "text": "React", "level": 0 },
+            { "id": "b-sk-3", "text": "Python", "level": 0 },
+            { "id": "b-sk-4", "text": "FastAPI", "level": 0 },
+            { "id": "b-sk-5", "text": "PostgreSQL", "level": 0 }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -2,25 +2,37 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { arrayMove } from '@dnd-kit/sortable';
-import { ResumeContent, ResumeSection, SectionItem, SectionType, HeaderContent } from '@/types/content';
+import { ResumeContent, ResumeSection, SectionItem, SectionType, HeaderContent, BulletItem } from '@/types/content';
 import { ResumeStyle } from '@/types/style';
 import { Resume } from '@/types/resume';
-import { apiClient } from '@/lib/api';
 import { classicSingleColumnPreset, defaultResumeContent } from '@/lib/presets';
+import {
+  getActiveRepository,
+  localRepo,
+  supabaseRepo,
+  VersionConflictError,
+  ImportResult,
+} from '@/repositories';
 
-type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error';
+type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error' | 'conflict';
 
 interface ResumeContextType {
   resumeId: string;
   title: string;
   content: ResumeContent;
   style: ResumeStyle;
+  version: number;
   saveStatus: SaveStatus;
   lastSaved: Date | null;
   zoom: number;
   activeTab: 'content' | 'style' | 'templates';
   activeSectionId: string | null;
   loading: boolean;
+  hasLocalResumes: boolean;
+
+  // Conflict & Migration
+  resolveConflict: (action: 'reload' | 'overwrite') => Promise<void>;
+  importLocalResumes: () => Promise<ImportResult>;
 
   // View / UI
   setZoom: (zoom: number | ((prev: number) => number)) => void;
@@ -33,6 +45,7 @@ interface ResumeContextType {
   updateHeader: (header: Partial<HeaderContent>) => void;
   reorderSections: (oldIndex: number, newIndex: number) => void;
   toggleSectionVisibility: (sectionId: string) => void;
+  toggleSectionPageBreak: (sectionId: string) => void;
   removeSection: (sectionId: string) => void;
   addSection: (type: SectionType, title?: string) => void;
   updateSectionTitle: (sectionId: string, title: string) => void;
@@ -43,7 +56,23 @@ interface ResumeContextType {
   addBullet: (sectionId: string, itemId: string) => void;
   removeBullet: (sectionId: string, itemId: string, bulletId: string) => void;
   reorderBullets: (sectionId: string, itemId: string, oldIndex: number, newIndex: number) => void;
-  updateBullet: (sectionId: string, itemId: string, bulletId: string, text: string) => void;
+  updateBullet: (
+    sectionId: string,
+    itemId: string,
+    bulletId: string,
+    patch: string | Partial<BulletItem>
+  ) => void;
+
+  // Undo / Redo
+  canUndo: boolean;
+  canRedo: boolean;
+  undo: () => void;
+  redo: () => void;
+
+  // One-Page Fit
+  onePageFitActive: boolean;
+  onePageFitWarning: string | null;
+  toggleOnePageFit: () => void;
 
   // Style Actions
   updateStyle: (style: ResumeStyle) => void;
@@ -74,14 +103,88 @@ export const ResumeProvider: React.FC<{
   const [style, setStyleState] = useState<ResumeStyle>(
     initialResume?.style || classicSingleColumnPreset
   );
+  const [version, setVersion] = useState<number>(initialResume?.version ?? 1);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved');
+  const [hasLocalResumes, setHasLocalResumes] = useState<boolean>(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(new Date());
   const [zoom, setZoom] = useState(1);
   const [activeTab, setActiveTab] = useState<'content' | 'style' | 'templates'>('content');
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
 
+  // Undo / Redo history
+  const undoStackRef = useRef<ResumeContent[]>([]);
+  const redoStackRef = useRef<ResumeContent[]>([]);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+
+  // One-Page Fit
+  const [onePageFitActive, setOnePageFitActive] = useState(false);
+  const [onePageFitWarning, setOnePageFitWarning] = useState<string | null>(null);
+
   const isInitialMount = useRef(true);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Helper to push history
+  const pushContentWithHistory = useCallback((newContent: ResumeContent | ((prev: ResumeContent) => ResumeContent)) => {
+    setContentState((prev) => {
+      const next = typeof newContent === 'function' ? newContent(prev) : newContent;
+      if (next !== prev) {
+        undoStackRef.current.push(prev);
+        if (undoStackRef.current.length > 50) undoStackRef.current.shift();
+        redoStackRef.current = [];
+        setCanUndo(true);
+        setCanRedo(false);
+      }
+      return next;
+    });
+  }, []);
+
+  const undo = useCallback(() => {
+    if (undoStackRef.current.length === 0) return;
+    const previous = undoStackRef.current.pop()!;
+    redoStackRef.current.push(content);
+    setContentState(previous);
+    setCanUndo(undoStackRef.current.length > 0);
+    setCanRedo(true);
+  }, [content]);
+
+  const redo = useCallback(() => {
+    if (redoStackRef.current.length === 0) return;
+    const next = redoStackRef.current.pop()!;
+    undoStackRef.current.push(content);
+    setContentState(next);
+    setCanUndo(true);
+    setCanRedo(redoStackRef.current.length > 0);
+  }, [content]);
+
+  // Keyboard shortcut listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA');
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        if (!isInput) {
+          e.preventDefault();
+          if (e.shiftKey) redo();
+          else undo();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        if (!isInput) {
+          e.preventDefault();
+          redo();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undo, redo]);
+
+  // Check if local storage has resumes that can be migrated
+  useEffect(() => {
+    setHasLocalResumes(localRepo.hasResumes());
+  }, []);
 
   // Fetch resume if not provided as initial prop
   useEffect(() => {
@@ -90,10 +193,14 @@ export const ResumeProvider: React.FC<{
     async function fetchResume() {
       try {
         setLoading(true);
-        const res = await apiClient.get<Resume>(`/resumes/${resumeId}`);
-        setTitleState(res.data.title || 'Untitled Resume');
-        setContentState(res.data.content || defaultResumeContent);
-        setStyleState(res.data.style || classicSingleColumnPreset);
+        const repo = await getActiveRepository();
+        const data = await repo.get(resumeId);
+        if (data) {
+          setTitleState(data.title || 'Untitled Resume');
+          setContentState(data.content || defaultResumeContent);
+          setStyleState(data.style || classicSingleColumnPreset);
+          setVersion(data.version ?? 1);
+        }
       } catch (err) {
         console.error('Failed to load resume:', err);
         setSaveStatus('error');
@@ -105,24 +212,37 @@ export const ResumeProvider: React.FC<{
     fetchResume();
   }, [resumeId, initialResume]);
 
-  // Autosave execution function
+  // Autosave execution function with optimistic locking
   const executeSave = useCallback(
-    async (curTitle: string, curContent: ResumeContent, curStyle: ResumeStyle) => {
+    async (
+      curTitle: string,
+      curContent: ResumeContent,
+      curStyle: ResumeStyle,
+      forceOverwrite = false
+    ) => {
       setSaveStatus('saving');
       try {
-        await apiClient.put(`/resumes/${resumeId}`, {
+        const repo = await getActiveRepository();
+        const updated = await repo.update(resumeId, {
           title: curTitle,
           content: curContent,
           style: curStyle,
+          expected_version: forceOverwrite ? undefined : version,
         });
+        setVersion(updated.version ?? version + 1);
         setSaveStatus('saved');
         setLastSaved(new Date());
-      } catch (err) {
-        console.error('Autosave error:', err);
-        setSaveStatus('error');
+      } catch (err: unknown) {
+        if (err instanceof VersionConflictError || (err as { code?: string })?.code === 'VERSION_CONFLICT') {
+          console.warn('Optimistic lock conflict detected for resume:', resumeId);
+          setSaveStatus('conflict');
+        } else {
+          console.error('Autosave error:', err);
+          setSaveStatus('error');
+        }
       }
     },
-    [resumeId]
+    [resumeId, version]
   );
 
   // Trigger debounced autosave when title, content, or style changes
@@ -153,6 +273,39 @@ export const ResumeProvider: React.FC<{
     await executeSave(title, content, style);
   };
 
+  const resolveConflict = useCallback(
+    async (action: 'reload' | 'overwrite') => {
+      if (action === 'reload') {
+        try {
+          setLoading(true);
+          const repo = await getActiveRepository();
+          const latest = await repo.get(resumeId);
+          if (latest) {
+            setTitleState(latest.title);
+            setContentState(latest.content);
+            setStyleState(latest.style);
+            setVersion(latest.version ?? 1);
+            setSaveStatus('saved');
+          }
+        } catch (e) {
+          console.error('Failed to reload latest resume:', e);
+          setSaveStatus('error');
+        } finally {
+          setLoading(false);
+        }
+      } else if (action === 'overwrite') {
+        await executeSave(title, content, style, true);
+      }
+    },
+    [resumeId, executeSave, title, content, style]
+  );
+
+  const importLocalResumes = useCallback(async (): Promise<ImportResult> => {
+    const res = await supabaseRepo.importLocalResumes(localRepo.getAll());
+    setHasLocalResumes(localRepo.hasResumes());
+    return res;
+  }, []);
+
   const setTitle = (newTitle: string) => {
     setTitleState(newTitle);
   };
@@ -170,8 +323,70 @@ export const ResumeProvider: React.FC<{
   };
 
   // Header update
+  const toggleSectionPageBreak = (sectionId: string) => {
+    pushContentWithHistory((prev) => ({
+      ...prev,
+      sections: prev.sections.map((s) =>
+        s.id === sectionId ? { ...s, pageBreakBefore: !s.pageBreakBefore } : s
+      ),
+    }));
+  };
+
+  const toggleOnePageFit = () => {
+    if (!onePageFitActive) {
+      setStyleState((prev) => ({
+        ...prev,
+        typography: {
+          ...prev.typography,
+          fontSizeScale: 0.92,
+          lineHeight: 1.32,
+        },
+        spacing: {
+          ...prev.spacing,
+          sectionSpacing: 9,
+          itemSpacing: 5,
+          bulletSpacing: 1.5,
+          headerBottomSpacing: 12,
+        },
+        margins: {
+          ...prev.margins,
+          top: 24,
+          bottom: 24,
+          left: 28,
+          right: 28,
+        },
+      }));
+      setOnePageFitActive(true);
+    } else {
+      setStyleState((prev) => ({
+        ...prev,
+        typography: {
+          ...prev.typography,
+          fontSizeScale: 1.0,
+          lineHeight: 1.45,
+        },
+        spacing: {
+          ...prev.spacing,
+          sectionSpacing: 14,
+          itemSpacing: 8,
+          bulletSpacing: 3,
+          headerBottomSpacing: 16,
+        },
+        margins: {
+          ...prev.margins,
+          top: 36,
+          bottom: 36,
+          left: 42,
+          right: 42,
+        },
+      }));
+      setOnePageFitActive(false);
+      setOnePageFitWarning(null);
+    }
+  };
+
   const updateHeader = (patch: Partial<HeaderContent>) => {
-    setContentState((prev) => ({
+    pushContentWithHistory((prev) => ({
       ...prev,
       header: {
         ...prev.header,
@@ -182,14 +397,14 @@ export const ResumeProvider: React.FC<{
 
   // Section actions
   const reorderSections = (oldIndex: number, newIndex: number) => {
-    setContentState((prev) => ({
+    pushContentWithHistory((prev) => ({
       ...prev,
       sections: arrayMove(prev.sections, oldIndex, newIndex),
     }));
   };
 
   const toggleSectionVisibility = (sectionId: string) => {
-    setContentState((prev) => ({
+    pushContentWithHistory((prev) => ({
       ...prev,
       sections: prev.sections.map((s) =>
         s.id === sectionId ? { ...s, visible: !s.visible } : s
@@ -198,7 +413,7 @@ export const ResumeProvider: React.FC<{
   };
 
   const removeSection = (sectionId: string) => {
-    setContentState((prev) => ({
+    pushContentWithHistory((prev) => ({
       ...prev,
       sections: prev.sections.filter((s) => s.id !== sectionId),
     }));
@@ -215,6 +430,13 @@ export const ResumeProvider: React.FC<{
       projects: 'Projects',
       certifications: 'Certifications',
       custom: 'Additional Information',
+      languages: 'Languages',
+      awards: 'Honors & Awards',
+      publications: 'Publications',
+      volunteering: 'Volunteering & Leadership',
+      interests: 'Interests & Activities',
+      references: 'References',
+      links: 'Portfolio & Links',
     };
 
     const newSection: ResumeSection = {
@@ -234,7 +456,7 @@ export const ResumeProvider: React.FC<{
       ],
     };
 
-    setContentState((prev) => ({
+    pushContentWithHistory((prev) => ({
       ...prev,
       sections: [...prev.sections, newSection],
     }));
@@ -242,7 +464,7 @@ export const ResumeProvider: React.FC<{
   };
 
   const updateSectionTitle = (sectionId: string, newTitle: string) => {
-    setContentState((prev) => ({
+    pushContentWithHistory((prev) => ({
       ...prev,
       sections: prev.sections.map((s) =>
         s.id === sectionId ? { ...s, title: newTitle } : s
@@ -261,7 +483,7 @@ export const ResumeProvider: React.FC<{
       bullets: [{ id: `b-${Date.now()}`, text: 'Key contribution or achievement' }],
     };
 
-    setContentState((prev) => ({
+    pushContentWithHistory((prev) => ({
       ...prev,
       sections: prev.sections.map((s) =>
         s.id === sectionId ? { ...s, items: [...(s.items || []), newItem] } : s
@@ -270,7 +492,7 @@ export const ResumeProvider: React.FC<{
   };
 
   const removeItem = (sectionId: string, itemId: string) => {
-    setContentState((prev) => ({
+    pushContentWithHistory((prev) => ({
       ...prev,
       sections: prev.sections.map((s) =>
         s.id === sectionId
@@ -281,7 +503,7 @@ export const ResumeProvider: React.FC<{
   };
 
   const reorderItems = (sectionId: string, oldIndex: number, newIndex: number) => {
-    setContentState((prev) => ({
+    pushContentWithHistory((prev) => ({
       ...prev,
       sections: prev.sections.map((s) =>
         s.id === sectionId ? { ...s, items: arrayMove(s.items, oldIndex, newIndex) } : s
@@ -294,7 +516,7 @@ export const ResumeProvider: React.FC<{
     itemId: string,
     itemData: Partial<SectionItem>
   ) => {
-    setContentState((prev) => ({
+    pushContentWithHistory((prev) => ({
       ...prev,
       sections: prev.sections.map((s) =>
         s.id === sectionId
@@ -316,7 +538,7 @@ export const ResumeProvider: React.FC<{
       text: 'New bullet point',
     };
 
-    setContentState((prev) => ({
+    pushContentWithHistory((prev) => ({
       ...prev,
       sections: prev.sections.map((s) =>
         s.id === sectionId
@@ -334,7 +556,7 @@ export const ResumeProvider: React.FC<{
   };
 
   const removeBullet = (sectionId: string, itemId: string, bulletId: string) => {
-    setContentState((prev) => ({
+    pushContentWithHistory((prev) => ({
       ...prev,
       sections: prev.sections.map((s) =>
         s.id === sectionId
@@ -357,7 +579,7 @@ export const ResumeProvider: React.FC<{
     oldIndex: number,
     newIndex: number
   ) => {
-    setContentState((prev) => ({
+    pushContentWithHistory((prev) => ({
       ...prev,
       sections: prev.sections.map((s) =>
         s.id === sectionId
@@ -378,9 +600,11 @@ export const ResumeProvider: React.FC<{
     sectionId: string,
     itemId: string,
     bulletId: string,
-    text: string
+    patch: string | Partial<BulletItem>
   ) => {
-    setContentState((prev) => ({
+    const patchObj = typeof patch === 'string' ? { text: patch } : patch;
+
+    pushContentWithHistory((prev) => ({
       ...prev,
       sections: prev.sections.map((s) =>
         s.id === sectionId
@@ -391,7 +615,7 @@ export const ResumeProvider: React.FC<{
                   ? {
                       ...item,
                       bullets: item.bullets.map((b) =>
-                        b.id === bulletId ? { ...b, text } : b
+                        b.id === bulletId ? { ...b, ...patchObj } : b
                       ),
                     }
                   : item
@@ -440,12 +664,16 @@ export const ResumeProvider: React.FC<{
         title,
         content,
         style,
+        version,
         saveStatus,
+        hasLocalResumes,
         lastSaved,
         zoom,
         activeTab,
         activeSectionId,
         loading,
+        resolveConflict,
+        importLocalResumes,
         setZoom,
         setActiveTab,
         setActiveSectionId,
@@ -454,6 +682,7 @@ export const ResumeProvider: React.FC<{
         updateHeader,
         reorderSections,
         toggleSectionVisibility,
+        toggleSectionPageBreak,
         removeSection,
         addSection,
         updateSectionTitle,
@@ -465,6 +694,13 @@ export const ResumeProvider: React.FC<{
         removeBullet,
         reorderBullets,
         updateBullet,
+        canUndo,
+        canRedo,
+        undo,
+        redo,
+        onePageFitActive,
+        onePageFitWarning,
+        toggleOnePageFit,
         updateStyle,
         applyPreset,
         exportContentJson,

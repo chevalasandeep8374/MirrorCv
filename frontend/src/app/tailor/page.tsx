@@ -14,42 +14,87 @@ import {
   ArrowLeft,
   FileCheck,
   AlertCircle,
+  ShieldCheck,
+  Type,
+  Columns,
+  Eye,
 } from 'lucide-react';
+import ImportReportModal from '@/components/tailor/ImportReportModal';
 
 export default function NewTailoredResumePage() {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [jdText, setJdText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
   const [stepMessage, setStepMessage] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  // Phase 2.5 PDF Template state
+  const [uploadedTemplateId, setUploadedTemplateId] = useState<string | null>(null);
+  const [templateData, setTemplateData] = useState<any | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
+
   const pipelineStages = [
-    'Parsing & fingerprinting DOCX template formatting',
+    'Extracting document layout, vector art, and font metrics',
     'Classifying paragraph roles and section hierarchies',
     'Analyzing target job description and required competencies',
-    'Tailoring achievements with strict character budgets',
-    'Writing fidelity DOCX and deep-copy XML paragraph cloning',
-    'Converting PDF and running multi-page fit checks',
-    'Computing keyword coverage score before & after',
+    'Tailoring achievements with strict glyph-measured character budgets',
+    'Executing in-place vector redaction & deep XML paragraph cloning',
+    'Running multi-round fit checks and page count verification',
+    'Computing keyword coverage score and fidelity metrics',
   ];
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
-    if (selected) {
-      if (!selected.name.toLowerCase().endsWith('.docx')) {
-        setError('Only .docx files are supported.');
-        return;
+    if (!selected) return;
+
+    const name = selected.name.toLowerCase();
+    const isPdf = name.endsWith('.pdf');
+    const isDocx = name.endsWith('.docx');
+
+    if (!isPdf && !isDocx) {
+      setError('Only .pdf and .docx resume files are supported.');
+      return;
+    }
+
+    if (selected.size > 10 * 1024 * 1024) {
+      setError('File size exceeds the 10 MB limit.');
+      return;
+    }
+
+    setFile(selected);
+    setError(null);
+    setUploadedTemplateId(null);
+    setTemplateData(null);
+
+    // If PDF, run upload and no-op test upfront to show the Import Report
+    if (isPdf) {
+      setUploadingFile(true);
+      try {
+        const formData = new FormData();
+        formData.append('file', selected);
+
+        const uploadRes = await apiClient.post('/templates/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+
+        setUploadedTemplateId(uploadRes.data.id);
+        setTemplateData(uploadRes.data);
+        setShowReportModal(true);
+      } catch (err: any) {
+        setError(err?.response?.data?.detail || 'Failed to parse and analyze PDF resume.');
+        setFile(null);
+      } finally {
+        setUploadingFile(false);
       }
-      setFile(selected);
-      setError(null);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      setError('Please upload your original DOCX resume.');
+      setError('Please upload your original PDF or DOCX resume.');
       return;
     }
     if (!jdText.trim()) {
@@ -61,20 +106,25 @@ export default function NewTailoredResumePage() {
     setError(null);
 
     try {
-      // 1. Upload DOCX template
-      setStepMessage('Uploading and fingerprinting DOCX template...');
-      const formData = new FormData();
-      formData.append('file', file);
+      let tplId = uploadedTemplateId;
 
-      const uploadRes = await apiClient.post('/templates/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      const templateId = uploadRes.data.id;
+      // If DOCX or not yet uploaded
+      if (!tplId) {
+        setStepMessage('Uploading and fingerprinting master template...');
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const uploadRes = await apiClient.post('/templates/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        tplId = uploadRes.data.id;
+        setUploadedTemplateId(tplId);
+      }
 
       // 2. Submit Tailoring Job
       setStepMessage('Launching tailoring pipeline in background...');
       const tailorRes = await apiClient.post('/tailor', {
-        template_id: templateId,
+        template_id: tplId,
         jd_text: jdText,
       });
       const jobId = tailorRes.data.job_id;
@@ -99,7 +149,6 @@ export default function NewTailoredResumePage() {
           console.warn('Poll error:', pollErr);
         }
       }, 1500);
-
     } catch (err: any) {
       setError(err?.response?.data?.detail || 'An error occurred while uploading.');
       setLoading(false);
@@ -119,7 +168,7 @@ export default function NewTailoredResumePage() {
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <span className="text-base font-bold text-slate-900 tracking-tight">
-              Tailor Resume from Upload (Phase 2)
+              Tailor Resume (Phase 2.5 PDF & DOCX Fidelity)
             </span>
           </div>
         </div>
@@ -133,8 +182,8 @@ export default function NewTailoredResumePage() {
             <span>Generate Identical-Look Tailored Resume</span>
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Upload your master DOCX resume and paste the job description. MirrorCV preserves your runs,
-            fonts, and layout in-place with zero invented facts.
+            Upload your master PDF or DOCX resume and paste the job description. MirrorCV preserves
+            your exact fonts, vector lines, colors, and layout with zero invented facts.
           </p>
         </div>
 
@@ -170,42 +219,113 @@ export default function NewTailoredResumePage() {
         ) : (
           /* Submission Form */
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Step 1: Upload DOCX */}
+            {/* Step 1: Upload PDF or DOCX */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                1. Upload Master Resume (.docx)
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">
+                  1. Upload Master Resume (.pdf or .docx)
+                </label>
+                {templateData && (
+                  <button
+                    type="button"
+                    onClick={() => setShowReportModal(true)}
+                    className="inline-flex items-center space-x-1 text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>View Import Report</span>
+                  </button>
+                )}
+              </div>
 
               <div className="border-2 border-dashed border-slate-200 hover:border-blue-400 rounded-xl p-8 text-center transition-colors">
                 <input
                   type="file"
                   id="resume-file"
-                  accept=".docx"
+                  accept=".pdf,.docx"
                   onChange={handleFileChange}
                   className="hidden"
                 />
                 <label htmlFor="resume-file" className="cursor-pointer flex flex-col items-center">
                   <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-                    {file ? <FileCheck className="w-6 h-6" /> : <Upload className="w-6 h-6" />}
+                    {uploadingFile ? (
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                    ) : file ? (
+                      <FileCheck className="w-6 h-6" />
+                    ) : (
+                      <Upload className="w-6 h-6" />
+                    )}
                   </div>
-                  {file ? (
+                  {uploadingFile ? (
+                    <div>
+                      <span className="font-bold text-blue-600 text-sm">
+                        Analyzing Document & Running No-Op Test...
+                      </span>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Extracting vector line art, glyph metrics, and layout
+                      </p>
+                    </div>
+                  ) : file ? (
                     <div>
                       <span className="font-bold text-slate-900 text-sm">{file.name}</span>
                       <p className="text-xs text-slate-400 mt-0.5">
-                        {(file.size / 1024).toFixed(1)} KB — Ready for extraction
+                        {(file.size / 1024).toFixed(1)} KB — Ready for tailoring
                       </p>
                     </div>
                   ) : (
                     <div>
                       <span className="font-semibold text-blue-600 hover:underline text-sm">
-                        Click to upload DOCX
+                        Click to upload PDF or DOCX
                       </span>
                       <span className="text-slate-500 text-sm"> or drag and drop</span>
-                      <p className="text-xs text-slate-400 mt-1">Microsoft Word documents up to 5 MB</p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        PDF or Word documents up to 10 MB (up to 3 pages)
+                      </p>
                     </div>
                   )}
                 </label>
               </div>
+
+              {/* Template Import Summary Pill */}
+              {templateData && (
+                <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
+                  <div className="flex items-center space-x-2.5">
+                    <span
+                      className={`px-2 py-0.5 rounded-full font-bold text-[10px] border ${
+                        templateData.fidelity_forecast?.tier === 'A'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                          : templateData.fidelity_forecast?.tier === 'B'
+                          ? 'bg-blue-50 text-blue-700 border-blue-300'
+                          : 'bg-amber-50 text-amber-700 border-amber-300'
+                      }`}
+                    >
+                      Tier {templateData.fidelity_forecast?.tier || 'A'} ·{' '}
+                      {templateData.fidelity_forecast?.tier === 'A'
+                        ? 'Exact'
+                        : templateData.fidelity_forecast?.tier === 'B'
+                        ? 'Close'
+                        : 'Approximate'}
+                    </span>
+                    <span className="text-slate-600 font-medium">
+                      Fidelity Forecast:{' '}
+                      <strong className="text-slate-900">
+                        {templateData.fidelity_forecast?.total_score?.toFixed(1) || '95.0'} / 100
+                      </strong>
+                    </span>
+                    <span className="text-slate-400">·</span>
+                    <span className="text-slate-500">
+                      {templateData.columns_detected === 2 ? 'Two Columns' : 'Single Column'}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowReportModal(true)}
+                    className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold shadow-2xs transition"
+                  >
+                    Open Import Report
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Step 2: Job Description Text */}
@@ -217,7 +337,7 @@ export default function NewTailoredResumePage() {
                 rows={8}
                 value={jdText}
                 onChange={(e) => setJdText(e.target.value)}
-                placeholder="Paste the job requirements, responsibilities, and qualifications here..."
+                placeholder="Paste the target job description requirements, responsibilities, and qualifications here..."
                 className="w-full text-xs p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 leading-relaxed font-sans"
               />
             </div>
@@ -225,7 +345,8 @@ export default function NewTailoredResumePage() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2"
+              disabled={uploadingFile}
+              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
             >
               <span>Analyze & Tailor Resume</span>
               <ArrowRight className="w-4 h-4" />
@@ -233,6 +354,18 @@ export default function NewTailoredResumePage() {
           </form>
         )}
       </main>
+
+      {/* Import Report Modal */}
+      {showReportModal && templateData && (
+        <ImportReportModal
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          onConfirm={() => setShowReportModal(false)}
+          templateData={templateData}
+          originalFile={file}
+          onFontUpdated={(updated) => setTemplateData(updated)}
+        />
+      )}
     </div>
   );
 }

@@ -1,0 +1,169 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mirrorcv.dev/schemas/v1/style_tokens.schema.json",
+  "title": "StyleTokens",
+  "description": "Standard schema for resume styling tokens, units, layout, and typography.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "templateId",
+    "pageSize",
+    "margins",
+    "typography",
+    "spacing",
+    "colors",
+    "bulletStyle",
+    "headingStyle",
+    "layout"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.0.0"],
+      "default": "1.0.0"
+    },
+    "templateId": { "type": "string" },
+    "pageSize": {
+      "type": "string",
+      "enum": ["A4", "Letter"]
+    },
+    "margins": {
+      "type": "object",
+      "required": ["top", "bottom", "left", "right", "unit"],
+      "properties": {
+        "top": { "type": "number" },
+        "bottom": { "type": "number" },
+        "left": { "type": "number" },
+        "right": { "type": "number" },
+        "unit": { "type": "string", "enum": ["pt", "px"] }
+      },
+      "additionalProperties": false
+    },
+    "typography": {
+      "type": "object",
+      "required": ["baseFontFamily", "headingFontFamily", "fontSizes", "lineHeight"],
+      "properties": {
+        "baseFontFamily": { "type": "string" },
+        "headingFontFamily": { "type": "string" },
+        "nameFontFamily": { "type": "string" },
+        "fontSizeScale": { "type": "number", "default": 1.0 },
+        "fontSizes": {
+          "type": "object",
+          "required": [
+            "name",
+            "headerTitle",
+            "contact",
+            "sectionHeading",
+            "itemTitle",
+            "itemSubtitle",
+            "body",
+            "meta",
+            "unit"
+          ],
+          "properties": {
+            "name": { "type": "number" },
+            "headerTitle": { "type": "number" },
+            "contact": { "type": "number" },
+            "sectionHeading": { "type": "number" },
+            "itemTitle": { "type": "number" },
+            "itemSubtitle": { "type": "number" },
+            "body": { "type": "number" },
+            "meta": { "type": "number" },
+            "unit": { "type": "string", "enum": ["pt", "px"] }
+          },
+          "additionalProperties": false
+        },
+        "lineHeight": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "spacing": {
+      "type": "object",
+      "required": ["sectionSpacing", "itemSpacing", "bulletSpacing", "headerBottomSpacing", "unit"],
+      "properties": {
+        "sectionSpacing": { "type": "number" },
+        "itemSpacing": { "type": "number" },
+        "bulletSpacing": { "type": "number" },
+        "headerBottomSpacing": { "type": "number" },
+        "unit": { "type": "string", "enum": ["pt", "px"] }
+      },
+      "additionalProperties": false
+    },
+    "colors": {
+      "type": "object",
+      "required": ["accent", "text", "muted", "background", "sidebarBackground", "divider"],
+      "properties": {
+        "accent": { "type": "string" },
+        "text": { "type": "string" },
+        "muted": { "type": "string" },
+        "background": { "type": "string" },
+        "sidebarBackground": { "type": "string" },
+        "divider": { "type": "string" },
+        "headerBannerColor": { "type": "string" },
+        "headerBannerTextColor": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "bulletStyle": {
+      "type": "string",
+      "enum": ["disc", "circle", "square", "dash", "arrow", "none"]
+    },
+    "headingStyle": {
+      "type": "string",
+      "enum": ["underline", "bar", "plain", "caps", "boxed", "pill"]
+    },
+    "layout": {
+      "type": "object",
+      "required": ["type", "sidebarWidthPercent", "sidebarSectionIds", "mainSectionIds"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "single",
+            "sidebar_left",
+            "sidebar_right",
+            "header_banner",
+            "compact",
+            "creative",
+            "minimal",
+            "academic"
+          ]
+        },
+        "sidebarWidthPercent": { "type": "number" },
+        "sidebarSectionIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "mainSectionIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "decorations": {
+      "type": "object",
+      "properties": {
+        "headerBanner": { "type": "boolean" },
+        "headerBannerColor": { "type": "string" },
+        "headerBannerTextColor": { "type": "string" },
+        "avatarShape": { "type": "string", "enum": ["circle", "square"] },
+        "showAvatar": { "type": "boolean" },
+        "avatarUrl": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "dateFormat": { "type": "string" },
+    "locale": {
+      "type": "string",
+      "enum": ["en", "hi", "ar", "he", "fr", "es", "de"],
+      "default": "en"
+    },
+    "direction": {
+      "type": "string",
+      "enum": ["ltr", "rtl"],
+      "default": "ltr"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,293 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mirrorcv.dev/schemas/v1/tailored_content.schema.json",
+  "title": "TailoredContent",
+  "description": "Agent 2 output containing JD analysis, match scores, verified structured changes, missing skills breakdown, generator metadata, and inline markup validation rules.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "resume_id",
+    "rules",
+    "changes",
+    "score_before",
+    "score_after",
+    "matched_keywords",
+    "missing_keywords"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.0.0", "1.1.0"],
+      "default": "1.1.0"
+    },
+    "run_id": { "type": "string" },
+    "resume_id": { "type": "string" },
+    "job_description_id": { "type": ["string", "null"] },
+    "mode": {
+      "type": "string",
+      "enum": ["analyze", "full"],
+      "default": "full"
+    },
+    "rules": {
+      "type": "object",
+      "required": ["no_new_facts_allowed", "allowed_inline_markup", "syntax_guide"],
+      "properties": {
+        "no_new_facts_allowed": {
+          "type": "boolean",
+          "enum": [true],
+          "default": true,
+          "description": "Enforces strict anti-hallucination: every claim must be grounded in the original resume or confirmed master profile."
+        },
+        "allowed_inline_markup": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["bold", "italic", "link"]
+          },
+          "default": ["bold", "italic", "link"],
+          "description": "List of allowed inline markup types. Raw HTML tags and block elements are forbidden."
+        },
+        "syntax_guide": {
+          "type": "object",
+          "required": ["bold", "italic", "link"],
+          "properties": {
+            "bold": { "type": "string", "default": "**text**" },
+            "italic": { "type": "string", "default": "*text*" },
+            "link": { "type": "string", "default": "[label](url)" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "score_before": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "score_after": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "score_breakdown": {
+      "type": "object",
+      "properties": {
+        "required_skill_coverage": { "type": "number", "minimum": 0, "maximum": 40 },
+        "preferred_skill_coverage": { "type": "number", "minimum": 0, "maximum": 15 },
+        "semantic_relevance": { "type": "number", "minimum": 0, "maximum": 25 },
+        "seniority_fit": { "type": "number", "minimum": 0, "maximum": 10 },
+        "ats_readability": { "type": "number", "minimum": 0, "maximum": 10 },
+        "stuffing_penalty": { "type": "number", "minimum": 0, "maximum": 20 },
+        "confidence_note": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "skills_analysis": {
+      "type": "object",
+      "properties": {
+        "matched_skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["skill", "canonical_name", "category", "content_ids"],
+            "properties": {
+              "skill": { "type": "string" },
+              "canonical_name": { "type": "string" },
+              "category": { "type": "string" },
+              "content_ids": { "type": "array", "items": { "type": "string" } }
+            },
+            "additionalProperties": false
+          }
+        },
+        "missing_skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["skill", "canonical_name", "category", "importance"],
+            "properties": {
+              "skill": { "type": "string" },
+              "canonical_name": { "type": "string" },
+              "category": { "type": "string" },
+              "importance": { "type": "string", "enum": ["required", "preferred"] }
+            },
+            "additionalProperties": false
+          }
+        },
+        "present_not_visible": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["skill", "canonical_name", "master_item_id"],
+            "properties": {
+              "skill": { "type": "string" },
+              "canonical_name": { "type": "string" },
+              "master_item_id": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "adjacent_skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["jd_skill", "resume_skill", "relation"],
+            "properties": {
+              "jd_skill": { "type": "string" },
+              "resume_skill": { "type": "string" },
+              "relation": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "generator": {
+      "type": "object",
+      "properties": {
+        "model": { "type": "string" },
+        "prompt_version": { "type": "string" },
+        "weights_version": { "type": "string" },
+        "taxonomy_version": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "changes": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Change" }
+    },
+    "rejected_changes": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Change" },
+      "default": []
+    },
+    "suggestions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["suggestion_id", "skill", "canonical_name", "category", "class", "prompt_text", "confirmed"],
+        "properties": {
+          "suggestion_id": { "type": "string" },
+          "skill": { "type": "string" },
+          "canonical_name": { "type": "string" },
+          "category": { "type": "string" },
+          "class": { "type": "string", "enum": ["missing", "present_not_visible", "adjacent"] },
+          "prompt_text": { "type": "string" },
+          "target_section_id": { "type": ["string", "null"] },
+          "confirmed": { "type": "boolean", "default": false }
+        },
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "matched_keywords": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "missing_keywords": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "definitions": {
+    "Change": {
+      "type": "object",
+      "required": [
+        "change_id",
+        "field",
+        "reason"
+      ],
+      "properties": {
+        "change_id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "rewrite_bullet",
+            "reorder_bullets",
+            "reorder_items",
+            "show_item",
+            "hide_item",
+            "reorder_skills",
+            "regroup_skills",
+            "rewrite_summary",
+            "normalize_term",
+            "add_item_from_master_profile"
+          ],
+          "default": "rewrite_bullet"
+        },
+        "target_content_id": {
+          "type": "string",
+          "description": "Identifier for the target section_id, item_id, or bullet_id"
+        },
+        "slot_id": { "type": ["string", "null"] },
+        "item_id": { "type": ["string", "null"] },
+        "field": { "type": "string" },
+        "before": {
+          "description": "Previous content: string for text, list of IDs for reorders/regroupings",
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } },
+            { "type": "null" }
+          ]
+        },
+        "after": {
+          "description": "Tailored content: string for text, list of IDs for reorders/regroupings",
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } },
+            { "type": "null" }
+          ]
+        },
+        "reason": { "type": "string" },
+        "evidence_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        },
+        "keywords_touched": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "default": "low"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["proposed", "accepted", "rejected", "auto_rejected"],
+          "default": "proposed"
+        },
+        "rejection_reason": { "type": ["string", "null"] },
+        "generator": {
+          "type": "object",
+          "properties": {
+            "model": { "type": "string" },
+            "prompt_version": { "type": "string" },
+            "weights_version": { "type": "string" },
+            "taxonomy_version": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "target_id": { "type": "string" },
+        "original_text": { "type": "string" },
+        "tailored_text": { "type": "string" },
+        "source_reference": {
+          "type": "object",
+          "properties": {
+            "source_item_id": { "type": "string" },
+            "source_bullet_id": { "type": ["string", "null"] },
+            "verified_fact": { "type": "string" },
+            "is_grounded": { "type": "boolean", "default": true }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

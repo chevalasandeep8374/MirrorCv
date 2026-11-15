@@ -37,5 +37,13 @@ class TailoringState(TypedDict, total=False):
     match_score_before: MatchScore
     match_score_after: MatchScore
 
+    template_type: str
+    layout: Dict[str, Any]
+    font_table: Dict[str, Any]
+    fidelity_score: Dict[str, Any]
+    fidelity_tier: str
+    selected_strategy: str
+    noop_preview_pdf_path: str
+
     current_step: str
     error: Optional[str]

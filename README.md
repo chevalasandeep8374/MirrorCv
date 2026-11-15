@@ -12,6 +12,33 @@ MirrorCV is an open-source, modern resume builder built with strict separation o
 
 ---
 
+## Phase 2.5: PDF Template Intake & Fidelity Engine
+
+Phase 2.5 accepts a PDF resume as the template and produces a tailored PDF that mirrors the original format (same fonts, sizes, colors, positions, lines, icons, links), plus loads it into the visual editor.
+
+### Reality Check & Fidelity Tiers
+PDFs have no native paragraphs or styles—only positioned text spans and vector shapes. MirrorCV measures its own fidelity, auto-selects the best strategy, and reports an honest tier per result:
+- **Tier A "Exact"**: Text-based PDF, in-place redaction and injection succeeds (fidelity score >= 90). Native vector drawings, rules, background cards, icons, and photos stay untouched.
+- **Tier B "Close"**: Fonts substituted or layout rebuilt in the Playwright HTML renderer with extracted style tokens and original image assets embedded.
+- **Tier C "Approximate"**: Scanned or image-only PDF rasterized at 300 DPI, processed with pluggable OCR (Tesseract / Vision LLM), and reconstructed via the HTML renderer.
+
+### Core Architecture & Modules
+1. **Intake & Validation**: Detects corruption, encryption, page counts (fails if >3 pages), and evaluates text density vs image coverage to identify scanned PDFs.
+2. **Span & Asset Extractor (PyMuPDF)**: Extracts span bboxes, baseline origins, font metadata, vector drawings (lines, rectangles, curves), embedded images, and link annotations.
+3. **Font Analyzer & Resolution Table**: Detects subset and embedded fonts. Maps fonts to metric-compatible open fonts (Calibri -> Carlito, Arial -> Liberation Sans, Times -> Liberation Serif, Cambria -> Caladea). Never reuses embedded subset fonts for new text.
+4. **Layout Analyzer**: Groups spans into lines and blocks, clusters x-positions to identify columns and sidebars, detects bullet glyphs (`•`, `-`, `▪`, `➤`) with hanging indents, and calculates available line widths for character budgets.
+5. **Role Classification Adapter**: Bridges PDF layout into paragraph-like structures, reusing Phase 2 classifiers and content extractors unchanged.
+6. **In-Place Writer Strategy (Tier A)**: Applies redaction annotations exclusively over modified text blocks with `PDF_REDACT_IMAGE_NONE` and `PDF_REDACT_LINE_ART_NONE` so backgrounds, dividers, and avatars survive untouched; injects new text with exact line-height reflow across columns.
+7. **Rebuild Writer Strategy (Tier B/C)**: Rebuilds layout in Playwright using `<ResumeDocument>` styles, CSS variables, and embedded image assets.
+8. **Pluggable OCR Engine (Tier C)**: Pluggable OCR engine (`BaseOcrEngine`, `TesseractOcrEngine`) estimating font sizes and bounding boxes; fails clearly if OCR confidence < 0.6.
+9. **Automated Fidelity Scorer**: Computes a 0-100 score combining page count delta, line-based text position delta (mean/max in pt), font match rate, and rasterized SSIM.
+
+### Font Licensing & Privacy
+- **Font Licensing**: MirrorCV strictly respects font copyright and licensing. We never bundle proprietary fonts. The system resolves fonts against open metric-compatible fonts or user-uploaded `.ttf`/`.otf` files.
+- **Privacy**: All uploaded resumes and custom fonts are strictly private to the user, deletable on request, and never logged in full.
+
+---
+
 ## Phase 2: Template-Preserving Tailoring
 
 Upload your existing DOCX resume and paste any Job Description. MirrorCV produces two coordinated outputs:

@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "run-8812c-491a",
+  "resume_id": "c65b64a7-b82d-4ebb-9f13-112e5808a81f",
+  "rules": {
+    "no_new_facts_allowed": true,
+    "allowed_inline_markup": ["bold", "italic", "link"],
+    "syntax_guide": {
+      "bold": "**text**",
+      "italic": "*text*",
+      "link": "[label](url)"
+    }
+  },
+  "changes": [
+    {
+      "change_id": "chg-1",
+      "target_id": "b-exp-1",
+      "slot_id": "slot-exp-1-b1",
+      "item_id": "item-exp-1",
+      "field": "bullets",
+      "original_text": "Architected high-concurrency document rendering microservices processing **4.2M daily export jobs** with sub-500ms latency.",
+      "tailored_text": "Architected enterprise document microservices using **FastAPI** and **Playwright**, sustaining **4.2M daily jobs** with sub-500ms latency.",
+      "reason": "Emphasized target JD requirements for FastAPI and Playwright, verified from original project context.",
+      "source_reference": {
+        "source_item_id": "item-exp-1",
+        "source_bullet_id": "b-exp-1",
+        "verified_fact": "Candidate built document rendering services with FastAPI and Playwright scaling to 4.2M daily jobs.",
+        "is_grounded": true
+      }
+    }
+  ],
+  "score_before": 72.0,
+  "score_after": 94.5,
+  "matched_keywords": ["FastAPI", "Playwright", "Microservices", "High-Concurrency", "Latency"],
+  "missing_keywords": ["Kubernetes", "GraphQL"]
+}

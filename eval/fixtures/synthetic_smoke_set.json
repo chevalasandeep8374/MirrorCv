@@ -1,0 +1,1673 @@
+[
+  {
+    "pair_id": "pair_001",
+    "same_family": true,
+    "role": "Python Backend",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 1",
+        "title": "Python Backend"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Python"
+            },
+            {
+              "id": "s2",
+              "title": "FastAPI"
+            },
+            {
+              "id": "s3",
+              "title": "PostgreSQL"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Python Backend",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Python."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using FastAPI."
+                },
+                {
+                  "id": "b3",
+                  "text": "Engineered solutions using PostgreSQL."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Looking for Python FastAPI backend engineer with PostgreSQL database skills.",
+    "expected_matched_skills": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL"
+    ],
+    "expected_missing_skills": [
+      "Kubernetes",
+      "Redis"
+    ]
+  },
+  {
+    "pair_id": "pair_002",
+    "same_family": true,
+    "role": "Django Developer",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 2",
+        "title": "Django Developer"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Python"
+            },
+            {
+              "id": "s2",
+              "title": "Django"
+            },
+            {
+              "id": "s3",
+              "title": "PostgreSQL"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Django Developer",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Python."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using Django."
+                },
+                {
+                  "id": "b3",
+                  "text": "Engineered solutions using PostgreSQL."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Django engineer needed with PostgreSQL and Python.",
+    "expected_matched_skills": [
+      "Python",
+      "Django",
+      "PostgreSQL"
+    ],
+    "expected_missing_skills": [
+      "AWS",
+      "Docker"
+    ]
+  },
+  {
+    "pair_id": "pair_003",
+    "same_family": true,
+    "role": "React Developer",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 3",
+        "title": "React Developer"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "React"
+            },
+            {
+              "id": "s2",
+              "title": "TypeScript"
+            },
+            {
+              "id": "s3",
+              "title": "Next.js"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "React Developer",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using React."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using TypeScript."
+                },
+                {
+                  "id": "b3",
+                  "text": "Engineered solutions using Next.js."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Frontend developer specializing in React and TypeScript.",
+    "expected_matched_skills": [
+      "React",
+      "TypeScript",
+      "Next.js"
+    ],
+    "expected_missing_skills": [
+      "Tailwind CSS"
+    ]
+  },
+  {
+    "pair_id": "pair_004",
+    "same_family": true,
+    "role": "Vue Developer",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 4",
+        "title": "Vue Developer"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Vue.js"
+            },
+            {
+              "id": "s2",
+              "title": "JavaScript"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Vue Developer",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Vue.js."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using JavaScript."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Vue.js frontend engineer with JavaScript skills.",
+    "expected_matched_skills": [
+      "Vue.js",
+      "JavaScript"
+    ],
+    "expected_missing_skills": [
+      "TypeScript",
+      "Jest"
+    ]
+  },
+  {
+    "pair_id": "pair_005",
+    "same_family": true,
+    "role": "DevOps Platform",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 5",
+        "title": "DevOps Platform"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Kubernetes"
+            },
+            {
+              "id": "s2",
+              "title": "Docker"
+            },
+            {
+              "id": "s3",
+              "title": "AWS"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "DevOps Platform",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Kubernetes."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using Docker."
+                },
+                {
+                  "id": "b3",
+                  "text": "Engineered solutions using AWS."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Kubernetes platform engineer on AWS with Docker.",
+    "expected_matched_skills": [
+      "Kubernetes",
+      "Docker",
+      "AWS"
+    ],
+    "expected_missing_skills": [
+      "Terraform"
+    ]
+  },
+  {
+    "pair_id": "pair_006",
+    "same_family": true,
+    "role": "CI/CD Engineer",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 6",
+        "title": "CI/CD Engineer"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "CI/CD"
+            },
+            {
+              "id": "s2",
+              "title": "Git"
+            },
+            {
+              "id": "s3",
+              "title": "Docker"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "CI/CD Engineer",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using CI/CD."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using Git."
+                },
+                {
+                  "id": "b3",
+                  "text": "Engineered solutions using Docker."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "DevOps automation engineer with CI/CD and Docker pipelines.",
+    "expected_matched_skills": [
+      "CI/CD",
+      "Git",
+      "Docker"
+    ],
+    "expected_missing_skills": [
+      "AWS"
+    ]
+  },
+  {
+    "pair_id": "pair_007",
+    "same_family": true,
+    "role": "SQL Data Engineer",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 7",
+        "title": "SQL Data Engineer"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "SQL"
+            },
+            {
+              "id": "s2",
+              "title": "PostgreSQL"
+            },
+            {
+              "id": "s3",
+              "title": "Python"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "SQL Data Engineer",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using SQL."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using PostgreSQL."
+                },
+                {
+                  "id": "b3",
+                  "text": "Engineered solutions using Python."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Data engineer with SQL, PostgreSQL and Python.",
+    "expected_matched_skills": [
+      "SQL",
+      "PostgreSQL",
+      "Python"
+    ],
+    "expected_missing_skills": [
+      "Elasticsearch"
+    ]
+  },
+  {
+    "pair_id": "pair_008",
+    "same_family": true,
+    "role": "TypeScript Fullstack",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 8",
+        "title": "TypeScript Fullstack"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "TypeScript"
+            },
+            {
+              "id": "s2",
+              "title": "React"
+            },
+            {
+              "id": "s3",
+              "title": "Node.js"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "TypeScript Fullstack",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using TypeScript."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using React."
+                },
+                {
+                  "id": "b3",
+                  "text": "Engineered solutions using Node.js."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Full stack developer in TypeScript, React and Node.js.",
+    "expected_matched_skills": [
+      "TypeScript",
+      "React",
+      "Node.js"
+    ],
+    "expected_missing_skills": [
+      "PostgreSQL"
+    ]
+  },
+  {
+    "pair_id": "pair_009",
+    "same_family": true,
+    "role": "Rust Systems",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 9",
+        "title": "Rust Systems"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Rust"
+            },
+            {
+              "id": "s2",
+              "title": "C++"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Rust Systems",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Rust."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using C++."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Systems programmer in Rust and C++.",
+    "expected_matched_skills": [
+      "Rust",
+      "C++"
+    ],
+    "expected_missing_skills": [
+      "Go"
+    ]
+  },
+  {
+    "pair_id": "pair_010",
+    "same_family": true,
+    "role": "Go Backend",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 10",
+        "title": "Go Backend"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Go"
+            },
+            {
+              "id": "s2",
+              "title": "Docker"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Go Backend",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Go."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using Docker."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Backend engineer in Go with Docker.",
+    "expected_matched_skills": [
+      "Go",
+      "Docker"
+    ],
+    "expected_missing_skills": [
+      "Kubernetes"
+    ]
+  },
+  {
+    "pair_id": "pair_011",
+    "same_family": true,
+    "role": "React Native Mobile",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 11",
+        "title": "React Native Mobile"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "React"
+            },
+            {
+              "id": "s2",
+              "title": "JavaScript"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "React Native Mobile",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using React."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using JavaScript."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Mobile application engineer using React.",
+    "expected_matched_skills": [
+      "React",
+      "JavaScript"
+    ],
+    "expected_missing_skills": [
+      "TypeScript"
+    ]
+  },
+  {
+    "pair_id": "pair_012",
+    "same_family": true,
+    "role": "QA Automation",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 12",
+        "title": "QA Automation"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Playwright"
+            },
+            {
+              "id": "s2",
+              "title": "TypeScript"
+            },
+            {
+              "id": "s3",
+              "title": "Python"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "QA Automation",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Playwright."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using TypeScript."
+                },
+                {
+                  "id": "b3",
+                  "text": "Engineered solutions using Python."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "QA engineer with Playwright and TypeScript testing.",
+    "expected_matched_skills": [
+      "Playwright",
+      "TypeScript",
+      "Python"
+    ],
+    "expected_missing_skills": [
+      "CI/CD"
+    ]
+  },
+  {
+    "pair_id": "pair_013",
+    "same_family": true,
+    "role": "AWS Architect",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 13",
+        "title": "AWS Architect"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "AWS"
+            },
+            {
+              "id": "s2",
+              "title": "Terraform"
+            },
+            {
+              "id": "s3",
+              "title": "Docker"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "AWS Architect",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using AWS."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using Terraform."
+                },
+                {
+                  "id": "b3",
+                  "text": "Engineered solutions using Docker."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Cloud architect with AWS infrastructure and Terraform.",
+    "expected_matched_skills": [
+      "AWS",
+      "Terraform",
+      "Docker"
+    ],
+    "expected_missing_skills": [
+      "Python"
+    ]
+  },
+  {
+    "pair_id": "pair_014",
+    "same_family": true,
+    "role": "API Architect",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 14",
+        "title": "API Architect"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "GraphQL"
+            },
+            {
+              "id": "s2",
+              "title": "REST API"
+            },
+            {
+              "id": "s3",
+              "title": "Node.js"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "API Architect",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using GraphQL."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using REST API."
+                },
+                {
+                  "id": "b3",
+                  "text": "Engineered solutions using Node.js."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "API engineer with GraphQL and REST API design.",
+    "expected_matched_skills": [
+      "GraphQL",
+      "REST API",
+      "Node.js"
+    ],
+    "expected_missing_skills": [
+      "PostgreSQL"
+    ]
+  },
+  {
+    "pair_id": "pair_015",
+    "same_family": true,
+    "role": "Search Engineer",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 15",
+        "title": "Search Engineer"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Elasticsearch"
+            },
+            {
+              "id": "s2",
+              "title": "Python"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Search Engineer",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Elasticsearch."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using Python."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Search infrastructure engineer with Elasticsearch.",
+    "expected_matched_skills": [
+      "Elasticsearch",
+      "Python"
+    ],
+    "expected_missing_skills": [
+      "PostgreSQL"
+    ]
+  },
+  {
+    "pair_id": "pair_016",
+    "same_family": true,
+    "role": "Microservices Lead",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 16",
+        "title": "Microservices Lead"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Microservices"
+            },
+            {
+              "id": "s2",
+              "title": "Docker"
+            },
+            {
+              "id": "s3",
+              "title": "FastAPI"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Microservices Lead",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Microservices."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using Docker."
+                },
+                {
+                  "id": "b3",
+                  "text": "Engineered solutions using FastAPI."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Lead engineer building microservices architectures.",
+    "expected_matched_skills": [
+      "Microservices",
+      "Docker",
+      "FastAPI"
+    ],
+    "expected_missing_skills": [
+      "Kubernetes"
+    ]
+  },
+  {
+    "pair_id": "pair_017",
+    "same_family": true,
+    "role": "Angular Engineer",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 17",
+        "title": "Angular Engineer"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Angular"
+            },
+            {
+              "id": "s2",
+              "title": "TypeScript"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Angular Engineer",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Angular."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using TypeScript."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Enterprise frontend engineer with Angular.",
+    "expected_matched_skills": [
+      "Angular",
+      "TypeScript"
+    ],
+    "expected_missing_skills": [
+      "RxJS"
+    ]
+  },
+  {
+    "pair_id": "pair_018",
+    "same_family": true,
+    "role": "Spring Boot Java",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 18",
+        "title": "Spring Boot Java"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Java"
+            },
+            {
+              "id": "s2",
+              "title": "Spring Boot"
+            },
+            {
+              "id": "s3",
+              "title": "SQL"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Spring Boot Java",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Java."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using Spring Boot."
+                },
+                {
+                  "id": "b3",
+                  "text": "Engineered solutions using SQL."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Backend Java developer with Spring Boot.",
+    "expected_matched_skills": [
+      "Java",
+      "Spring Boot",
+      "SQL"
+    ],
+    "expected_missing_skills": [
+      "Docker"
+    ]
+  },
+  {
+    "pair_id": "pair_019",
+    "same_family": true,
+    "role": "Backend to Fullstack",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 19",
+        "title": "Backend to Fullstack"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Python"
+            },
+            {
+              "id": "s2",
+              "title": "PostgreSQL"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Backend to Fullstack",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Python."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using PostgreSQL."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Full stack engineer with React and Python.",
+    "expected_matched_skills": [
+      "Python",
+      "PostgreSQL"
+    ],
+    "expected_missing_skills": [
+      "React",
+      "TypeScript"
+    ]
+  },
+  {
+    "pair_id": "pair_020",
+    "same_family": true,
+    "role": "DevOps to Cloud Architect",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 20",
+        "title": "DevOps to Cloud Architect"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Docker"
+            },
+            {
+              "id": "s2",
+              "title": "CI/CD"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "DevOps to Cloud Architect",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Docker."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using CI/CD."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Cloud architect with AWS and Kubernetes.",
+    "expected_matched_skills": [
+      "Docker",
+      "CI/CD"
+    ],
+    "expected_missing_skills": [
+      "AWS",
+      "Kubernetes"
+    ]
+  },
+  {
+    "pair_id": "pair_021",
+    "same_family": true,
+    "role": "Python to Data Science",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 21",
+        "title": "Python to Data Science"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Python"
+            },
+            {
+              "id": "s2",
+              "title": "SQL"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Python to Data Science",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Python."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using SQL."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Data engineer with Python and SQL.",
+    "expected_matched_skills": [
+      "Python",
+      "SQL"
+    ],
+    "expected_missing_skills": [
+      "PostgreSQL"
+    ]
+  },
+  {
+    "pair_id": "pair_022",
+    "same_family": true,
+    "role": "JS to TS Migration",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 22",
+        "title": "JS to TS Migration"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "JavaScript"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "JS to TS Migration",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using JavaScript."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "TypeScript engineer for React frontend.",
+    "expected_matched_skills": [
+      "JavaScript"
+    ],
+    "expected_missing_skills": [
+      "TypeScript",
+      "React"
+    ]
+  },
+  {
+    "pair_id": "pair_023",
+    "same_family": true,
+    "role": "GCP Engineer for AWS Role",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 23",
+        "title": "GCP Engineer for AWS Role"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "GCP"
+            },
+            {
+              "id": "s2",
+              "title": "Docker"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "GCP Engineer for AWS Role",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using GCP."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using Docker."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "AWS cloud engineer with Docker experience.",
+    "expected_matched_skills": [
+      "GCP",
+      "Docker"
+    ],
+    "expected_missing_skills": [
+      "AWS"
+    ]
+  },
+  {
+    "pair_id": "pair_024",
+    "same_family": true,
+    "role": "Django to FastAPI Role",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 24",
+        "title": "Django to FastAPI Role"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {
+              "id": "s1",
+              "title": "Django"
+            },
+            {
+              "id": "s2",
+              "title": "Python"
+            }
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Django to FastAPI Role",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Engineered solutions using Django."
+                },
+                {
+                  "id": "b2",
+                  "text": "Engineered solutions using Python."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "FastAPI backend engineer with Python.",
+    "expected_matched_skills": [
+      "Django",
+      "Python"
+    ],
+    "expected_missing_skills": [
+      "FastAPI"
+    ]
+  },
+  {
+    "pair_id": "pair_025",
+    "same_family": false,
+    "role": "Backend to Nurse",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 25",
+        "title": "Backend to Nurse"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": []
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Backend to Nurse",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "General administrative duties."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Registered Nurse ICU medical triage BSN required.",
+    "expected_matched_skills": [],
+    "expected_missing_skills": [
+      "Nursing",
+      "ICU",
+      "Patient Care"
+    ]
+  },
+  {
+    "pair_id": "pair_026",
+    "same_family": false,
+    "role": "Frontend to Accountant",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 26",
+        "title": "Frontend to Accountant"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": []
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Frontend to Accountant",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "General administrative duties."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Senior Accountant CPA auditing GAAP compliance ledger reconciliations.",
+    "expected_matched_skills": [],
+    "expected_missing_skills": [
+      "Auditing",
+      "GAAP",
+      "CPA"
+    ]
+  },
+  {
+    "pair_id": "pair_027",
+    "same_family": false,
+    "role": "DevOps to Executive Chef",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 27",
+        "title": "DevOps to Executive Chef"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": []
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "DevOps to Executive Chef",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "General administrative duties."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Executive Chef high volume French cuisine culinary arts.",
+    "expected_matched_skills": [],
+    "expected_missing_skills": [
+      "Culinary",
+      "Menu Design",
+      "Kitchen Operations"
+    ]
+  },
+  {
+    "pair_id": "pair_028",
+    "same_family": false,
+    "role": "Data to Auto Mechanic",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 28",
+        "title": "Data to Auto Mechanic"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": []
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Data to Auto Mechanic",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "General administrative duties."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Master Automotive Technician diesel engine diagnostics ASE certified.",
+    "expected_matched_skills": [],
+    "expected_missing_skills": [
+      "Automotive",
+      "Engine Diagnostics",
+      "ASE"
+    ]
+  },
+  {
+    "pair_id": "pair_029",
+    "same_family": false,
+    "role": "Engineer to Dental Hygienist",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 29",
+        "title": "Engineer to Dental Hygienist"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": []
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Engineer to Dental Hygienist",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "General administrative duties."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Licensed Dental Hygienist patient care teeth cleaning prophylaxis.",
+    "expected_matched_skills": [],
+    "expected_missing_skills": [
+      "Dental",
+      "Hygiene",
+      "Periodontal"
+    ]
+  },
+  {
+    "pair_id": "pair_030",
+    "same_family": false,
+    "role": "Sysadmin to Commercial Pilot",
+    "resume_content": {
+      "header": {
+        "name": "Candidate 30",
+        "title": "Sysadmin to Commercial Pilot"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": []
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Sysadmin to Commercial Pilot",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "General administrative duties."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Commercial Airline Pilot multi engine turbine FAA ATP rating.",
+    "expected_matched_skills": [],
+    "expected_missing_skills": [
+      "Aviation",
+      "Flight Hours",
+      "FAA"
+    ]
+  }
+]

@@ -1,0 +1,262 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mirrorcv.dev/schemas/v1/template_profile.schema.json",
+  "title": "TemplateProfile",
+  "description": "Agent 1 output containing the extracted template profile, geometric slot constraints, and slot map.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "template_profile_id",
+    "resume_id",
+    "version",
+    "source_type",
+    "slots",
+    "slot_map",
+    "fidelity_score",
+    "status"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.0.0", "1.1.0"],
+      "default": "1.1.0"
+    },
+    "template_profile_id": { "type": "string" },
+    "resume_id": { "type": "string" },
+    "version": { "type": "integer", "default": 1 },
+    "source_type": {
+      "type": "string",
+      "enum": ["uploaded_docx", "uploaded_pdf", "editor"]
+    },
+    "page_count": { "type": "integer", "default": 1 },
+    "slots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "slot_id",
+          "section_id",
+          "item_id",
+          "role",
+          "max_chars",
+          "max_lines",
+          "font",
+          "size",
+          "source_pointer"
+        ],
+        "properties": {
+          "slot_id": { "type": "string" },
+          "section_id": { "type": "string" },
+          "item_id": { "type": "string" },
+          "bullet_id": { "type": ["string", "null"] },
+          "item_block_id": { "type": ["string", "null"] },
+          "role": {
+            "type": "string",
+            "enum": [
+              "name",
+              "headline",
+              "contact",
+              "section_heading",
+              "heading",
+              "item_title",
+              "item_meta",
+              "bullet",
+              "body",
+              "skill_line",
+              "link_line",
+              "separator",
+              "other"
+            ]
+          },
+          "binds": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Content IDs rendered by this slot"
+          },
+          "max_chars": { "type": "integer" },
+          "max_lines": { "type": "integer" },
+          "font": { "type": "string" },
+          "size": { "type": "number" },
+          "color": { "type": ["string", "null"] },
+          "source_pointer": {
+            "type": "object",
+            "required": ["pointer_type"],
+            "properties": {
+              "pointer_type": {
+                "type": "string",
+                "enum": [
+                  "docx_paragraph",
+                  "docx_table_cell",
+                  "docx_textbox",
+                  "pdf_block",
+                  "editor_path"
+                ]
+              },
+              "paragraph_index": { "type": "integer" },
+              "table_path": {
+                "type": "array",
+                "items": { "type": "integer" },
+                "description": "[table_idx, row_idx, cell_idx, p_idx]"
+              },
+              "textbox_id": { "type": ["string", "null"] },
+              "page_number": { "type": "integer" },
+              "bbox": {
+                "type": "array",
+                "items": { "type": "number" },
+                "minItems": 4,
+                "maxItems": 4
+              }
+            },
+            "additionalProperties": false
+          },
+          "run_structure": {
+            "type": "object",
+            "properties": {
+              "normal_rPr": {
+                "type": "object",
+                "properties": {
+                  "font_family": { "type": "string" },
+                  "font_size_pt": { "type": "number" },
+                  "bold": { "type": "boolean" },
+                  "italic": { "type": "boolean" },
+                  "underline": { "type": "boolean" },
+                  "color_hex": { "type": ["string", "null"] },
+                  "spacing_twips": { "type": "integer" }
+                },
+                "additionalProperties": true
+              },
+              "bold_rPr": { "type": ["object", "null"] },
+              "italic_rPr": { "type": ["object", "null"] }
+            },
+            "additionalProperties": true
+          },
+          "inline_structures": {
+            "type": "object",
+            "properties": {
+              "hyperlinks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "target": { "type": "string" },
+                    "text": { "type": "string" }
+                  }
+                }
+              },
+              "tabs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "pos_pt": { "type": "number" },
+                    "align": { "type": "string" }
+                  }
+                }
+              },
+              "line_breaks_count": { "type": "integer" }
+            },
+            "additionalProperties": true
+          },
+          "budgets": {
+            "type": "object",
+            "properties": {
+              "max_lines": { "type": "integer" },
+              "max_chars": { "type": "integer" },
+              "hard_max_chars": { "type": "integer" },
+              "line_width_pt": { "type": "number" },
+              "last_line_fill_ratio": { "type": "number" }
+            },
+            "additionalProperties": true
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "classification_source": {
+            "type": "string",
+            "enum": ["rule", "llm", "user_override"]
+          },
+          "is_clonable": { "type": "boolean" },
+          "prototype_xml_path": { "type": ["string", "null"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "slot_map": {
+      "type": "object",
+      "description": "Mapping from slot_id to resume content target paths",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["section_id", "item_id", "target_field"],
+        "properties": {
+          "section_id": { "type": "string" },
+          "item_id": { "type": "string" },
+          "bullet_id": { "type": ["string", "null"] },
+          "target_field": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "item_blocks": {
+      "type": "array",
+      "description": "Hierarchical structures linking title, meta, and bullets so entries can be cloned as a unit",
+      "items": {
+        "type": "object",
+        "required": ["item_block_id", "section_id", "item_id", "title_slot_id", "bullet_slot_ids"],
+        "properties": {
+          "item_block_id": { "type": "string" },
+          "section_id": { "type": "string" },
+          "item_id": { "type": "string" },
+          "title_slot_id": { "type": "string" },
+          "meta_slot_id": { "type": ["string", "null"] },
+          "bullet_slot_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "font_report": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["original_name", "in_container", "confidence"],
+        "properties": {
+          "original_name": { "type": "string" },
+          "in_container": { "type": "boolean" },
+          "substitute_used": { "type": ["string", "null"] },
+          "confidence": { "type": "number" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "fidelity_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "fidelity_metrics": {
+      "type": "object",
+      "properties": {
+        "page_count_match": { "type": "boolean" },
+        "mean_line_delta_pt": { "type": "number" },
+        "max_line_delta_pt": { "type": "number" },
+        "run_property_match_rate": { "type": "number" },
+        "ssim_score": { "type": "number" }
+      },
+      "additionalProperties": true
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ready", "warning", "failed"],
+      "default": "ready"
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

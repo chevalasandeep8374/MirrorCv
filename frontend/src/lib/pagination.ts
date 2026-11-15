@@ -30,8 +30,19 @@ export function paginateResume(
     style.typography.fontSizes.contact * 2.5 +
     style.spacing.headerBottomSpacing * 1.5;
 
+  if (content.coverLetter) {
+    return [
+      {
+        pageIndex: 0,
+        isFirstPage: true,
+        mainSections: [],
+        sidebarSections: [],
+      },
+    ];
+  }
+
   const visibleSections = content.sections.filter(
-    (s) => s.visible && s.items && s.items.length > 0
+    (s) => s.visible !== false && s.items && s.items.length > 0
   );
 
   const isTwoColumn =
@@ -58,6 +69,10 @@ export function paginateResume(
     };
 
     for (const section of visibleSections) {
+      // Force page-break if section requests it
+      if (section.pageBreakBefore && currentMainSections.length > 0) {
+        flushPage();
+      }
       const sectionHeadingHeight =
         style.typography.fontSizes.sectionHeading * 1.4 + 10;
       let sectionItemsForCurrentPage: SectionItem[] = [];

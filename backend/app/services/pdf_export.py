@@ -8,19 +8,21 @@ logger = logging.getLogger(__name__)
 async def generate_resume_pdf(
     resume_id: str,
     page_size: str = "A4",
+    render_token: Optional[str] = None,
     auth_token: Optional[str] = None,
 ) -> bytes:
     """Uses headless Playwright Chromium to open the /render/{resume_id} route
-
     and return exact 1:1 PDF bytes without browser headers/footers.
     """
     from playwright.async_api import async_playwright
 
     url = f"{settings.FRONTEND_URL}/render/{resume_id}"
-    if auth_token:
+    if render_token:
+        url += f"?render_token={render_token}"
+    elif auth_token:
         url += f"?token={auth_token}"
 
-    logger.info(f"Generating PDF for resume {resume_id} from {url}")
+    logger.info(f"Generating PDF for resume {resume_id} from {url} (render_token={'present' if render_token else 'none'})")
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(

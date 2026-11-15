@@ -5,22 +5,50 @@ from app.graph.state import TailoringState
 from app.services.docx_fingerprint import fingerprint_docx
 from app.services.role_classifier import classify_paragraphs
 from app.services.content_extractor import extract_content_and_style
-from app.services.jd_analyzer import analyze_job_description
-from app.services.tailor_agent import tailor_resume_content
+from app.services.jd_analyzer import analyze_job_description_sync
+from app.services.tailor_agent import tailor_resume_content, calculate_pdf_bullet_budgets
 from app.services.fidelity_writer import write_tailored_docx
 from app.services.pdf_converter import convert_docx_to_pdf
 from app.services.fit_checker import check_pdf_fit_overflow
 from app.services.match_scorer import calculate_match_score
+from app.services.pdf_extractor import extract_pdf_spans_and_assets
+from app.services.pdf_layout_analyzer import analyze_pdf_layout
+from app.services.pdf_font_analyzer import analyze_pdf_fonts
+from app.services.pdf_role_adapter import process_pdf_roles_and_content
+from app.services.pdf_strategy_selector import select_best_strategy
 from app.schemas.template import DocxFingerprint, RoleMap
+from app.schemas.pdf_template import PdfLayout, FontResolutionTable
 
 logger = logging.getLogger(__name__)
 
 
 def node_parse_fingerprint(state: TailoringState) -> TailoringState:
     logger.info("Executing node: parse_fingerprint")
-    if not state.get("fingerprint"):
-        fp = fingerprint_docx(state["original_docx_path"])
-        state["fingerprint"] = fp.model_dump()
+    is_pdf = state.get("template_type") == "pdf" or (
+        state.get("original_pdf_path", "").lower().endswith(".pdf")
+        and not state.get("original_docx_path")
+    )
+    if is_pdf:
+        state["template_type"] = "pdf"
+        if not state.get("layout"):
+            pdf_path = state["original_pdf_path"]
+            raw_layout = extract_pdf_spans_and_assets(pdf_path)
+            layout = analyze_pdf_layout(raw_layout)
+            font_table = analyze_pdf_fonts(pdf_path, layout)
+            role_map, content, style, c_to_p, c_to_boxes = process_pdf_roles_and_content(layout)
+
+            state["layout"] = layout.model_dump()
+            state["font_table"] = font_table.model_dump()
+            state["role_map"] = role_map.model_dump()
+            state["source_content"] = content
+            state["source_style"] = style
+            state["content_to_paragraphs"] = c_to_p
+    else:
+        state["template_type"] = "docx"
+        if not state.get("fingerprint"):
+            fp = fingerprint_docx(state["original_docx_path"])
+            state["fingerprint"] = fp.model_dump()
+
     state["current_step"] = "fingerprinted"
     return state
 
@@ -50,7 +78,7 @@ def node_extract_content(state: TailoringState) -> TailoringState:
 
 def node_analyze_jd(state: TailoringState) -> TailoringState:
     logger.info("Executing node: analyze_jd")
-    jd_analysis = analyze_job_description(state["jd_text"])
+    jd_analysis = analyze_job_description_sync(state["jd_text"])
     state["jd_analysis"] = jd_analysis
     state["current_step"] = "jd_analyzed"
     return state
@@ -72,10 +100,19 @@ def node_tailor(state: TailoringState) -> TailoringState:
     logger.info(f"Executing node: tailor (attempt {attempt}/3)")
 
     stricter = state.get("stricter_budgets", {})
+    custom_budgets = None
+    if state.get("template_type") == "pdf" and state.get("layout"):
+        custom_budgets = calculate_pdf_bullet_budgets(
+            state["source_content"],
+            state["layout"],
+            state.get("content_to_paragraphs", {}),
+        )
+
     tailored_out = tailor_resume_content(
         source_content=state["source_content"],
         jd_analysis=state["jd_analysis"],
         stricter_budgets=stricter,
+        custom_budgets=custom_budgets,
     )
 
     state["tailored_content"] = tailored_out.tailored_content
@@ -86,6 +123,11 @@ def node_tailor(state: TailoringState) -> TailoringState:
 
 
 def node_write_docx(state: TailoringState) -> TailoringState:
+    if state.get("template_type") == "pdf":
+        logger.info("Bypassing write_docx for PDF template")
+        state["current_step"] = "pdf_template_bypassed_docx"
+        return state
+
     logger.info("Executing node: write_docx")
     out_dir = os.path.dirname(os.path.abspath(state["original_docx_path"]))
     tailored_docx_path = os.path.join(out_dir, f"tailored_{state['job_id']}.docx")
@@ -103,6 +145,52 @@ def node_write_docx(state: TailoringState) -> TailoringState:
 
 def node_render_pdf(state: TailoringState) -> TailoringState:
     logger.info("Executing node: render_pdf")
+    if state.get("template_type") == "pdf":
+        out_dir = os.path.dirname(os.path.abspath(state["original_pdf_path"]))
+        tailored_pdf_path = os.path.join(out_dir, f"tailored_{state['job_id']}.pdf")
+
+        layout_obj = PdfLayout.model_validate(state["layout"]) if isinstance(state.get("layout"), dict) else state.get("layout")
+        role_map_obj = RoleMap.model_validate(state["role_map"]) if isinstance(state.get("role_map"), dict) else state.get("role_map")
+        font_tbl_obj = FontResolutionTable.model_validate(state["font_table"]) if isinstance(state.get("font_table"), dict) else state.get("font_table")
+
+        writer, score, _ = select_best_strategy(
+            template_path=state["original_pdf_path"],
+            layout=layout_obj,
+            role_map=role_map_obj,
+            content=state["tailored_content"],
+            style=state["source_style"],
+            content_to_paragraphs=state["content_to_paragraphs"],
+            font_table=font_tbl_obj,
+            work_dir=out_dir,
+        )
+
+        writer.write(
+            content=state["tailored_content"],
+            template_path=state["original_pdf_path"],
+            output_path=tailored_pdf_path,
+            template_data={
+                "layout": layout_obj,
+                "role_map": role_map_obj,
+                "style": state["source_style"],
+                "content_to_paragraphs": state["content_to_paragraphs"],
+                "font_table": font_tbl_obj,
+                "is_scanned": layout_obj.document_metadata.is_scanned if layout_obj else False,
+            },
+        )
+
+        state["tailored_pdf_path"] = tailored_pdf_path
+        state["fidelity_score"] = score.model_dump()
+        state["fidelity_tier"] = score.tier
+        state["selected_strategy"] = score.selected_strategy
+
+        # Add warnings for substituted fonts
+        if font_tbl_obj and font_tbl_obj.substitutions:
+            for sub in font_tbl_obj.substitutions:
+                state["warnings"].append(f"Font '{sub.original}' substituted with '{sub.replacement}'.")
+
+        state["current_step"] = "pdf_rendered"
+        return state
+
     out_dir = os.path.dirname(os.path.abspath(state["tailored_docx_path"]))
     tailored_pdf_path = os.path.join(out_dir, f"tailored_{state['job_id']}.pdf")
 

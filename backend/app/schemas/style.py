@@ -1,11 +1,20 @@
-from typing import List, Literal
+from typing import List, Literal, Optional
 from pydantic import BaseModel, Field
 
 PageSize = Literal["A4", "Letter"]
 Unit = Literal["pt", "px"]
-BulletStyle = Literal["disc", "circle", "square", "dash", "none"]
-HeadingStyle = Literal["underline", "bar", "plain", "caps"]
-ColumnLayoutType = Literal["single", "sidebar_left", "sidebar_right"]
+BulletStyle = Literal["disc", "circle", "square", "dash", "arrow", "none"]
+HeadingStyle = Literal["underline", "bar", "plain", "caps", "boxed", "pill"]
+ColumnLayoutType = Literal[
+    "single",
+    "sidebar_left",
+    "sidebar_right",
+    "header_banner",
+    "compact",
+    "creative",
+    "minimal",
+    "academic",
+]
 
 
 class Margins(BaseModel):
@@ -31,6 +40,8 @@ class FontSizes(BaseModel):
 class Typography(BaseModel):
     baseFontFamily: str = "Inter"
     headingFontFamily: str = "Inter"
+    nameFontFamily: Optional[str] = None
+    fontSizeScale: float = 1.0
     fontSizes: FontSizes = Field(default_factory=FontSizes)
     lineHeight: float = 1.45
 
@@ -50,6 +61,8 @@ class Colors(BaseModel):
     background: str = "#ffffff"
     sidebarBackground: str = "#f8fafc"
     divider: str = "#e5e7eb"
+    headerBannerColor: Optional[str] = None
+    headerBannerTextColor: Optional[str] = None
 
 
 class ColumnLayout(BaseModel):
@@ -57,6 +70,15 @@ class ColumnLayout(BaseModel):
     sidebarWidthPercent: float = 32.0
     sidebarSectionIds: List[str] = Field(default_factory=list)
     mainSectionIds: List[str] = Field(default_factory=list)
+
+
+class Decorations(BaseModel):
+    headerBanner: bool = False
+    headerBannerColor: str = "#0f172a"
+    headerBannerTextColor: str = "#ffffff"
+    avatarShape: Literal["circle", "square"] = "circle"
+    showAvatar: bool = False
+    avatarUrl: Optional[str] = None
 
 
 class ResumeStyle(BaseModel):
@@ -69,3 +91,5 @@ class ResumeStyle(BaseModel):
     bulletStyle: BulletStyle = "disc"
     headingStyle: HeadingStyle = "bar"
     layout: ColumnLayout = Field(default_factory=ColumnLayout)
+    decorations: Decorations = Field(default_factory=Decorations)
+    dateFormat: str = "MMM YYYY"

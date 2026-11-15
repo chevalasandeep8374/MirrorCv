@@ -1,8 +1,16 @@
 export type PageSize = 'A4' | 'Letter';
 export type Unit = 'pt' | 'px';
-export type BulletStyle = 'disc' | 'circle' | 'square' | 'dash' | 'none';
-export type HeadingStyle = 'underline' | 'bar' | 'plain' | 'caps';
-export type ColumnLayoutType = 'single' | 'sidebar_left' | 'sidebar_right';
+export type BulletStyle = 'disc' | 'circle' | 'square' | 'dash' | 'arrow' | 'none';
+export type HeadingStyle = 'underline' | 'bar' | 'plain' | 'caps' | 'boxed' | 'pill';
+export type ColumnLayoutType =
+  | 'single'
+  | 'sidebar_left'
+  | 'sidebar_right'
+  | 'header_banner'
+  | 'compact'
+  | 'creative'
+  | 'minimal'
+  | 'academic';
 
 export interface Margins {
   top: number;
@@ -27,6 +35,8 @@ export interface FontSizes {
 export interface Typography {
   baseFontFamily: string;
   headingFontFamily: string;
+  nameFontFamily?: string;
+  fontSizeScale?: number;
   fontSizes: FontSizes;
   lineHeight: number;
 }
@@ -46,6 +56,8 @@ export interface Colors {
   background: string;
   sidebarBackground: string;
   divider: string;
+  headerBannerColor?: string;
+  headerBannerTextColor?: string;
 }
 
 export interface ColumnLayout {
@@ -53,6 +65,15 @@ export interface ColumnLayout {
   sidebarWidthPercent: number;
   sidebarSectionIds: string[];
   mainSectionIds: string[];
+}
+
+export interface Decorations {
+  headerBanner?: boolean;
+  headerBannerColor?: string;
+  headerBannerTextColor?: string;
+  avatarShape?: 'circle' | 'square';
+  showAvatar?: boolean;
+  avatarUrl?: string;
 }
 
 export interface ResumeStyle {
@@ -65,4 +86,8 @@ export interface ResumeStyle {
   bulletStyle: BulletStyle;
   headingStyle: HeadingStyle;
   layout: ColumnLayout;
+  decorations?: Decorations;
+  dateFormat?: string;
+  locale?: 'en' | 'hi' | 'ar' | 'he' | 'fr' | 'es' | 'de';
+  direction?: 'ltr' | 'rtl';
 }

@@ -13,6 +13,7 @@ export default function RenderResumePage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const id = params?.id as string;
+  const renderToken = searchParams.get('render_token');
   const token = searchParams.get('token');
 
   const [resume, setResume] = useState<Resume | null>(null);
@@ -23,14 +24,23 @@ export default function RenderResumePage() {
     async function fetchResume() {
       if (!id) return;
       try {
-        const headers: Record<string, string> = {};
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
+        if (renderToken) {
+          // Secure single-use, 60s render token endpoint
+          const res = await axios.get<Resume>(
+            `${API_BASE_URL}/api/resumes/${id}/render-data?render_token=${encodeURIComponent(renderToken)}`
+          );
+          setResume(res.data);
+        } else {
+          // Fallback legacy token or public view
+          const headers: Record<string, string> = {};
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
+          const res = await axios.get<Resume>(`${API_BASE_URL}/api/resumes/${id}`, {
+            headers,
+          });
+          setResume(res.data);
         }
-        const res = await axios.get<Resume>(`${API_BASE_URL}/api/resumes/${id}`, {
-          headers,
-        });
-        setResume(res.data);
       } catch (err: unknown) {
         console.error('Failed to load resume for print', err);
         setError('Failed to load resume document.');
@@ -40,7 +50,7 @@ export default function RenderResumePage() {
     }
 
     fetchResume();
-  }, [id, token]);
+  }, [id, renderToken, token]);
 
   if (loading) {
     return (

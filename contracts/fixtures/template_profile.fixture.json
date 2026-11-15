@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0.0",
+  "template_profile_id": "tpl-prof-9281a",
+  "resume_id": "c65b64a7-b82d-4ebb-9f13-112e5808a81f",
+  "version": 1,
+  "source_type": "editor",
+  "page_count": 1,
+  "slots": [
+    {
+      "slot_id": "slot-name",
+      "section_id": "header",
+      "item_id": "header-item",
+      "role": "name",
+      "max_chars": 40,
+      "max_lines": 1,
+      "font": "Inter",
+      "size": 22,
+      "color": "#111827",
+      "source_pointer": {
+        "pointer_type": "editor_path",
+        "page_number": 1,
+        "bbox": [40, 36, 400, 60]
+      }
+    },
+    {
+      "slot_id": "slot-summary-1",
+      "section_id": "sec-summary",
+      "item_id": "item-sum-1",
+      "role": "body",
+      "max_chars": 260,
+      "max_lines": 3,
+      "font": "Inter",
+      "size": 9.5,
+      "color": "#111827",
+      "source_pointer": {
+        "pointer_type": "editor_path",
+        "page_number": 1,
+        "bbox": [40, 110, 555, 150]
+      }
+    },
+    {
+      "slot_id": "slot-exp-1-b1",
+      "section_id": "sec-experience",
+      "item_id": "item-exp-1",
+      "role": "bullet",
+      "max_chars": 160,
+      "max_lines": 2,
+      "font": "Inter",
+      "size": 9.5,
+      "color": "#111827",
+      "source_pointer": {
+        "pointer_type": "editor_path",
+        "page_number": 1,
+        "bbox": [55, 190, 555, 215]
+      }
+    }
+  ],
+  "slot_map": {
+    "slot-name": {
+      "section_id": "header",
+      "item_id": "header",
+      "target_field": "name"
+    },
+    "slot-summary-1": {
+      "section_id": "sec-summary",
+      "item_id": "item-sum-1",
+      "bullet_id": "b-sum-1",
+      "target_field": "text"
+    },
+    "slot-exp-1-b1": {
+      "section_id": "sec-experience",
+      "item_id": "item-exp-1",
+      "bullet_id": "b-exp-1",
+      "target_field": "text"
+    }
+  },
+  "fidelity_score": 98.5,
+  "status": "ready"
+}

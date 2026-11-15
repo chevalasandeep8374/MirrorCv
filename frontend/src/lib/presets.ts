@@ -4,16 +4,12 @@ import { ResumeContent } from '@/types/content';
 export const classicSingleColumnPreset: ResumeStyle = {
   templateId: 'classic-single-column',
   pageSize: 'A4',
-  margins: {
-    top: 36,
-    bottom: 36,
-    left: 42,
-    right: 42,
-    unit: 'pt',
-  },
+  margins: { top: 36, bottom: 36, left: 42, right: 42, unit: 'pt' },
   typography: {
     baseFontFamily: 'Inter',
     headingFontFamily: 'Inter',
+    nameFontFamily: 'Inter',
+    fontSizeScale: 1.0,
     fontSizes: {
       name: 22,
       headerTitle: 11,
@@ -59,19 +55,14 @@ export const classicSingleColumnPreset: ResumeStyle = {
   },
 };
 
-export const modernTwoColumnPreset: ResumeStyle = {
-  templateId: 'modern-two-column',
+export const modernSidebarLeftPreset: ResumeStyle = {
+  templateId: 'modern-sidebar-left',
   pageSize: 'A4',
-  margins: {
-    top: 32,
-    bottom: 32,
-    left: 32,
-    right: 32,
-    unit: 'pt',
-  },
+  margins: { top: 32, bottom: 32, left: 32, right: 32, unit: 'pt' },
   typography: {
     baseFontFamily: 'Inter',
     headingFontFamily: 'Inter',
+    fontSizeScale: 1.0,
     fontSizes: {
       name: 20,
       headerTitle: 11,
@@ -93,7 +84,7 @@ export const modernTwoColumnPreset: ResumeStyle = {
     unit: 'pt',
   },
   colors: {
-    accent: '#0f766e', // Teal
+    accent: '#0f766e', // Deep Teal
     text: '#1f2937',
     muted: '#6b7280',
     background: '#ffffff',
@@ -105,23 +96,388 @@ export const modernTwoColumnPreset: ResumeStyle = {
   layout: {
     type: 'sidebar_left',
     sidebarWidthPercent: 33,
+    sidebarSectionIds: ['sec-skills', 'sec-edu', 'sec-cert', 'sec-lang'],
+    mainSectionIds: ['sec-summary', 'sec-exp', 'sec-proj'],
+  },
+};
+export const modernTwoColumnPreset = modernSidebarLeftPreset;
+
+export const executiveSidebarRightPreset: ResumeStyle = {
+  templateId: 'executive-sidebar-right',
+  pageSize: 'A4',
+  margins: { top: 36, bottom: 36, left: 36, right: 36, unit: 'pt' },
+  typography: {
+    baseFontFamily: 'Inter',
+    headingFontFamily: 'Inter',
+    fontSizeScale: 1.0,
+    fontSizes: {
+      name: 22,
+      headerTitle: 11.5,
+      contact: 9,
+      sectionHeading: 12.5,
+      itemTitle: 10.5,
+      itemSubtitle: 9.5,
+      body: 9.5,
+      meta: 8.5,
+      unit: 'pt',
+    },
+    lineHeight: 1.42,
+  },
+  spacing: {
+    sectionSpacing: 14,
+    itemSpacing: 8,
+    bulletSpacing: 3,
+    headerBottomSpacing: 16,
+    unit: 'pt',
+  },
+  colors: {
+    accent: '#18181b', // Charcoal
+    text: '#0f172a',
+    muted: '#64748b',
+    background: '#ffffff',
+    sidebarBackground: '#f8fafc',
+    divider: '#e2e8f0',
+  },
+  bulletStyle: 'disc',
+  headingStyle: 'bar',
+  layout: {
+    type: 'sidebar_right',
+    sidebarWidthPercent: 34,
+    sidebarSectionIds: ['sec-skills', 'sec-edu', 'sec-cert', 'sec-awards'],
+    mainSectionIds: ['sec-summary', 'sec-exp', 'sec-proj'],
+  },
+};
+
+export const headerBannerPreset: ResumeStyle = {
+  templateId: 'header-banner',
+  pageSize: 'A4',
+  margins: { top: 28, bottom: 32, left: 36, right: 36, unit: 'pt' },
+  typography: {
+    baseFontFamily: 'Inter',
+    headingFontFamily: 'Inter',
+    fontSizeScale: 1.0,
+    fontSizes: {
+      name: 24,
+      headerTitle: 12,
+      contact: 9,
+      sectionHeading: 12.5,
+      itemTitle: 10.5,
+      itemSubtitle: 9.5,
+      body: 9.5,
+      meta: 8.5,
+      unit: 'pt',
+    },
+    lineHeight: 1.45,
+  },
+  spacing: {
+    sectionSpacing: 13,
+    itemSpacing: 7.5,
+    bulletSpacing: 2.5,
+    headerBottomSpacing: 18,
+    unit: 'pt',
+  },
+  colors: {
+    accent: '#3b82f6', // Bright Blue
+    text: '#1e293b',
+    muted: '#64748b',
+    background: '#ffffff',
+    sidebarBackground: '#f8fafc',
+    divider: '#e2e8f0',
+    headerBannerColor: '#0f172a',
+    headerBannerTextColor: '#ffffff',
+  },
+  bulletStyle: 'circle',
+  headingStyle: 'pill',
+  layout: {
+    type: 'header_banner',
+    sidebarWidthPercent: 32,
+    sidebarSectionIds: [],
+    mainSectionIds: [
+      'sec-summary',
+      'sec-exp',
+      'sec-skills',
+      'sec-proj',
+      'sec-edu',
+      'sec-cert',
+    ],
+  },
+  decorations: {
+    headerBanner: true,
+    headerBannerColor: '#0f172a',
+    headerBannerTextColor: '#ffffff',
+  },
+};
+
+export const compactDensePreset: ResumeStyle = {
+  templateId: 'compact-dense',
+  pageSize: 'A4',
+  margins: { top: 24, bottom: 24, left: 28, right: 28, unit: 'pt' },
+  typography: {
+    baseFontFamily: 'Inter',
+    headingFontFamily: 'Inter',
+    fontSizeScale: 0.92,
+    fontSizes: {
+      name: 18,
+      headerTitle: 10,
+      contact: 8,
+      sectionHeading: 11,
+      itemTitle: 9.5,
+      itemSubtitle: 8.5,
+      body: 8.5,
+      meta: 7.5,
+      unit: 'pt',
+    },
+    lineHeight: 1.28,
+  },
+  spacing: {
+    sectionSpacing: 9,
+    itemSpacing: 5,
+    bulletSpacing: 1.5,
+    headerBottomSpacing: 10,
+    unit: 'pt',
+  },
+  colors: {
+    accent: '#2563eb',
+    text: '#0f172a',
+    muted: '#475569',
+    background: '#ffffff',
+    sidebarBackground: '#f8fafc',
+    divider: '#cbd5e1',
+  },
+  bulletStyle: 'disc',
+  headingStyle: 'plain',
+  layout: {
+    type: 'compact',
+    sidebarWidthPercent: 30,
+    sidebarSectionIds: [],
+    mainSectionIds: [
+      'sec-summary',
+      'sec-exp',
+      'sec-skills',
+      'sec-proj',
+      'sec-edu',
+      'sec-cert',
+    ],
+  },
+};
+
+export const creativeAccentPreset: ResumeStyle = {
+  templateId: 'creative-accent',
+  pageSize: 'A4',
+  margins: { top: 32, bottom: 32, left: 34, right: 34, unit: 'pt' },
+  typography: {
+    baseFontFamily: 'Inter',
+    headingFontFamily: 'Inter',
+    fontSizeScale: 1.0,
+    fontSizes: {
+      name: 22,
+      headerTitle: 11.5,
+      contact: 8.5,
+      sectionHeading: 12,
+      itemTitle: 10.5,
+      itemSubtitle: 9,
+      body: 9,
+      meta: 8,
+      unit: 'pt',
+    },
+    lineHeight: 1.42,
+  },
+  spacing: {
+    sectionSpacing: 13,
+    itemSpacing: 7.5,
+    bulletSpacing: 2.5,
+    headerBottomSpacing: 15,
+    unit: 'pt',
+  },
+  colors: {
+    accent: '#059669', // Emerald Green
+    text: '#111827',
+    muted: '#4b5563',
+    background: '#ffffff',
+    sidebarBackground: '#ecfdf5',
+    divider: '#a7f3d0',
+  },
+  bulletStyle: 'arrow',
+  headingStyle: 'boxed',
+  layout: {
+    type: 'creative',
+    sidebarWidthPercent: 32,
     sidebarSectionIds: ['sec-skills', 'sec-edu', 'sec-cert'],
     mainSectionIds: ['sec-summary', 'sec-exp', 'sec-proj'],
   },
 };
 
-export const TEMPLATE_PRESETS: { id: string; name: string; description: string; style: ResumeStyle }[] = [
+export const minimalEditorialPreset: ResumeStyle = {
+  templateId: 'minimal-editorial',
+  pageSize: 'A4',
+  margins: { top: 40, bottom: 40, left: 44, right: 44, unit: 'pt' },
+  typography: {
+    baseFontFamily: 'Inter',
+    headingFontFamily: 'Inter',
+    fontSizeScale: 1.0,
+    fontSizes: {
+      name: 22,
+      headerTitle: 11,
+      contact: 8.5,
+      sectionHeading: 12,
+      itemTitle: 10,
+      itemSubtitle: 9,
+      body: 9,
+      meta: 8,
+      unit: 'pt',
+    },
+    lineHeight: 1.52,
+  },
+  spacing: {
+    sectionSpacing: 16,
+    itemSpacing: 9,
+    bulletSpacing: 3.5,
+    headerBottomSpacing: 18,
+    unit: 'pt',
+  },
+  colors: {
+    accent: '#09090b', // Pitch Black
+    text: '#18181b',
+    muted: '#71717a',
+    background: '#ffffff',
+    sidebarBackground: '#ffffff',
+    divider: '#e4e4e7',
+  },
+  bulletStyle: 'dash',
+  headingStyle: 'caps',
+  layout: {
+    type: 'minimal',
+    sidebarWidthPercent: 30,
+    sidebarSectionIds: [],
+    mainSectionIds: [
+      'sec-summary',
+      'sec-exp',
+      'sec-skills',
+      'sec-proj',
+      'sec-edu',
+      'sec-cert',
+    ],
+  },
+};
+
+export const academicCvPreset: ResumeStyle = {
+  templateId: 'academic-cv',
+  pageSize: 'A4',
+  margins: { top: 42, bottom: 42, left: 46, right: 46, unit: 'pt' },
+  typography: {
+    baseFontFamily: 'Liberation Serif',
+    headingFontFamily: 'Liberation Serif',
+    nameFontFamily: 'Liberation Serif',
+    fontSizeScale: 1.02,
+    fontSizes: {
+      name: 24,
+      headerTitle: 12,
+      contact: 9.5,
+      sectionHeading: 13,
+      itemTitle: 11,
+      itemSubtitle: 10,
+      body: 10,
+      meta: 9,
+      unit: 'pt',
+    },
+    lineHeight: 1.48,
+  },
+  spacing: {
+    sectionSpacing: 15,
+    itemSpacing: 8.5,
+    bulletSpacing: 3,
+    headerBottomSpacing: 16,
+    unit: 'pt',
+  },
+  colors: {
+    accent: '#1e3a8a', // Classic Navy
+    text: '#0f172a',
+    muted: '#475569',
+    background: '#ffffff',
+    sidebarBackground: '#f8fafc',
+    divider: '#cbd5e1',
+  },
+  bulletStyle: 'disc',
+  headingStyle: 'underline',
+  layout: {
+    type: 'academic',
+    sidebarWidthPercent: 30,
+    sidebarSectionIds: [],
+    mainSectionIds: [
+      'sec-summary',
+      'sec-edu',
+      'sec-exp',
+      'sec-proj',
+      'sec-skills',
+      'sec-cert',
+    ],
+  },
+};
+
+export interface TemplatePresetInfo {
+  id: string;
+  name: string;
+  category: 'single' | 'sidebar' | 'banner' | 'compact' | 'creative' | 'minimal' | 'academic';
+  description: string;
+  style: ResumeStyle;
+}
+
+export const TEMPLATE_PRESETS: TemplatePresetInfo[] = [
   {
     id: 'classic-single-column',
-    name: 'Classic Single-Column',
-    description: 'Traditional chronological layout with bold section bars and royal blue accents.',
+    name: 'Classic Single Column',
+    category: 'single',
+    description: 'Timeless single-column design with clean bar headings and balanced margins.',
     style: classicSingleColumnPreset,
   },
   {
-    id: 'modern-two-column',
-    name: 'Modern Two-Column Sidebar',
-    description: 'Contemporary dual-column format with skills & education highlighted in a soft sidebar.',
-    style: modernTwoColumnPreset,
+    id: 'modern-sidebar-left',
+    name: 'Modern Left Sidebar',
+    category: 'sidebar',
+    description: 'Two-column layout with a shaded sidebar for skills, contact, and credentials.',
+    style: modernSidebarLeftPreset,
+  },
+  {
+    id: 'executive-sidebar-right',
+    name: 'Executive Right Sidebar',
+    category: 'sidebar',
+    description: 'High-contrast right sidebar for certifications and education; primary space for experience.',
+    style: executiveSidebarRightPreset,
+  },
+  {
+    id: 'header-banner',
+    name: 'Header Banner',
+    category: 'banner',
+    description: 'Prominent colored header card with crisp inverted white title typography.',
+    style: headerBannerPreset,
+  },
+  {
+    id: 'compact-dense',
+    name: 'Compact Technical',
+    category: 'compact',
+    description: 'High-density formatting engineered to maximize content on a single page.',
+    style: compactDensePreset,
+  },
+  {
+    id: 'creative-accent',
+    name: 'Creative Accent',
+    category: 'creative',
+    description: 'Vibrant emerald green accents, boxed section headings, and dynamic list arrows.',
+    style: creativeAccentPreset,
+  },
+  {
+    id: 'minimal-editorial',
+    name: 'Minimal Editorial',
+    category: 'minimal',
+    description: 'Monochromatic typography-focused design with generous leading and hairline rules.',
+    style: minimalEditorialPreset,
+  },
+  {
+    id: 'academic-cv',
+    name: 'Academic CV',
+    category: 'academic',
+    description: 'Formal serif curriculum vitae format with hanging indents for extensive credentials.',
+    style: academicCvPreset,
   },
 ];
 

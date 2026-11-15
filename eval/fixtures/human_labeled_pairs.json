@@ -1,0 +1,316 @@
+[
+  {
+    "pair_id": "human_pair_001",
+    "domain": "backend",
+    "same_family": true,
+    "expected_score_band": "high",
+    "resume_content": {
+      "header": {
+        "name": "David Chen",
+        "title": "Senior Backend Software Engineer"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {"id": "sk1", "title": "Python"},
+            {"id": "sk2", "title": "FastAPI"},
+            {"id": "sk3", "title": "PostgreSQL"},
+            {"id": "sk4", "title": "Redis"},
+            {"id": "sk5", "title": "Docker"},
+            {"id": "sk6", "title": "AWS"}
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Senior Backend Developer",
+              "subtitle": "Apex Cloud Systems",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Built asynchronous Python APIs with FastAPI handling 4,000 requests per second with PostgreSQL storage."
+                },
+                {
+                  "id": "b2",
+                  "text": "Implemented Redis caching layer cutting database query latencies by 45% across microservices."
+                },
+                {
+                  "id": "b3",
+                  "text": "Containerized backend services with Docker and deployed to AWS ECS clusters."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "We are seeking a Senior Python Backend Engineer to design high-throughput APIs. Required: Python, FastAPI, PostgreSQL, and Redis caching. Experience with Docker and AWS is strongly desired. Kubernetes and Kafka are pluses.",
+    "required_skills": ["Python", "FastAPI", "PostgreSQL", "Redis", "Docker", "AWS", "Kubernetes", "Kafka"],
+    "expected_present": ["Python", "FastAPI", "PostgreSQL", "Redis", "Docker", "AWS"],
+    "expected_missing": ["Kubernetes", "Kafka"]
+  },
+  {
+    "pair_id": "human_pair_002",
+    "domain": "frontend",
+    "same_family": true,
+    "expected_score_band": "high",
+    "resume_content": {
+      "header": {
+        "name": "Sarah Jenkins",
+        "title": "Lead Frontend Engineer"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {"id": "sk1", "title": "TypeScript"},
+            {"id": "sk2", "title": "React"},
+            {"id": "sk3", "title": "Next.js"},
+            {"id": "sk4", "title": "Tailwind CSS"},
+            {"id": "sk5", "title": "GraphQL"}
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Senior Frontend Developer",
+              "subtitle": "ModernWeb Labs",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Developed customer-facing dashboard in Next.js and TypeScript utilizing React Server Components."
+                },
+                {
+                  "id": "b2",
+                  "text": "Styled responsive design systems using Tailwind CSS and headless UI primitives."
+                },
+                {
+                  "id": "b3",
+                  "text": "Integrated GraphQL APIs using Apollo Client with optimistic cache updates."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Looking for a Frontend Specialist proficient in React, Next.js, and TypeScript. Experience crafting design systems in Tailwind CSS and querying GraphQL endpoints is required. Testing with Playwright is desirable.",
+    "required_skills": ["React", "Next.js", "TypeScript", "Tailwind CSS", "GraphQL", "Playwright"],
+    "expected_present": ["React", "Next.js", "TypeScript", "Tailwind CSS", "GraphQL"],
+    "expected_missing": ["Playwright"]
+  },
+  {
+    "pair_id": "human_pair_003",
+    "domain": "cross_domain_mismatch",
+    "same_family": false,
+    "expected_score_band": "low",
+    "resume_content": {
+      "header": {
+        "name": "Michael Roberts",
+        "title": "Embedded Firmware Engineer"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {"id": "sk1", "title": "C"},
+            {"id": "sk2", "title": "C++"},
+            {"id": "sk3", "title": "RTOS"},
+            {"id": "sk4", "title": "SPI"},
+            {"id": "sk5", "title": "I2C"}
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Firmware Engineer",
+              "subtitle": "MicroSensors Inc",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Developed bare-metal C drivers for ARM Cortex-M microcontrollers operating under FreeRTOS."
+                },
+                {
+                  "id": "b2",
+                  "text": "Configured SPI and I2C hardware bus communication protocols with external peripheral sensors."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Lead Full-Stack Web Engineer needed. Must have 5+ years building SaaS applications with React, Node.js, Express, and MongoDB. Familiarity with AWS and CI/CD pipelines.",
+    "required_skills": ["React", "Node.js", "Express", "MongoDB", "AWS", "CI/CD"],
+    "expected_present": [],
+    "expected_missing": ["React", "Node.js", "Express", "MongoDB", "AWS", "CI/CD"]
+  },
+  {
+    "pair_id": "human_pair_004",
+    "domain": "devops_sre",
+    "same_family": true,
+    "expected_score_band": "high",
+    "resume_content": {
+      "header": {
+        "name": "Elena Rostova",
+        "title": "Site Reliability Engineer"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {"id": "sk1", "title": "Kubernetes"},
+            {"id": "sk2", "title": "Terraform"},
+            {"id": "sk3", "title": "AWS"},
+            {"id": "sk4", "title": "Prometheus"},
+            {"id": "sk5", "title": "Grafana"},
+            {"id": "sk6", "title": "CI/CD"}
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "SRE Specialist",
+              "subtitle": "Global Infrastructure Partners",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Provisioned multi-region AWS cloud infrastructure as code using Terraform modules."
+                },
+                {
+                  "id": "b2",
+                  "text": "Operated production Kubernetes clusters hosting 120 containerized microservices."
+                },
+                {
+                  "id": "b3",
+                  "text": "Configured monitoring and alerting dashboards in Prometheus and Grafana with 99.95% uptime SLO."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Senior DevOps / SRE role. Requires production experience managing Kubernetes clusters, writing Terraform modules, and building monitoring with Prometheus and Grafana on AWS. Helm experience is a plus.",
+    "required_skills": ["Kubernetes", "Terraform", "Prometheus", "Grafana", "AWS", "Helm"],
+    "expected_present": ["Kubernetes", "Terraform", "Prometheus", "Grafana", "AWS"],
+    "expected_missing": ["Helm"]
+  },
+  {
+    "pair_id": "human_pair_005",
+    "domain": "data_engineering",
+    "same_family": true,
+    "expected_score_band": "medium",
+    "resume_content": {
+      "header": {
+        "name": "Marcus Vance",
+        "title": "Data Engineer"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {"id": "sk1", "title": "Python"},
+            {"id": "sk2", "title": "SQL"},
+            {"id": "sk3", "title": "PostgreSQL"},
+            {"id": "sk4", "title": "Airflow"}
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Junior Data Engineer",
+              "subtitle": "Analytics Corp",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Wrote Apache Airflow DAGs in Python to orchestrate daily ETL batch transformations."
+                },
+                {
+                  "id": "b2",
+                  "text": "Optimized complex SQL aggregation queries in PostgreSQL reducing runtime by 30%."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "We need a Senior Data Platform Engineer with Apache Spark, Snowflake, dbt, Apache Airflow, Python, and SQL expertise. Must be skilled in distributed big data pipelines.",
+    "required_skills": ["Apache Spark", "Snowflake", "dbt", "Airflow", "Python", "SQL"],
+    "expected_present": ["Airflow", "Python", "SQL"],
+    "expected_missing": ["Apache Spark", "Snowflake", "dbt"]
+  },
+  {
+    "pair_id": "human_pair_006",
+    "domain": "fullstack",
+    "same_family": true,
+    "expected_score_band": "high",
+    "resume_content": {
+      "header": {
+        "name": "Priya Patel",
+        "title": "Full Stack Engineer"
+      },
+      "sections": [
+        {
+          "id": "sec_skills",
+          "type": "skills",
+          "items": [
+            {"id": "sk1", "title": "JavaScript"},
+            {"id": "sk2", "title": "TypeScript"},
+            {"id": "sk3", "title": "Node.js"},
+            {"id": "sk4", "title": "React"},
+            {"id": "sk5", "title": "MongoDB"},
+            {"id": "sk6", "title": "Git"}
+          ]
+        },
+        {
+          "id": "sec_exp",
+          "type": "experience",
+          "items": [
+            {
+              "id": "exp1",
+              "title": "Full Stack Developer",
+              "subtitle": "OmniApps Inc",
+              "bullets": [
+                {
+                  "id": "b1",
+                  "text": "Developed responsive web UIs in React and TypeScript integrated with Node.js REST endpoints."
+                },
+                {
+                  "id": "b2",
+                  "text": "Modeled document schemas and aggregation pipelines in MongoDB for user preference storage."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "jd_text": "Full Stack Developer needed. Key requirements: TypeScript, React, Node.js, and MongoDB. Experience using Git for version control and collaboration is required.",
+    "required_skills": ["TypeScript", "React", "Node.js", "MongoDB", "Git"],
+    "expected_present": ["TypeScript", "React", "Node.js", "MongoDB", "Git"],
+    "expected_missing": []
+  }
+]

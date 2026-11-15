@@ -1,0 +1,158 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mirrorcv.dev/schemas/v1/composition_result.schema.json",
+  "title": "CompositionResult",
+  "description": "Agent 3 output containing composition artifacts, file references, overflow detection, fidelity metrics, and template integrity verification.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "resume_id",
+    "output_files",
+    "fidelity_score",
+    "overflow_report",
+    "warnings",
+    "status"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.0.0", "1.1.0"],
+      "default": "1.1.0"
+    },
+    "run_id": { "type": "string" },
+    "resume_id": { "type": "string" },
+    "composition_id": { "type": "string" },
+    "output_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "storage_path", "mime_type", "size_bytes"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["original", "tailored", "export"]
+          },
+          "format": {
+            "type": "string",
+            "enum": ["pdf", "docx"]
+          },
+          "storage_path": { "type": "string" },
+          "mime_type": { "type": "string" },
+          "size_bytes": { "type": "integer" },
+          "download_url": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "fidelity_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "page_count_before": { "type": "integer", "minimum": 1 },
+    "page_count_after": { "type": "integer", "minimum": 1 },
+    "page_count_preserved": { "type": "boolean" },
+    "integrity_report": {
+      "type": "object",
+      "required": ["passed", "violations", "invariants_checked"],
+      "properties": {
+        "passed": { "type": "boolean" },
+        "violations": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "invariants_checked": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "passed", "details"],
+            "properties": {
+              "name": { "type": "string" },
+              "passed": { "type": "boolean" },
+              "details": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "byte_identical_parts": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "id_collisions_found": { "type": "integer" }
+      },
+      "additionalProperties": false
+    },
+    "fit_loop": {
+      "type": "object",
+      "required": ["rounds_executed", "overflow_resolved"],
+      "properties": {
+        "rounds_executed": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "overflow_resolved": { "type": "boolean" },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "round": { "type": "integer" },
+              "overflowing_slots": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "shortened_changes": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "page_count": { "type": "integer" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "per_slot_lines": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "max_lines": { "type": "integer" },
+          "lines_before": { "type": "integer" },
+          "lines_after": { "type": "integer" },
+          "clipped": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "overflow_report": {
+      "type": "object",
+      "required": ["has_overflow", "overflowing_slots", "details"],
+      "properties": {
+        "has_overflow": { "type": "boolean" },
+        "overflowing_slots": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "details": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "final_content": { "type": "object" },
+    "substituted_fonts": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "whitespace_created_pt": { "type": "number", "default": 0.0 },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ready", "layout_changed", "failed", "success", "warning"],
+      "default": "ready"
+    }
+  },
+  "additionalProperties": false
+}

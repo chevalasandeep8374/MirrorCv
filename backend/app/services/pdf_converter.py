@@ -33,11 +33,25 @@ def find_libreoffice_executable() -> Optional[str]:
     return None
 
 
-def convert_docx_to_pdf(docx_path: str, output_pdf_path: Optional[str] = None) -> str:
+def convert_docx_to_pdf(
+    docx_path: str,
+    output_pdf_path: Optional[str] = None,
+    allow_fallback: Optional[bool] = None,
+) -> str:
     """Converts a DOCX file to PDF using LibreOffice headless.
 
-    If LibreOffice is unavailable in test environment, generates an equivalent PDF using PyMuPDF.
+    Fails closed: raises RuntimeError unless ALLOW_FALLBACK_RENDERER=1 is explicitly set.
     """
+    path, _ = convert_docx_to_pdf_with_metadata(docx_path, output_pdf_path, allow_fallback)
+    return path
+
+
+def convert_docx_to_pdf_with_metadata(
+    docx_path: str,
+    output_pdf_path: Optional[str] = None,
+    allow_fallback: Optional[bool] = None,
+) -> tuple[str, str]:
+    """Converts a DOCX file to PDF and returns (pdf_path, renderer_name)."""
     if not os.path.exists(docx_path):
         raise FileNotFoundError(f"Input DOCX file not found: {docx_path}")
 
@@ -48,12 +62,21 @@ def convert_docx_to_pdf(docx_path: str, output_pdf_path: Optional[str] = None) -
     if output_pdf_path is None:
         output_pdf_path = expected_pdf
 
+    if allow_fallback is None:
+        env_flag = os.environ.get("ALLOW_FALLBACK_RENDERER", "").lower()
+        allow_fallback = env_flag in ("1", "true", "yes")
+
     soffice_bin = find_libreoffice_executable()
 
     if soffice_bin:
+        from app.services.process_concurrency import libreoffice_sync_limit
+        import tempfile
+        user_profile_dir = tempfile.mkdtemp(prefix="lo_user_profile_")
+        user_uri = f"file:///{user_profile_dir.replace(os.sep, '/')}"
         logger.info(f"Converting {docx_path} to PDF using LibreOffice at {soffice_bin}")
         cmd = [
             soffice_bin,
+            f"-env:UserInstallation={user_uri}",
             "--headless",
             "--convert-to",
             "pdf",
@@ -61,19 +84,30 @@ def convert_docx_to_pdf(docx_path: str, output_pdf_path: Optional[str] = None) -
             os.path.dirname(os.path.abspath(output_pdf_path)),
             docx_path,
         ]
-        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60)
-        if res.returncode != 0:
-            logger.warning(f"LibreOffice conversion warning: {res.stderr.decode('utf-8', errors='ignore')}")
+        try:
+            with libreoffice_sync_limit(timeout=30.0):
+                res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
+            if res.returncode != 0:
+                logger.warning(f"LibreOffice conversion warning: {res.stderr.decode('utf-8', errors='ignore')}")
+        finally:
+            shutil.rmtree(user_profile_dir, ignore_errors=True)
 
         if os.path.exists(expected_pdf) and expected_pdf != output_pdf_path:
             shutil.move(expected_pdf, output_pdf_path)
 
         if os.path.exists(output_pdf_path):
-            return output_pdf_path
+            return output_pdf_path, "libreoffice"
 
-    # Fallback / Environment where LibreOffice is still installing or absent
-    logger.info("LibreOffice binary not found; generating fallback high-fidelity PDF from DOCX runs via PyMuPDF...")
-    return _generate_fallback_pdf_from_docx(docx_path, output_pdf_path)
+    # Fails closed if LibreOffice is missing or conversion failed
+    if not allow_fallback:
+        raise RuntimeError(
+            "Production render failed: LibreOffice executable not found and fallback renderer is disabled. "
+            "Real LibreOffice is required for production rendering. Set ALLOW_FALLBACK_RENDERER=1 only for offline unit test mocks."
+        )
+
+    logger.info("ALLOW_FALLBACK_RENDERER is enabled; generating test fallback PDF via PyMuPDF...")
+    pdf_path = _generate_fallback_pdf_from_docx(docx_path, output_pdf_path)
+    return pdf_path, "pymupdf_fallback"
 
 
 def _generate_fallback_pdf_from_docx(docx_path: str, output_pdf_path: str) -> str:

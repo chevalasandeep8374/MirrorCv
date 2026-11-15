@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "templateId": "classic_single_column",
+  "pageSize": "A4",
+  "margins": {
+    "top": 36,
+    "bottom": 36,
+    "left": 40,
+    "right": 40,
+    "unit": "pt"
+  },
+  "typography": {
+    "baseFontFamily": "Inter",
+    "headingFontFamily": "Inter",
+    "nameFontFamily": "Inter",
+    "fontSizeScale": 1.0,
+    "fontSizes": {
+      "name": 22,
+      "headerTitle": 12,
+      "contact": 9,
+      "sectionHeading": 12,
+      "itemTitle": 11,
+      "itemSubtitle": 10,
+      "body": 9.5,
+      "meta": 9,
+      "unit": "pt"
+    },
+    "lineHeight": 1.45
+  },
+  "spacing": {
+    "sectionSpacing": 14,
+    "itemSpacing": 10,
+    "bulletSpacing": 4,
+    "headerBottomSpacing": 12,
+    "unit": "pt"
+  },
+  "colors": {
+    "accent": "#2563eb",
+    "text": "#111827",
+    "muted": "#4b5563",
+    "background": "#ffffff",
+    "sidebarBackground": "#f8fafc",
+    "divider": "#e2e8f0",
+    "headerBannerColor": "#1e293b",
+    "headerBannerTextColor": "#ffffff"
+  },
+  "bulletStyle": "disc",
+  "headingStyle": "bar",
+  "layout": {
+    "type": "single",
+    "sidebarWidthPercent": 32,
+    "sidebarSectionIds": [],
+    "mainSectionIds": ["sec-summary", "sec-experience", "sec-skills"]
+  },
+  "decorations": {
+    "headerBanner": false,
+    "avatarShape": "circle",
+    "showAvatar": false
+  },
+  "dateFormat": "YYYY - Present",
+  "locale": "en",
+  "direction": "ltr"
+}

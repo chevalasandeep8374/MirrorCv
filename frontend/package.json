@@ -16,6 +16,7 @@
     "@fontsource/inter": "^5.0.19",
     "@fontsource/merriweather": "^5.0.13",
     "@fontsource/roboto": "^5.0.13",
+    "@supabase/supabase-js": "^2.119.0",
     "axios": "^1.7.2",
     "clsx": "^2.1.1",
     "lucide-react": "^0.395.0",

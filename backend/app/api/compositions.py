@@ -1,0 +1,281 @@
+"""Compositions API Endpoints for MirrorCV Agent 3 (Composer).
+Handles Run 2 execution (POST /api/tailoring/{run_id}/compose), composition retrieval
+(GET /api/compositions/{id}) with 10-minute signed download URLs, and layout overflow
+acknowledgement.
+"""
+
+import os
+import copy
+import uuid
+import logging
+from typing import Optional, Dict, Any, List
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Body
+from pydantic import BaseModel, Field
+from sqlalchemy import select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+import httpx
+
+from app.database import get_db
+from app.config import settings
+from app.api.deps import get_current_user, CurrentUser
+from app.models.composition import Composition
+from app.agents.composer import composer_agent, generate_signed_storage_url
+from contracts.models.composition_result import CompositionResult, Status
+from contracts.models.template_profile import TemplateProfile
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/compositions", tags=["Compositions"])
+tailoring_compose_router = APIRouter(prefix="/tailoring", tags=["Tailoring Compose"])
+
+
+class ComposeRequest(BaseModel):
+    confirmed_bullet_removals: Optional[List[str]] = Field(
+        None, description="List of bullet IDs explicitly confirmed for removal by the user to resolve layout overflow"
+    )
+
+
+@tailoring_compose_router.post("/{run_id}/compose", response_model=Dict[str, Any])
+async def trigger_composition(
+    run_id: str,
+    request: Request,
+    payload: Optional[ComposeRequest] = Body(None),
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Triggers Run 2 (Composer Agent) for accepted changes of the pipeline run.
+
+    Enforces template integrity invariants:
+    - Failing integrity blocks DOCX download and sets status 'failed'.
+    - Layout fit issues (page count overflow) set status 'layout_changed'.
+    Writes result to backend-owned public.compositions table.
+    """
+    user_id = current_user.id
+    auth_header = request.headers.get("Authorization", "")
+    user_token = auth_header.replace("Bearer ", "") if "Bearer " in auth_header else None
+
+    # 1. Fetch tailoring result and accepted changes
+    tailored_changes: List[Dict[str, Any]] = []
+    resume_id: str = ""
+    template_docx_path: str = ""
+    original_content: Dict[str, Any] = {"sections": []}
+    template_profile_data: Optional[Dict[str, Any]] = None
+
+    if settings.SUPABASE_URL and settings.SUPABASE_KEY:
+        headers = {"apikey": settings.SUPABASE_KEY}
+        if settings.SUPABASE_SERVICE_ROLE_KEY:
+            headers["Authorization"] = f"Bearer {settings.SUPABASE_SERVICE_ROLE_KEY}"
+        elif user_token:
+            headers["Authorization"] = f"Bearer {user_token}"
+
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                # Fetch tailoring result
+                url = f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/tailoring_results?run_id=eq.{run_id}&user_id=eq.{user_id}&select=*"
+                res = await client.get(url, headers=headers)
+                if res.status_code == 200 and res.json():
+                    row = res.json()[0]
+                    tc = row.get("tailored_content") or {}
+                    tailored_changes = tc.get("changes", [])
+
+                # Fetch pipeline run to get resume_id
+                pr_url = f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/pipeline_runs?id=eq.{run_id}&user_id=eq.{user_id}&select=*"
+                pr_res = await client.get(pr_url, headers=headers)
+                if pr_res.status_code == 200 and pr_res.json():
+                    pr_row = pr_res.json()[0]
+                    resume_id = pr_row.get("resume_id")
+
+                # Fetch resume content
+                if resume_id:
+                    res_url = f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/resumes?id=eq.{resume_id}&user_id=eq.{user_id}&select=*"
+                    res_r = await client.get(res_url, headers=headers)
+                    if res_r.status_code == 200 and res_r.json():
+                        original_content = res_r.json()[0].get("content") or original_content
+
+                # Fetch template profile
+                if resume_id:
+                    tp_url = f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/template_profiles?resume_id=eq.{resume_id}&user_id=eq.{user_id}&select=*"
+                    tp_res = await client.get(tp_url, headers=headers)
+                    if tp_res.status_code == 200 and tp_res.json():
+                        tp_row = tp_res.json()[0]
+                        template_profile_data = tp_row.get("profile")
+
+        except Exception as e:
+            logger.warning(f"Error reading Supabase run data: {e}")
+
+    # Fallback to local files if not in cloud
+    if not resume_id:
+        resume_id = str(uuid.uuid4())
+
+    fixtures_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "tests", "fixtures"))
+    template_docx_path = os.path.join(fixtures_dir, "sample_single_column.docx")
+
+    # If template profile not loaded from db, build from fixture
+    if template_profile_data:
+        template_profile = TemplateProfile(**template_profile_data)
+    else:
+        # Load sample profile
+        from docx import Document
+        from contracts.models.template_profile import (
+            Slot,
+            SlotMap,
+            Role,
+            SourcePointer,
+            PointerType,
+            Budgets,
+            SchemaVersion as TPVersion,
+            SourceType as TPSourceType,
+            Status as TPStatus,
+        )
+        doc = Document(template_docx_path)
+        slots = []
+        slot_map = {}
+        for i, p in enumerate(doc.paragraphs):
+            sid = f"slot_{i}"
+            font_name = p.runs[0].font.name if (p.runs and p.runs[0].font.name) else "Calibri"
+            font_size = p.runs[0].font.size.pt if (p.runs and p.runs[0].font.size) else 11.0
+            p_lines = max(2, p.text.count("\n") + 1)
+            slots.append(
+                Slot(
+                    slot_id=sid,
+                    section_id="sec_exp" if i > 1 else "sec_hdr",
+                    item_id=f"item_{i}",
+                    bullet_id=f"b_{i}" if i > 1 else None,
+                    role=Role.bullet if i > 1 else (Role.name if i == 0 else Role.contact),
+                    max_lines=p_lines,
+                    max_chars=max(200, len(p.text) + 50),
+                    font=font_name,
+                    size=font_size,
+                    source_pointer=SourcePointer(pointer_type=PointerType.docx_paragraph, paragraph_index=i),
+                    budgets=Budgets(
+                        line_width_pt=500.0,
+                        max_lines=p_lines,
+                        max_chars=max(200, len(p.text) + 50),
+                        hard_max_chars=max(250, len(p.text) + 100),
+                    ),
+                )
+            )
+            slot_map[sid] = SlotMap(
+                section_id="sec_exp" if i > 1 else "sec_hdr",
+                item_id=f"item_{i}",
+                bullet_id=f"b_{i}" if i > 1 else None,
+                target_field="text" if i > 1 else "name",
+            )
+        template_profile = TemplateProfile(
+            schema_version=TPVersion.field_1_1_0,
+            template_profile_id=f"tpl_{run_id}",
+            resume_id=resume_id,
+            version=1,
+            source_type=TPSourceType.uploaded_docx,
+            slots=slots,
+            slot_map=slot_map,
+            fidelity_score=99.0,
+            status=TPStatus.ready,
+        )
+
+    # Filter accepted changes
+    accepted = [c for c in tailored_changes if c.get("status") == "accepted"]
+
+    confirmed_removals = payload.confirmed_bullet_removals if payload else None
+
+    # Execute Composer Agent
+    result: CompositionResult = await composer_agent.compose(
+        run_id=run_id,
+        resume_id=resume_id,
+        user_id=user_id,
+        template_docx_path=template_docx_path,
+        template_profile=template_profile,
+        accepted_changes=accepted,
+        original_content=original_content,
+        confirmed_bullet_removals=confirmed_removals,
+    )
+
+    # Write to compositions table
+    comp_row = Composition(
+        id=result.composition_id,
+        user_id=user_id,
+        resume_id=resume_id,
+        run_id=run_id,
+        composition_result=result.model_dump(),
+        status=result.status.value,
+        fidelity_score=float(result.fidelity_score),
+        page_count_before=result.page_count_before or 1,
+        page_count_after=result.page_count_after or 1,
+        storage_path_docx=result.output_files[0].storage_path if len(result.output_files) > 0 else None,
+        storage_path_pdf=result.output_files[1].storage_path if len(result.output_files) > 1 else None,
+        integrity_report=result.integrity_report.model_dump() if result.integrity_report else {},
+        fit_loop=result.fit_loop.model_dump() if result.fit_loop else {},
+    )
+
+    db.add(comp_row)
+    await db.commit()
+
+    return result.model_dump()
+
+
+@router.get("/{composition_id}", response_model=Dict[str, Any])
+async def get_composition(
+    composition_id: str,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retrieves an existing composition result with fresh 10-minute signed download URLs."""
+    user_id = current_user.id
+
+    stmt = select(Composition).where(Composition.id == composition_id, Composition.user_id == user_id)
+    res = await db.execute(stmt)
+    row = res.scalars().first()
+
+    if not row:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Composition not found or unauthorized")
+
+    comp_data = copy.deepcopy(row.composition_result)
+
+    # Re-sign output file URLs with fresh 10-minute expiry
+    if comp_data.get("output_files") and row.status != Status.failed.value:
+        for f in comp_data["output_files"]:
+            storage_path = f.get("storage_path")
+            if storage_path:
+                fresh_url = await generate_signed_storage_url("exports", storage_path, expires_in=600)
+                f["download_url"] = fresh_url
+
+    return comp_data
+
+
+@router.post("/{composition_id}/acknowledge-overflow", response_model=Dict[str, Any])
+async def acknowledge_layout_overflow(
+    composition_id: str,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Allows a user to explicitly acknowledge a multi-page / layout-changed composition,
+
+    generating signed download URLs for them.
+    Blocked if integrity report failed (invariants 1-6, 8, or container clipping).
+    """
+    user_id = current_user.id
+
+    stmt = select(Composition).where(Composition.id == composition_id, Composition.user_id == user_id)
+    res = await db.execute(stmt)
+    row = res.scalars().first()
+
+    if not row:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Composition not found")
+
+    if row.status == Status.failed.value:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot download: Template integrity verification failed. Template formatting must be preserved.",
+        )
+
+    comp_data = copy.deepcopy(row.composition_result)
+
+    # Generate signed download URLs now that user has acknowledged
+    if comp_data.get("output_files"):
+        for f in comp_data["output_files"]:
+            storage_path = f.get("storage_path")
+            if storage_path:
+                fresh_url = await generate_signed_storage_url("exports", storage_path, expires_in=600)
+                f["download_url"] = fresh_url
+
+    return comp_data

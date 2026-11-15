@@ -1,27 +1,31 @@
 import { CSSProperties } from 'react';
 import { ResumeStyle } from '@/types/style';
+import { getFontFallbackForLocale } from '@/lib/i18n';
 
 export function getStyleCssVariables(style: ResumeStyle): CSSProperties {
-  const { typography, spacing, margins, colors, layout } = style;
+  const { typography, spacing, margins, colors, layout, decorations, locale } = style;
   const fUnit = typography.fontSizes.unit;
   const sUnit = spacing.unit;
   const mUnit = margins.unit;
+  const scale = typography.fontSizeScale ?? 1.0;
+  const fallback = getFontFallbackForLocale(locale);
 
   return {
     // Fonts
-    '--font-base': `${typography.baseFontFamily}, system-ui, -apple-system, sans-serif`,
-    '--font-heading': `${typography.headingFontFamily}, system-ui, -apple-system, sans-serif`,
+    '--font-base': `${typography.baseFontFamily}, ${fallback}`,
+    '--font-heading': `${typography.headingFontFamily}, ${fallback}`,
+    '--font-name': `${typography.nameFontFamily || typography.headingFontFamily}, ${fallback}`,
     '--line-height': typography.lineHeight.toString(),
 
-    // Font Sizes
-    '--font-size-name': `${typography.fontSizes.name}${fUnit}`,
-    '--font-size-header-title': `${typography.fontSizes.headerTitle}${fUnit}`,
-    '--font-size-contact': `${typography.fontSizes.contact}${fUnit}`,
-    '--font-size-section-heading': `${typography.fontSizes.sectionHeading}${fUnit}`,
-    '--font-size-item-title': `${typography.fontSizes.itemTitle}${fUnit}`,
-    '--font-size-item-subtitle': `${typography.fontSizes.itemSubtitle}${fUnit}`,
-    '--font-size-body': `${typography.fontSizes.body}${fUnit}`,
-    '--font-size-meta': `${typography.fontSizes.meta}${fUnit}`,
+    // Font Sizes (scaled)
+    '--font-size-name': `${(typography.fontSizes.name * scale).toFixed(1)}${fUnit}`,
+    '--font-size-header-title': `${(typography.fontSizes.headerTitle * scale).toFixed(1)}${fUnit}`,
+    '--font-size-contact': `${(typography.fontSizes.contact * scale).toFixed(1)}${fUnit}`,
+    '--font-size-section-heading': `${(typography.fontSizes.sectionHeading * scale).toFixed(1)}${fUnit}`,
+    '--font-size-item-title': `${(typography.fontSizes.itemTitle * scale).toFixed(1)}${fUnit}`,
+    '--font-size-item-subtitle': `${(typography.fontSizes.itemSubtitle * scale).toFixed(1)}${fUnit}`,
+    '--font-size-body': `${(typography.fontSizes.body * scale).toFixed(1)}${fUnit}`,
+    '--font-size-meta': `${(typography.fontSizes.meta * scale).toFixed(1)}${fUnit}`,
 
     // Spacing
     '--spacing-section': `${spacing.sectionSpacing}${sUnit}`,
@@ -42,6 +46,8 @@ export function getStyleCssVariables(style: ResumeStyle): CSSProperties {
     '--color-background': colors.background,
     '--color-sidebar-background': colors.sidebarBackground,
     '--color-divider': colors.divider,
+    '--color-header-banner': colors.headerBannerColor || decorations?.headerBannerColor || '#0f172a',
+    '--color-header-banner-text': colors.headerBannerTextColor || decorations?.headerBannerTextColor || '#ffffff',
 
     // Layout
     '--sidebar-width': `${layout.sidebarWidthPercent}%`,

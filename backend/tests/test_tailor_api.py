@@ -149,3 +149,67 @@ async def test_tailoring_pipeline_and_change_toggle(client, db_session):
     pdf_res = await client.get(f"/api/tailor/{job_id}/pdf")
     assert pdf_res.status_code == 200
     assert len(pdf_res.content) > 100
+
+
+@pytest.mark.asyncio
+async def test_pdf_template_tailoring_api_flow(client, db_session):
+    pdf_path = os.path.join(FIXTURES_DIR, "pdf", "fixture_a_word_single_col.pdf")
+    with open(pdf_path, "rb") as f:
+        file_bytes = f.read()
+
+    # 1. Upload PDF Template
+    upload_res = await client.post(
+        "/api/templates/upload",
+        files={"file": ("fixture_a.pdf", file_bytes, "application/pdf")},
+    )
+    assert upload_res.status_code in (200, 201)
+    upload_data = upload_res.json()
+    template_id = upload_data["id"]
+    assert upload_data["template_type"] == "pdf"
+    assert "font_table" in upload_data
+    assert "fidelity_forecast" in upload_data
+
+    # 2. Check Analysis Endpoint
+    analysis_res = await client.get(f"/api/templates/{template_id}/analysis")
+    assert analysis_res.status_code == 200
+    analysis_data = analysis_res.json()
+    assert analysis_data["template_type"] == "pdf"
+    assert "fidelity_forecast" in analysis_data
+
+    # 3. Check No-op Preview PDF Endpoint
+    noop_res = await client.get(f"/api/templates/{template_id}/noop-pdf")
+    assert noop_res.status_code == 200
+    assert len(noop_res.content) > 100
+
+    # 4. Trigger Tailoring Job
+    sample_jd = (
+        "Staff Python Developer needed. Skills: Python, FastAPI, Docker, Microservices, AsyncIO."
+    )
+    tailor_res = await client.post(
+        "/api/tailor",
+        json={"template_id": template_id, "jd_text": sample_jd},
+    )
+    assert tailor_res.status_code == 202
+    job_id = tailor_res.json()["job_id"]
+
+    # 5. Run Pipeline
+    await run_tailoring_pipeline_task(job_id=job_id, template_id=template_id, jd_text=sample_jd, session=db_session)
+
+    # 6. Poll Tailoring Job
+    poll_res = await client.get(f"/api/tailor/{job_id}")
+    assert poll_res.status_code == 200
+    job_data = poll_res.json()
+    assert job_data["status"] == "completed"
+    assert job_data["fidelity_tier"] == "A"
+    assert job_data["fidelity_score"] >= 90.0
+
+    # 7. Check PDF Download OK
+    pdf_res = await client.get(f"/api/tailor/{job_id}/pdf")
+    assert pdf_res.status_code == 200
+    assert len(pdf_res.content) > 100
+
+    # 8. Check DOCX Download Blocked (400)
+    docx_res = await client.get(f"/api/tailor/{job_id}/docx")
+    assert docx_res.status_code == 400
+    assert "DOCX download is not available for PDF templates" in docx_res.json()["detail"]
+

@@ -1,3 +1,8 @@
+"""DOCX Resume Content and Style Extractor.
+Translates a DocxFingerprint and RoleMap into the frontend editor's ResumeContent
+and StyleTokens shapes with stable IDs and safe inline markdown markup.
+"""
+
 import re
 from typing import Dict, List, Tuple, Optional
 from app.schemas.content import (
@@ -18,21 +23,64 @@ from app.schemas.style import (
     Spacing,
     Colors,
     ColumnLayout,
-    BulletStyle,
-    HeadingStyle,
 )
 from app.schemas.template import DocxFingerprint, RoleMap, ParagraphFingerprint
 
 
 def _clean_bullet_text(text: str) -> str:
-    """Strips leading bullet characters from bullet text."""
+    """Strips leading bullet glyphs from text."""
     return re.sub(r"^[\u2022\u25E6\u25AA\u25AB\u2013\u2014\-*]\s*", "", text).strip()
 
 
+def convert_runs_to_markdown(p: ParagraphFingerprint) -> str:
+    """Converts runs and inline hyperlinks into safe markdown (**bold**, *italic*, [text](url))."""
+    if not p.runs:
+        return _clean_bullet_text(p.text)
+
+    hyperlink_map = {h["text"].strip(): h["target"] for h in p.hyperlinks if "text" in h and "target" in h}
+
+    parts = []
+    for r in p.runs:
+        txt = r.text
+        if not txt:
+            continue
+
+        stripped = txt.strip()
+        if stripped in hyperlink_map:
+            # Inline link
+            target = hyperlink_map[stripped]
+            txt = f"[{txt}]({target})"
+        else:
+            # Check bold & italic
+            is_b = bool(r.formatting.bold)
+            is_i = bool(r.formatting.italic)
+
+            if is_b and is_i:
+                # Keep leading/trailing whitespace outside markdown delimiters
+                l_space = " " if txt.startswith(" ") else ""
+                r_space = " " if txt.endswith(" ") else ""
+                txt = f"{l_space}***{stripped}***{r_space}" if stripped else txt
+            elif is_b:
+                l_space = " " if txt.startswith(" ") else ""
+                r_space = " " if txt.endswith(" ") else ""
+                txt = f"{l_space}**{stripped}**{r_space}" if stripped else txt
+            elif is_i:
+                l_space = " " if txt.startswith(" ") else ""
+                r_space = " " if txt.endswith(" ") else ""
+                txt = f"{l_space}*{stripped}*{r_space}" if stripped else txt
+
+        parts.append(txt)
+
+    combined = "".join(parts)
+    return _clean_bullet_text(combined)
+
+
 def extract_content_and_style(
-    fingerprint: DocxFingerprint, role_map: RoleMap
+    fingerprint: DocxFingerprint,
+    role_map: RoleMap,
+    template_profile_id: Optional[str] = None,
 ) -> Tuple[ResumeContent, ResumeStyle, Dict[str, List[int]]]:
-    """Builds Phase 1 ResumeContent and ResumeStyle tokens from the DOCX fingerprint and role map."""
+    """Builds ResumeContent and ResumeStyle tokens with templateId = 'uploaded:{template_profile_id}'."""
     para_dict = {p.index: p for p in fingerprint.paragraphs}
     roles = role_map.paragraph_roles
 
@@ -42,7 +90,7 @@ def extract_content_and_style(
     if name_paras:
         header.name = para_dict[name_paras[0]].text.strip()
 
-    title_paras = [idx for idx, r in roles.items() if r.role == "title"]
+    title_paras = [idx for idx, r in roles.items() if r.role in ("headline", "title")]
     if title_paras:
         header.title = para_dict[title_paras[0]].text.strip()
 
@@ -60,7 +108,7 @@ def extract_content_and_style(
         if phone_m and not header.phone:
             header.phone = phone_m.group(0)
 
-        # Extract Location (e.g. "San Francisco, CA")
+        # Extract Location
         loc_m = re.search(r"([A-Z][a-zA-Z\s]+,\s*[A-Z]{2})", c_text)
         if loc_m and not header.location:
             header.location = loc_m.group(1).strip()
@@ -99,11 +147,10 @@ def extract_content_and_style(
         items_list: List[SectionItem] = []
 
         if valid_type == "summary":
-            # Combine body paragraphs under summary
             sum_texts = []
             for item in sec_h.items:
                 for b_idx in item.body_para_indices:
-                    sum_texts.append(para_dict[b_idx].text.strip())
+                    sum_texts.append(convert_runs_to_markdown(para_dict[b_idx]))
 
             full_sum = " ".join(sum_texts)
             item_id = f"item-{sec_h.section_id}-1"
@@ -119,7 +166,6 @@ def extract_content_and_style(
             ]
 
         elif valid_type == "skills":
-            # Group skill lines into items
             for idx, item in enumerate(sec_h.items):
                 for p_idx in item.body_para_indices:
                     raw_text = para_dict[p_idx].text.strip()
@@ -143,7 +189,7 @@ def extract_content_and_style(
                     content_to_paragraphs[f"{sec_h.section_id}.{sk_item_id}.{b_id}"] = [p_idx]
 
         else:
-            # Experience, Education, Projects, Certifications
+            # Experience, Education, Projects, Custom, Certifications
             for item_h in sec_h.items:
                 title = ""
                 subtitle = ""
@@ -152,7 +198,6 @@ def extract_content_and_style(
 
                 if item_h.title_para_index is not None and item_h.title_para_index in para_dict:
                     raw_title = para_dict[item_h.title_para_index].text.strip()
-                    # Check if company/subtitle is separated by dash or pipe
                     if "—" in raw_title:
                         t_parts = raw_title.split("—", 1)
                         title = t_parts[0].strip()
@@ -177,12 +222,12 @@ def extract_content_and_style(
                         else:
                             date_range = m_txt
 
-                # Bullets
+                # Bullets with safe markdown conversion
                 bullets = []
                 for b_idx in item_h.bullet_para_indices:
-                    b_raw = para_dict[b_idx].text.strip()
+                    b_md = convert_runs_to_markdown(para_dict[b_idx])
                     b_id = f"b-{sec_h.section_id}-{b_idx}"
-                    bullets.append(BulletItem(id=b_id, text=_clean_bullet_text(b_raw)))
+                    bullets.append(BulletItem(id=b_id, text=b_md))
                     content_to_paragraphs[f"{sec_h.section_id}.{item_h.item_id}.{b_id}"] = [b_idx]
 
                 items_list.append(
@@ -220,7 +265,6 @@ def extract_content_and_style(
         unit="pt",
     )
 
-    # Detect dominant base font family and heading font family
     body_fonts: Dict[str, int] = {}
     heading_fonts: Dict[str, int] = {}
     accent_colors: Dict[str, int] = {}
@@ -242,7 +286,6 @@ def extract_content_and_style(
     heading_font = max(heading_fonts, key=heading_fonts.get) if heading_fonts else base_font
     accent_color = max(accent_colors, key=accent_colors.get) if accent_colors else "#2563eb"
 
-    # Font sizes
     name_size = 22.0
     for idx, r in roles.items():
         if r.role == "name":
@@ -258,7 +301,6 @@ def extract_content_and_style(
                 heading_size = round(max(sizes), 1)
                 break
 
-    # Determine layout (single column vs two-column table)
     layout_type = "single"
     sidebar_ids: List[str] = []
     main_ids: List[str] = []
@@ -268,7 +310,6 @@ def extract_content_and_style(
         table_cells = [p for p in fingerprint.paragraphs if p.location.type == "table_cell"]
         if table_cells:
             layout_type = "sidebar_left"
-            # Split sections into sidebar vs main based on column location
             col_0_secs = {
                 roles[p.index].section_id
                 for p in table_cells
@@ -285,8 +326,10 @@ def extract_content_and_style(
     if not main_ids:
         main_ids = [s.id for s in sections]
 
+    template_id_str = f"uploaded:{template_profile_id}" if template_profile_id else "extracted-template"
+
     style = ResumeStyle(
-        templateId="extracted-template",
+        templateId=template_id_str,
         pageSize=page_size,
         margins=margins,
         typography=Typography(

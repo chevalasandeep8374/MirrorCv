@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { FileText, Loader2, ArrowRight } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -15,27 +16,62 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMsg(null);
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/auth/register`, {
+      // 1. Primary: Register with Supabase Auth
+      const { data, error: supaError } = await supabase.auth.signUp({
         email,
         password,
-        full_name: fullName,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
       });
 
-      if (res.data?.access_token) {
-        localStorage.setItem('mirrorcv_token', res.data.access_token);
-        localStorage.setItem('mirrorcv_user', JSON.stringify(res.data.user));
-        router.push('/');
+      if (!supaError) {
+        if (data?.session?.access_token) {
+          localStorage.setItem('mirrorcv_token', data.session.access_token);
+          localStorage.setItem('mirrorcv_user', JSON.stringify(data.user));
+          router.push('/');
+          return;
+        } else if (data?.user) {
+          setSuccessMsg('Account created successfully! Please check your email or proceed to sign in.');
+          return;
+        }
       }
+
+      // 2. Secondary fallback: Legacy SQLite registration
+      try {
+        const res = await axios.post(`${API_BASE_URL}/api/auth/register`, {
+          email,
+          password,
+          full_name: fullName,
+        });
+
+        if (res.data?.access_token) {
+          localStorage.setItem('mirrorcv_token', res.data.access_token);
+          localStorage.setItem('mirrorcv_user', JSON.stringify(res.data.user));
+          router.push('/');
+          return;
+        }
+      } catch {
+        if (supaError) {
+          throw supaError;
+        }
+      }
+
+      throw new Error('Registration failed. Please try again.');
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.detail || 'Registration failed.');
+      if (err instanceof Error) {
+        setError(err.message);
       } else {
         setError('Registration failed. Please try again.');
       }
@@ -64,6 +100,17 @@ export default function RegisterPage() {
         {error && (
           <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700">
             {error}
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-medium">
+            {successMsg}
+            <div className="mt-2">
+              <Link href="/login" className="text-emerald-900 underline font-bold">
+                Go to Sign In &rarr;
+              </Link>
+            </div>
           </div>
         )}
 

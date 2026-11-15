@@ -6,11 +6,21 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# Install system dependencies for Playwright and Postgres
+# Install system dependencies for Playwright, Postgres, and LibreOffice
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     curl \
+    libreoffice-writer \
+    libreoffice-calc \
+    fonts-liberation \
+    fonts-dejavu-core \
+    fonts-crosextra-carlito \
+    fonts-crosextra-caladea \
+    fonts-roboto \
+    fonts-open-sans \
+    fonts-lato \
+    fonts-sil-source-sans-pro \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

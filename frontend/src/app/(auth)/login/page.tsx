@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { FileText, Loader2, ArrowRight } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -21,19 +22,43 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/auth/login`, {
+      // 1. Primary: Authenticate with Supabase Auth
+      const { data, error: supaError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (res.data?.access_token) {
-        localStorage.setItem('mirrorcv_token', res.data.access_token);
-        localStorage.setItem('mirrorcv_user', JSON.stringify(res.data.user));
+      if (!supaError && data?.session?.access_token) {
+        localStorage.setItem('mirrorcv_token', data.session.access_token);
+        localStorage.setItem('mirrorcv_user', JSON.stringify(data.user));
         router.push('/');
+        return;
       }
+
+      // 2. Secondary fallback: Legacy SQLite backend login (maintained during migration)
+      try {
+        const res = await axios.post(`${API_BASE_URL}/api/auth/login`, {
+          email,
+          password,
+        });
+
+        if (res.data?.access_token) {
+          localStorage.setItem('mirrorcv_token', res.data.access_token);
+          localStorage.setItem('mirrorcv_user', JSON.stringify(res.data.user));
+          router.push('/');
+          return;
+        }
+      } catch {
+        // If legacy also fails, present the Supabase error
+        if (supaError) {
+          throw supaError;
+        }
+      }
+
+      throw new Error('Authentication failed. Please verify email and password.');
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.detail || 'Login failed. Please check credentials.');
+      if (err instanceof Error) {
+        setError(err.message);
       } else {
         setError('Login failed. Please try again.');
       }

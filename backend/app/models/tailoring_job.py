@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional
 from datetime import datetime
-from sqlalchemy import String, Integer, DateTime, ForeignKey, JSON, Text, func
+from sqlalchemy import String, Integer, Float, DateTime, ForeignKey, JSON, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
@@ -35,6 +35,9 @@ class TailoringJob(Base):
 
     tailored_docx_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     tailored_pdf_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
+    fidelity_tier: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    fidelity_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
     warnings: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
     error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

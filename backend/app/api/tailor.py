@@ -50,17 +50,24 @@ async def _execute_pipeline(session: AsyncSession, job_id: str, template_id: str
         job.current_step = "orchestrating_graph"
         await session.commit()
 
+        fp = template.fingerprint or {}
+        template_type = fp.get("template_type", "docx" if template.file_path.endswith(".docx") else "pdf")
+
         initial_state = {
             "job_id": job_id,
             "template_id": template_id,
-            "original_docx_path": template.file_path,
-            "original_pdf_path": template.pdf_path or "",
+            "original_docx_path": template.file_path if template_type == "docx" else "",
+            "original_pdf_path": template.pdf_path or (template.file_path if template_type == "pdf" else ""),
             "jd_text": jd_text,
             "fingerprint": template.fingerprint,
             "role_map": template.role_map,
             "content_to_paragraphs": template.content_to_paragraphs,
             "source_content": ResumeContent.model_validate(template.content),
             "source_style": template.style,
+            "template_type": template_type,
+            "layout": fp.get("layout"),
+            "font_table": fp.get("font_table"),
+            "warnings": [],
         }
 
         final_state = tailoring_pipeline_graph.invoke(initial_state)
@@ -77,6 +84,9 @@ async def _execute_pipeline(session: AsyncSession, job_id: str, template_id: str
         job.match_score_after = final_state.get("match_score_after", {}).model_dump() if hasattr(final_state.get("match_score_after"), "model_dump") else final_state.get("match_score_after", {})
         job.tailored_docx_path = final_state.get("tailored_docx_path")
         job.tailored_pdf_path = final_state.get("tailored_pdf_path")
+        job.fidelity_tier = final_state.get("fidelity_tier")
+        fid_score_dict = final_state.get("fidelity_score") or {}
+        job.fidelity_score = fid_score_dict.get("total_score") if isinstance(fid_score_dict, dict) else None
         job.warnings = final_state.get("warnings", [])
 
         await session.commit()
@@ -176,6 +186,8 @@ async def get_tailoring_job(
         "skills_missing": job.skills_missing,
         "match_score_before": job.match_score_before,
         "match_score_after": job.match_score_after,
+        "fidelity_tier": job.fidelity_tier,
+        "fidelity_score": job.fidelity_score,
         "warnings": job.warnings,
         "error": job.error,
         "created_at": job.created_at,
@@ -238,8 +250,45 @@ async def toggle_change(
 
     job.tailored_content = new_content.model_dump()
 
-    # Regenerate Fidelity DOCX & PDF
-    if job.tailored_docx_path and os.path.exists(template.file_path):
+    # Regenerate Fidelity output
+    is_pdf_template = template.fingerprint and template.fingerprint.get("template_type") == "pdf"
+    if is_pdf_template and job.tailored_pdf_path and os.path.exists(template.file_path):
+        from app.services.pdf_strategy_selector import select_best_strategy
+        from app.schemas.pdf_template import PdfLayout, FontResolutionTable
+        from app.schemas.role_map import RoleMap
+
+        fp = template.fingerprint
+        layout_obj = PdfLayout.model_validate(fp["layout"]) if fp.get("layout") else None
+        role_map_obj = RoleMap.model_validate(template.role_map) if template.role_map else None
+        font_tbl_obj = FontResolutionTable.model_validate(fp["font_table"]) if fp.get("font_table") else None
+        out_dir = os.path.dirname(os.path.abspath(job.tailored_pdf_path))
+
+        writer, score, _ = select_best_strategy(
+            template_path=template.file_path,
+            layout=layout_obj,
+            role_map=role_map_obj,
+            content=new_content,
+            style=template.style,
+            content_to_paragraphs=template.content_to_paragraphs,
+            font_table=font_tbl_obj,
+            work_dir=out_dir,
+        )
+        writer.write(
+            content=new_content,
+            template_path=template.file_path,
+            output_path=job.tailored_pdf_path,
+            template_data={
+                "layout": layout_obj,
+                "role_map": role_map_obj,
+                "style": template.style,
+                "content_to_paragraphs": template.content_to_paragraphs,
+                "font_table": font_tbl_obj,
+                "is_scanned": layout_obj.document_metadata.is_scanned if layout_obj else False,
+            },
+        )
+        job.fidelity_tier = score.tier
+        job.fidelity_score = score.total_score
+    elif job.tailored_docx_path and os.path.exists(template.file_path):
         write_tailored_docx(
             template_docx_path=template.file_path,
             tailored_content=new_content,
@@ -261,6 +310,8 @@ async def toggle_change(
         "change_id": change_id,
         "accepted": payload.accepted,
         "match_score_after": job.match_score_after,
+        "fidelity_tier": job.fidelity_tier,
+        "fidelity_score": job.fidelity_score,
     }
 
 
@@ -276,7 +327,19 @@ async def download_tailored_docx(
     )
     result = await db.execute(stmt)
     job = result.scalars().first()
-    if not job or not job.tailored_docx_path or not os.path.exists(job.tailored_docx_path):
+    if not job:
+        raise HTTPException(status_code=404, detail="Tailoring job not found.")
+
+    stmt_t = select(UploadedTemplate).where(UploadedTemplate.id == job.template_id)
+    res_t = await db.execute(stmt_t)
+    template = res_t.scalars().first()
+    if template and template.fingerprint and template.fingerprint.get("template_type") == "pdf":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="DOCX download is not available for PDF templates; please download PDF.",
+        )
+
+    if not job.tailored_docx_path or not os.path.exists(job.tailored_docx_path):
         raise HTTPException(status_code=404, detail="Tailored DOCX not found.")
 
     return FileResponse(

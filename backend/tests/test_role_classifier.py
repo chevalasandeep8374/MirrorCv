@@ -47,9 +47,9 @@ def test_classify_table_two_column():
 
     roles = role_map.paragraph_roles
 
-    # Header Name & Title
+    # Header Name & Title / Headline
     assert roles[0].role == "name"
-    assert roles[1].role == "title"
+    assert roles[1].role in ("headline", "title")
 
     # Verify section headings across both sidebar and main columns
     sec_types = {s.type for s in role_map.sections_hierarchy}

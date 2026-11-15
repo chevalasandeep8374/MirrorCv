@@ -33,9 +33,12 @@ class DocumentMetadata(BaseModel):
 
 class ParagraphLocation(BaseModel):
     type: Literal["body", "table_cell", "text_box"] = "body"
+    paragraph_index: Optional[int] = None
     table_index: Optional[int] = None
     row_index: Optional[int] = None
     col_index: Optional[int] = None
+    table_path: Optional[List[int]] = None  # [tbl_idx, row_idx, cell_idx, p_idx]
+    textbox_id: Optional[str] = None
     cell_width_pt: Optional[float] = None
 
 
@@ -88,6 +91,26 @@ class ParagraphFingerprint(BaseModel):
     runs: List[RunFingerprint] = Field(default_factory=list)
     character_count: int = 0
     estimated_lines: int = 1
+    has_bottom_border: bool = False
+    has_shading: bool = False
+    keep_with_next: bool = False
+    tab_stops: List[Dict[str, Any]] = Field(default_factory=list)
+    hyperlinks: List[Dict[str, str]] = Field(default_factory=list)
+    resolved_formatting: Optional[Dict[str, Any]] = None
+    measured_lines: int = 1
+    line_width_pt: float = 515.0
+    last_line_fill_ratio: float = 1.0
+    max_chars: int = 80
+    hard_max_chars: int = 100
+
+
+class BudgetInfo(BaseModel):
+    max_lines: int = 1
+    max_chars: int = 80
+    hard_max_chars: int = 100
+    line_width_pt: float = 515.0
+    last_line_fill_ratio: float = 1.0
+    budget_margin: float = 0.97
 
 
 class DocxFingerprint(BaseModel):
@@ -97,15 +120,19 @@ class DocxFingerprint(BaseModel):
 
 ParagraphRoleType = Literal[
     "name",
+    "headline",
     "contact",
     "title",
     "section_heading",
+    "heading",
     "item_title",
     "item_subtitle",
     "item_meta",
     "bullet",
     "body",
     "skill_line",
+    "link_line",
+    "separator",
     "other",
 ]
 

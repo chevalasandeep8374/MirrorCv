@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.1.0",
+  "run_id": "run-8812c-491a",
+  "resume_id": "c65b64a7-b82d-4ebb-9f13-112e5808a81f",
+  "composition_id": "comp-7701a-882f",
+  "output_files": [
+    {
+      "kind": "tailored",
+      "format": "docx",
+      "storage_path": "exports/4f84738d-671e-41db-8465-d705b2ee78c5/comp-7701a-882f/Alex_Mercer_TechCorp.docx",
+      "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "size_bytes": 48210,
+      "download_url": "https://storage.example.com/exports/Alex_Mercer_TechCorp.docx?token=abc"
+    },
+    {
+      "kind": "tailored",
+      "format": "pdf",
+      "storage_path": "exports/4f84738d-671e-41db-8465-d705b2ee78c5/comp-7701a-882f/Alex_Mercer_TechCorp.pdf",
+      "mime_type": "application/pdf",
+      "size_bytes": 145890,
+      "download_url": "https://storage.example.com/exports/Alex_Mercer_TechCorp.pdf?token=abc"
+    }
+  ],
+  "fidelity_score": 99.8,
+  "page_count_before": 1,
+  "page_count_after": 1,
+  "page_count_preserved": true,
+  "integrity_report": {
+    "passed": true,
+    "violations": [],
+    "invariants_checked": [
+      { "name": "package_part_byte_identity", "passed": true, "details": "All non-document parts SHA-256 byte-identical" },
+      { "name": "section_properties_identity", "passed": true, "details": "sectPr margins and geometry identical" },
+      { "name": "paragraph_properties_canonical", "passed": true, "details": "All pPr elements canonicalized and identical" },
+      { "name": "run_properties_whitelist", "passed": true, "details": "All rPr runs match slot prototype formatting" },
+      { "name": "cloned_block_fidelity", "passed": true, "details": "Cloned blocks inherit prototype styling" },
+      { "name": "xml_id_uniqueness", "passed": true, "details": "All w14:paraId, bookmark, and docPr IDs unique" },
+      { "name": "container_bounding_boxes", "passed": true, "details": "Zero text clipping inside containers" },
+      { "name": "unedited_slot_invariance", "passed": true, "details": "Unedited slots identical in text and x-position" }
+    ],
+    "byte_identical_parts": [
+      "[Content_Types].xml",
+      "_rels/.rels",
+      "word/_rels/document.xml.rels",
+      "word/styles.xml",
+      "word/theme/theme1.xml",
+      "word/fontTable.xml",
+      "word/settings.xml"
+    ],
+    "id_collisions_found": 0
+  },
+  "fit_loop": {
+    "rounds_executed": 0,
+    "overflow_resolved": true,
+    "history": []
+  },
+  "per_slot_lines": {
+    "b1": { "max_lines": 2, "lines_before": 2, "lines_after": 2, "clipped": false },
+    "b2": { "max_lines": 2, "lines_before": 1, "lines_after": 1, "clipped": false }
+  },
+  "overflow_report": {
+    "has_overflow": false,
+    "overflowing_slots": [],
+    "details": "All tailored text slots fit within character budgets and measured bounding boxes."
+  },
+  "final_content": {
+    "header": { "name": "Alex Mercer", "title": "Senior Software Engineer" }
+  },
+  "substituted_fonts": [],
+  "whitespace_created_pt": 4.5,
+  "warnings": [],
+  "status": "ready"
+}
