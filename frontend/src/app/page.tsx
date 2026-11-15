@@ -61,11 +61,13 @@ export default function HomePage() {
 
   // Local storage migration state
   const [hasLocalResumes, setHasLocalResumes] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [importingLocal, setImportingLocal] = useState(false);
   const [importSuccessMsg, setImportSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
     setHasLocalResumes(localRepo.hasResumes());
+    setIsLoggedIn(Boolean(localStorage.getItem('mirrorcv_token')));
   }, []);
 
   const handleImportLocal = async () => {
@@ -301,9 +303,7 @@ export default function HomePage() {
               }}
               className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 border border-slate-200 rounded-lg hover:bg-slate-100 transition"
             >
-              {typeof window !== 'undefined' && localStorage.getItem('mirrorcv_token')
-                ? 'Sign Out'
-                : 'Sign In'}
+              {isLoggedIn ? 'Sign Out' : 'Sign In'}
             </button>
 
             <button
