@@ -99,12 +99,19 @@ class ComposerAgent:
         user_id = user_id or "default_user"
         original_content = original_content or {"sections": []}
 
-        # Resolve template DOCX path fallback if missing
+        # Ensure template DOCX path exists; fallback is strictly prohibited
         if not template_docx_path or not os.path.exists(template_docx_path):
-            fixtures_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "tests", "fixtures"))
-            template_docx_path = os.path.join(fixtures_dir, "sample_single_column.docx")
+            raise FileNotFoundError(
+                f"Valid template_docx_path is strictly required for composition. Provided: '{template_docx_path}'"
+            )
 
-        # Resolve accepted changes fallback from tailored_content if needed
+        # Ensure real template_profile is provided; fallback profile generation is strictly prohibited
+        if template_profile is None:
+            raise ValueError(
+                "A verified TemplateProfile is strictly required for composition. Fallback profile generation is permanently disabled."
+            )
+
+        # Resolve accepted changes from tailored_content if needed
         if accepted_changes is None:
             if tailored_content is not None and hasattr(tailored_content, "changes"):
                 accepted_changes = [
@@ -115,66 +122,6 @@ class ComposerAgent:
                 accepted_changes = tailored_content["changes"]
             else:
                 accepted_changes = []
-
-        # Resolve template_profile fallback if missing
-        if template_profile is None:
-            from docx import Document
-            from contracts.models.template_profile import (
-                Slot,
-                SlotMap,
-                Role,
-                SourcePointer,
-                PointerType,
-                Budgets,
-                SchemaVersion as TPVersion,
-                SourceType as TPSourceType,
-                Status as TPStatus,
-            )
-            doc = Document(template_docx_path)
-            slots = []
-            slot_map = {}
-            for i, p in enumerate(doc.paragraphs):
-                sid = f"slot_{i}"
-                font_name = p.runs[0].font.name if (p.runs and p.runs[0].font.name) else "Calibri"
-                font_size = p.runs[0].font.size.pt if (p.runs and p.runs[0].font.size) else 11.0
-                p_lines = max(2, p.text.count("\n") + 1)
-                slots.append(
-                    Slot(
-                        slot_id=sid,
-                        section_id="sec_exp" if i > 1 else "sec_hdr",
-                        item_id=f"item_{i}",
-                        bullet_id=f"b_{i}" if i > 1 else None,
-                        role=Role.bullet if i > 1 else (Role.name if i == 0 else Role.contact),
-                        max_lines=p_lines,
-                        max_chars=max(200, len(p.text) + 50),
-                        font=font_name,
-                        size=font_size,
-                        source_pointer=SourcePointer(pointer_type=PointerType.docx_paragraph, paragraph_index=i),
-                        budgets=Budgets(
-                            line_width_pt=500.0,
-                            max_lines=p_lines,
-                            max_chars=max(200, len(p.text) + 50),
-                            hard_max_chars=max(250, len(p.text) + 100),
-                        ),
-                    )
-                )
-                slot_map[sid] = SlotMap(
-                    section_id="sec_exp" if i > 1 else "sec_hdr",
-                    item_id=f"item_{i}",
-                    bullet_id=f"b_{i}" if i > 1 else None,
-                    target_field="text" if i > 1 else "name",
-                )
-            template_profile = TemplateProfile(
-                schema_version=TPVersion.field_1_1_0,
-                template_profile_id=f"tpl_{run_id}",
-                resume_id=resume_id,
-                version=1,
-                source_type=TPSourceType.uploaded_docx,
-                slots=slots,
-                slot_map=slot_map,
-                fidelity_score=99.0,
-                status=TPStatus.ready,
-            )
 
         if not output_dir:
             output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "tmp_output", composition_id))
@@ -206,29 +153,34 @@ class ComposerAgent:
         docx_signed_url = None
         pdf_signed_url = None
 
-        # If integrity failed, DOCX download is strictly BLOCKED
-        if fit_result.status != Status.failed:
+        # Strict gating: No output files can be produced without passing integrity check
+        output_files: List[OutputFile] = []
+        if fit_result.status != Status.failed and fit_result.integrity_report.passed:
             docx_signed_url = await generate_signed_storage_url("exports", docx_storage_path, expires_in=600)
             pdf_signed_url = await generate_signed_storage_url("exports", pdf_storage_path, expires_in=600)
-
-        output_files = [
-            OutputFile(
-                kind=Kind.tailored,
-                format=Format.docx,
-                storage_path=docx_storage_path,
-                mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                size_bytes=docx_size,
-                download_url=docx_signed_url,
-            ),
-            OutputFile(
-                kind=Kind.tailored,
-                format=Format.pdf,
-                storage_path=pdf_storage_path,
-                mime_type="application/pdf",
-                size_bytes=pdf_size,
-                download_url=pdf_signed_url,
-            ),
-        ]
+            output_files = [
+                OutputFile(
+                    kind=Kind.tailored,
+                    format=Format.docx,
+                    storage_path=docx_storage_path,
+                    mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    size_bytes=docx_size,
+                    download_url=docx_signed_url,
+                ),
+                OutputFile(
+                    kind=Kind.tailored,
+                    format=Format.pdf,
+                    storage_path=pdf_storage_path,
+                    mime_type="application/pdf",
+                    size_bytes=pdf_size,
+                    download_url=pdf_signed_url,
+                ),
+            ]
+        else:
+            logger.warning(
+                f"Agent 3: Template integrity check failed ({len(fit_result.integrity_report.violations)} violations). "
+                "Output generation strictly gated: zero output files produced."
+            )
 
         page_count_preserved = (fit_result.page_count_after == fit_result.page_count_before)
 

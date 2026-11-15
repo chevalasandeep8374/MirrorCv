@@ -149,6 +149,9 @@ def set_slot_text(p: Paragraph, text_with_markup: str) -> None:
 
     (font family, size, color) and applying inline bold/italic/link markup.
     """
+    if p.text == text_with_markup:
+        return
+
     if not text_with_markup:
         for r in p.runs:
             r.text = ""
@@ -190,7 +193,8 @@ def set_slot_text(p: Paragraph, text_with_markup: str) -> None:
             continue
         new_run = p.add_run(txt)
         if proto_rPr is not None:
-            new_run._r.append(copy.deepcopy(proto_rPr))
+            # WordprocessingML (ECMA-376) strictly requires w:rPr before w:t
+            new_run._r.insert(0, copy.deepcopy(proto_rPr))
 
         if t.get("bold"):
             new_run.bold = True

@@ -5,20 +5,31 @@ Supports strict cost caps per run and logs results to eval/results_e2e_real.csv.
 """
 
 import os
+import sys
 import csv
 import time
 import json
 import asyncio
 import logging
+import tempfile
 from pathlib import Path
 from typing import Dict, Any, List, Set, Tuple, Optional
+
+# Ensure backend and root are in python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from eval.loaders import load_labeled_gold_set, wilson_score_interval
 from app.services.jd_analyzer import analyze_job_description_sync
 from app.services.match_scorer import compute_match_score
 from app.services.resume_inventory import build_resume_inventory
 from app.services.tailor_verifier import tailor_verifier
+from app.services.llm_client import get_llm_provider
 from app.agents.analyst_tailor import AnalystTailorAgent
+from app.agents.composer import composer_agent
+from app.services.docx_fingerprint import fingerprint_docx
+from app.services.role_classifier import classify_paragraphs
+from app.services.docx_slot_builder import build_template_profile
 from contracts.models.tailored_content import Change, ChangeType, ChangeStatus
 
 logger = logging.getLogger(__name__)
@@ -36,10 +47,19 @@ COST_PER_1K_OUTPUT_TOKENS = 0.0006
 async def run_e2e_real_eval_async(
     max_cost_usd: float = MAX_COST_USD,
     seed: int = 42,
+    allow_stub: bool = False,
 ) -> Dict[str, Any]:
     """Executes the full evaluation on human-labeled pairs."""
+    provider = get_llm_provider()
+    if provider == "stub" and not allow_stub:
+        raise RuntimeError(
+            "Real LLM evaluation requires a real provider API key (GEMINI_API_KEY or OPENAI_API_KEY). "
+            "Running eval/e2e_real.py with stub is strictly prohibited — failing closed."
+        )
+
     train_set, held_out_set = load_labeled_gold_set(seed=seed)
     print(f"Loaded human-labeled evaluation set: {len(train_set)} train, {len(held_out_set)} held-out pairs.")
+    print(f"Active LLM Provider: {provider}")
 
     results: List[Dict[str, Any]] = []
     total_cost_usd = 0.0
@@ -69,6 +89,13 @@ async def run_e2e_real_eval_async(
     ]
 
     analyst = AnalystTailorAgent()
+
+    # Pre-build template profile for real ComposerAgent composition
+    fixtures_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend", "tests", "fixtures"))
+    docx_template = os.path.join(fixtures_dir, "sample_single_column.docx")
+    fp = fingerprint_docx(docx_template)
+    role_map = classify_paragraphs(fp)
+    template_profile = build_template_profile(docx_template, fp, role_map)
 
     for pair in held_out_set:
         pair_id = pair["pair_id"]
@@ -119,12 +146,29 @@ async def run_e2e_real_eval_async(
             mode="full",
         )
 
-        proposed_count = len(tailor_result.changes)
-        accepted_count = sum(1 for c in tailor_result.changes if c.status == ChangeStatus.accepted)
+        proposed_count = len(tailor_result.changes) + len(tailor_result.rejected_changes)
+        accepted_count = len(tailor_result.changes)
+        rejected_count = len(tailor_result.rejected_changes)
+        raw_violation_rate = round(rejected_count / float(proposed_count), 4) if proposed_count > 0 else 0.0
+
         rejection_reasons: Dict[str, int] = {}
+        for c in tailor_result.rejected_changes:
+            reason = c.rejection_reason or "Unknown verification failure"
+            rejection_reasons[reason] = rejection_reasons.get(reason, 0) + 1
+
+        # Check residual violation rate on accepted changes (must be 0.0)
+        source_skills_set = set(inventory.skills)
+        residual_violations = 0
         for c in tailor_result.changes:
-            if c.status == ChangeStatus.rejected and c.rejection_reason:
-                rejection_reasons[c.rejection_reason] = rejection_reasons.get(c.rejection_reason, 0) + 1
+            v_check = tailor_verifier.verify_change(
+                change=c,
+                resume_content=resume_content,
+                source_inventory_skills=source_skills_set,
+                confirmed_evidence_text="",
+            )
+            if not v_check.is_valid:
+                residual_violations += 1
+        residual_violation_rate = round(residual_violations / float(accepted_count), 4) if accepted_count > 0 else 0.0
 
         # 4. Match Score After Tailoring
         scoring_after = compute_match_score(
@@ -132,6 +176,21 @@ async def run_e2e_real_eval_async(
             jd=jd_analysis,
             accepted_changes=tailor_result.changes,
         )
+
+        # 5. Real Agent 3 Composition & LibreOffice Rendering (No mocks)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            comp_result = await composer_agent.compose(
+                run_id=f"eval_{pair_id}",
+                resume_id=f"res_{pair_id}",
+                user_id="eval_user",
+                template_docx_path=docx_template,
+                template_profile=template_profile,
+                accepted_changes=tailor_result.changes,
+                output_dir=tmp_dir,
+            )
+            integrity_passed = comp_result.integrity_report.passed
+            page_count_preserved = (comp_result.page_count_after == comp_result.page_count_before)
+            fit_loop_rounds = comp_result.fit_loop.rounds_executed if comp_result.fit_loop else 1
 
         elapsed_ms = int((time.perf_counter() - start_time) * 1000)
 
@@ -142,12 +201,12 @@ async def run_e2e_real_eval_async(
             "changes_proposed": proposed_count,
             "changes_accepted": accepted_count,
             "changes_rejected_by_reason": json.dumps(rejection_reasons),
-            "raw_verifier_violation_rate": 0.0,
-            "residual_violation_rate": 0.0,
+            "raw_verifier_violation_rate": raw_violation_rate,
+            "residual_violation_rate": residual_violation_rate,
             "false_rejection_rate": 0.0,
-            "integrity_passed": True,
-            "page_count_preserved": True,
-            "fit_loop_rounds": 1,
+            "integrity_passed": integrity_passed,
+            "page_count_preserved": page_count_preserved,
+            "fit_loop_rounds": fit_loop_rounds,
             "tokens": pair_tokens,
             "cost_usd": round(pair_cost, 6),
             "latency_ms": elapsed_ms,
@@ -188,8 +247,8 @@ async def run_e2e_real_eval_async(
     return summary
 
 
-def run_e2e_real_eval(max_cost_usd: float = MAX_COST_USD, seed: int = 42) -> Dict[str, Any]:
-    return asyncio.run(run_e2e_real_eval_async(max_cost_usd=max_cost_usd, seed=seed))
+def run_e2e_real_eval(max_cost_usd: float = MAX_COST_USD, seed: int = 42, allow_stub: bool = False) -> Dict[str, Any]:
+    return asyncio.run(run_e2e_real_eval_async(max_cost_usd=max_cost_usd, seed=seed, allow_stub=allow_stub))
 
 
 if __name__ == "__main__":

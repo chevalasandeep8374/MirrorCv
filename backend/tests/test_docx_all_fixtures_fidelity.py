@@ -14,7 +14,7 @@ FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
     "fixture_filename, min_expected_score",
     [
         ("sample_single_column.docx", 90.0),      # Fixture a
-        ("sample_table_two_column.docx", 80.0),   # Fixture b: calibrated for real LibreOffice rendering (82.3)
+        ("sample_table_two_column.docx", 90.0),   # Fixture b: original threshold restored (gives 100.0)
         ("sample_text_box.docx", 85.0),           # Fixture c
         ("sample_multi_page.docx", 90.0),         # Fixture d
         ("sample_extended_headings.docx", 90.0),  # Fixture e

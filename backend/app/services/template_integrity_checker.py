@@ -358,6 +358,30 @@ def check_template_integrity(
                     f"Invariant 4 Failed: Run formatting (rPr) in paragraph {idx} does not match any prototype rPr"
                 )
 
+        # Tightened check: If paragraph text is unchanged from original, every run rPr must match 1:1 in sequence
+        if idx < len(all_p_orig):
+            orig_p_text = "".join(all_p_orig[idx].itertext()).strip()
+            tail_p_text = "".join(p.itertext()).strip()
+            if orig_p_text and orig_p_text == tail_p_text:
+                orig_runs = all_p_orig[idx].findall(f"{{{W_NS}}}r")
+                tail_runs = p.findall(f"{{{W_NS}}}r")
+                if len(orig_runs) == len(tail_runs):
+                    for r_i, (ro, rt) in enumerate(zip(orig_runs, tail_runs)):
+                        rpr_o = canonicalize_element(ro.find(_get_xml_tag(W_NS, "rPr")))
+                        rpr_t = canonicalize_element(rt.find(_get_xml_tag(W_NS, "rPr")))
+                        if rpr_o != rpr_t:
+                            r_prototype_mismatches += 1
+                            inv4_passed = False
+                            violations.append(
+                                f"Invariant 4 Failed: Run {r_i} in unedited paragraph {idx} had rPr mutated"
+                            )
+                elif len(orig_runs) != len(tail_runs):
+                    r_prototype_mismatches += 1
+                    inv4_passed = False
+                    violations.append(
+                        f"Invariant 4 Failed: Unedited paragraph {idx} had run count altered from {len(orig_runs)} to {len(tail_runs)}"
+                    )
+
     checks.append(
         InvariantCheck(
             name="Invariant 4: Run formatting (rPr) whitelist strictly preserved",

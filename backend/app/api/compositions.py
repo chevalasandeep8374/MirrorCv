@@ -110,67 +110,13 @@ async def trigger_composition(
     fixtures_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "tests", "fixtures"))
     template_docx_path = os.path.join(fixtures_dir, "sample_single_column.docx")
 
-    # If template profile not loaded from db, build from fixture
+    # Require valid template profile (fail closed - no synthetic template fabrication)
     if template_profile_data:
         template_profile = TemplateProfile(**template_profile_data)
     else:
-        # Load sample profile
-        from docx import Document
-        from contracts.models.template_profile import (
-            Slot,
-            SlotMap,
-            Role,
-            SourcePointer,
-            PointerType,
-            Budgets,
-            SchemaVersion as TPVersion,
-            SourceType as TPSourceType,
-            Status as TPStatus,
-        )
-        doc = Document(template_docx_path)
-        slots = []
-        slot_map = {}
-        for i, p in enumerate(doc.paragraphs):
-            sid = f"slot_{i}"
-            font_name = p.runs[0].font.name if (p.runs and p.runs[0].font.name) else "Calibri"
-            font_size = p.runs[0].font.size.pt if (p.runs and p.runs[0].font.size) else 11.0
-            p_lines = max(2, p.text.count("\n") + 1)
-            slots.append(
-                Slot(
-                    slot_id=sid,
-                    section_id="sec_exp" if i > 1 else "sec_hdr",
-                    item_id=f"item_{i}",
-                    bullet_id=f"b_{i}" if i > 1 else None,
-                    role=Role.bullet if i > 1 else (Role.name if i == 0 else Role.contact),
-                    max_lines=p_lines,
-                    max_chars=max(200, len(p.text) + 50),
-                    font=font_name,
-                    size=font_size,
-                    source_pointer=SourcePointer(pointer_type=PointerType.docx_paragraph, paragraph_index=i),
-                    budgets=Budgets(
-                        line_width_pt=500.0,
-                        max_lines=p_lines,
-                        max_chars=max(200, len(p.text) + 50),
-                        hard_max_chars=max(250, len(p.text) + 100),
-                    ),
-                )
-            )
-            slot_map[sid] = SlotMap(
-                section_id="sec_exp" if i > 1 else "sec_hdr",
-                item_id=f"item_{i}",
-                bullet_id=f"b_{i}" if i > 1 else None,
-                target_field="text" if i > 1 else "name",
-            )
-        template_profile = TemplateProfile(
-            schema_version=TPVersion.field_1_1_0,
-            template_profile_id=f"tpl_{run_id}",
-            resume_id=resume_id,
-            version=1,
-            source_type=TPSourceType.uploaded_docx,
-            slots=slots,
-            slot_map=slot_map,
-            fidelity_score=99.0,
-            status=TPStatus.ready,
+        raise HTTPException(
+            status_code=400,
+            detail="TemplateProfile required for composition; cannot compose without verified template"
         )
 
     # Filter accepted changes

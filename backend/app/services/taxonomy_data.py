@@ -1,6 +1,14 @@
 """Curated Technical Skills Taxonomy Data for MirrorCV.
 Contains 300+ vetted technical skills with aliases, categories, and role families.
 All entries in this table have status: 'approved'.
+
+Attribution Notice:
+This taxonomy incorporates technical skill definitions and classifications derived from
+the European Skills, Competences, Qualifications and Occupations (ESCO) classification dataset,
+provided by the European Commission.
+Licensed under Creative Commons Attribution 4.0 International (CC-BY 4.0).
+Source: https://ec.europa.eu/esco/portal
+Copyright © European Union, 2026.
 """
 
 from typing import List, Dict, Any

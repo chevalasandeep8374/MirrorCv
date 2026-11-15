@@ -48,6 +48,7 @@ SECTION_KEYWORDS: Dict[str, List[str]] = {
         "certifications", "certificates", "licenses", "credentials"
     ],
     "custom": [
+        "contact", "contact info", "contact information", "contact details",
         "extracurricular activities", "extracurricular", "declaration", "personal details",
         "hobbies", "interests", "publications", "patents", "honors", "awards", "volunteer",
         "activities", "affiliations"
@@ -173,6 +174,7 @@ def classify_paragraphs(fingerprint: DocxFingerprint) -> RoleMap:
             content_to_paragraphs["header.name"] = [best_candidate.index]
 
     # 2. Identify Contact and Headline in top region
+    headline_assigned = False
     for p in first_three_non_empty + paragraphs[3:6]:
         if p.index in assignments:
             continue
@@ -189,9 +191,9 @@ def classify_paragraphs(fingerprint: DocxFingerprint) -> RoleMap:
                 field="contact",
             )
             content_to_paragraphs.setdefault("header.contact", []).append(p.index)
-        elif name_para_idx is not None and p.index > name_para_idx and not detect_section_heading(text):
-            # Candidate headline
-            if len(text) < 70 and not any(p.bullet_info.is_bullet for _ in [1]):
+        elif not headline_assigned and name_para_idx is not None and p.index > name_para_idx and not detect_section_heading(text):
+            # Candidate headline - only valid for body paragraphs (not inside tables or textboxes)
+            if p.location.type == "body" and len(text) < 70 and not any(p.bullet_info.is_bullet for _ in [1]):
                 assignments[p.index] = ParagraphRoleAssignment(
                     role="headline",
                     confidence=0.90,
@@ -200,6 +202,7 @@ def classify_paragraphs(fingerprint: DocxFingerprint) -> RoleMap:
                     field="title",
                 )
                 content_to_paragraphs["header.title"] = [p.index]
+                headline_assigned = True
 
     # 3. Main Document Reading-Order Parsing
     current_section: Optional[SectionHierarchy] = None

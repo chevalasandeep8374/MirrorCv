@@ -20,14 +20,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fonts-roboto \
     fonts-open-sans \
     fonts-lato \
-    fonts-sil-source-sans-pro \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
-
-# Install Playwright Chromium and OS dependencies
-RUN playwright install --with-deps chromium
 
 COPY . .
 

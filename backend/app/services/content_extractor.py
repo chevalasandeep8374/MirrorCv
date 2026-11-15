@@ -34,8 +34,9 @@ def _clean_bullet_text(text: str) -> str:
 
 def convert_runs_to_markdown(p: ParagraphFingerprint) -> str:
     """Converts runs and inline hyperlinks into safe markdown (**bold**, *italic*, [text](url))."""
+    should_clean = p.bullet_info.num_id is not None
     if not p.runs:
-        return _clean_bullet_text(p.text)
+        return _clean_bullet_text(p.text) if should_clean else p.text
 
     hyperlink_map = {h["text"].strip(): h["target"] for h in p.hyperlinks if "text" in h and "target" in h}
 
@@ -72,7 +73,7 @@ def convert_runs_to_markdown(p: ParagraphFingerprint) -> str:
         parts.append(txt)
 
     combined = "".join(parts)
-    return _clean_bullet_text(combined)
+    return _clean_bullet_text(combined) if should_clean else combined
 
 
 def extract_content_and_style(
@@ -179,11 +180,13 @@ def extract_content_and_style(
 
                     sk_item_id = f"item-{sec_h.section_id}-{p_idx}"
                     b_id = f"b-{sec_h.section_id}-{p_idx}"
+                    is_word_bullet = para_dict[p_idx].bullet_info.num_id is not None
+                    bullet_text = _clean_bullet_text(cat_skills) if is_word_bullet else cat_skills
                     items_list.append(
                         SectionItem(
                             id=sk_item_id,
                             title=cat_title,
-                            bullets=[BulletItem(id=b_id, text=_clean_bullet_text(cat_skills))],
+                            bullets=[BulletItem(id=b_id, text=bullet_text)],
                         )
                     )
                     content_to_paragraphs[f"{sec_h.section_id}.{sk_item_id}.{b_id}"] = [p_idx]

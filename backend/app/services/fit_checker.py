@@ -154,9 +154,16 @@ def evaluate_fidelity(
     doc_regen.close()
 
     # 4. Property match rate
-    # If line count and text are nearly identical, run property match rate is high
+    # Calculates exact line and run property match rate
     line_count_ratio = min(len(lines_orig), len(lines_regen)) / float(max(len(lines_orig), len(lines_regen), 1))
-    run_prop_rate = round(line_count_ratio * 0.98, 2) if page_match else 0.70
+    if page_match and lines_orig and lines_regen:
+        matching_lines = sum(
+            1 for lo, lr in zip(lines_orig, lines_regen)
+            if lo.get("text", "").strip() == lr.get("text", "").strip()
+        )
+        run_prop_rate = round(matching_lines / float(max(len(lines_orig), len(lines_regen))), 4)
+    else:
+        run_prop_rate = round(line_count_ratio, 4) if page_match else 0.70
 
     metrics = FidelityMetrics(
         page_count_match=page_match,
