@@ -14,6 +14,7 @@ import {
   Circle,
   Square,
   Sparkles,
+  ChevronDown,
 } from 'lucide-react';
 
 const LINK_PRESETS = [
@@ -24,7 +25,19 @@ const LINK_PRESETS = [
   { label: 'Website', urlPrefix: 'https://' },
 ];
 
-export const HeaderForm: React.FC = () => {
+interface HeaderFormProps {
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
+}
+
+export const HeaderForm: React.FC<HeaderFormProps> = ({
+  isExpanded: externalExpanded,
+  onToggleExpand,
+}) => {
+  const [internalExpanded, setInternalExpanded] = React.useState(false);
+  const isExpanded = externalExpanded !== undefined ? externalExpanded : internalExpanded;
+  const toggleExpand = onToggleExpand || (() => setInternalExpanded((prev) => !prev));
+
   const { content, style, updateHeader, updateStyle } = useResume();
   const header = content.header;
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -171,21 +184,50 @@ export const HeaderForm: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs mb-4 space-y-4">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-100 text-slate-800">
-        <div className="flex items-center space-x-2">
-          <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
-            <User className="w-4 h-4" />
+    <div
+      className={`bg-white rounded-2xl border transition-all mb-3.5 overflow-hidden group ${
+        isExpanded
+          ? 'border-slate-300 shadow-sm ring-1 ring-slate-100'
+          : 'border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:border-slate-300'
+      }`}
+    >
+      {/* Dropdown Stage Trigger Header */}
+      <div
+        onClick={toggleExpand}
+        className="p-4 sm:p-4.5 flex items-center justify-between cursor-pointer select-none bg-white hover:bg-slate-50/50 transition-colors"
+      >
+        <div className="flex items-center space-x-3.5 min-w-0">
+          <User className="w-5 h-5 text-slate-800 shrink-0" />
+          <div className="min-w-0">
+            <h3 className="font-bold text-slate-900 text-[15px] sm:text-[16px] tracking-tight">
+              Personal Details
+            </h3>
+            {!isExpanded && header.name && (
+              <p className="text-xs text-slate-400 truncate max-w-[260px] sm:max-w-[320px]">
+                {header.name}{header.title ? ` · ${header.title}` : ''}
+              </p>
+            )}
           </div>
-          <div>
-            <h3 className="font-bold text-sm">Personal & Contact Details</h3>
-            <p className="text-[11px] text-slate-400">Toggle eye icons to show or hide fields on your resume</p>
-          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 shrink-0">
+          <ChevronDown
+            className={`w-5 h-5 text-slate-400 group-hover:text-slate-700 transition-transform duration-200 ${
+              isExpanded ? 'rotate-180' : ''
+            }`}
+          />
         </div>
       </div>
 
-      {/* Photo Upload Section */}
-      <div className="flex items-center gap-4 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+      {/* Expanded Fields */}
+      {isExpanded && (
+        <div className="p-4 sm:p-5 pt-1 border-t border-slate-100 space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100 text-slate-800">
+            <p className="text-[11px] text-slate-400">Toggle eye icons to show or hide fields on your resume</p>
+          </div>
+
+          {/* Photo Upload Section */}
+          <div className="flex items-center gap-4 p-3 bg-slate-50 border border-slate-200 rounded-xl">
         <div className="relative shrink-0">
           {header.photoUrl ? (
             /* eslint-disable-next-line @next/next/no-img-element */
@@ -487,6 +529,8 @@ export const HeaderForm: React.FC = () => {
           ))}
         </div>
       </div>
+        </div>
+      )}
     </div>
   );
 };

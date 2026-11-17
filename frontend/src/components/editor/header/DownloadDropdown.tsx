@@ -159,7 +159,7 @@ export const DownloadDropdown: React.FC = () => {
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         disabled={downloadingPdf || downloadingDocx}
-        className="btn-primary !text-xs !py-1.5 !px-3.5 shadow-btn"
+        className="bg-[#181824] hover:bg-[#282638] text-white text-xs font-semibold py-2 px-3.5 rounded-xl shadow-xs flex items-center gap-2 transition-colors cursor-pointer"
       >
         {downloadingPdf || downloadingDocx ? (
           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -167,7 +167,7 @@ export const DownloadDropdown: React.FC = () => {
           <Download className="w-3.5 h-3.5" />
         )}
         <span>Download</span>
-        <ChevronDown className="w-3 h-3 ml-0.5 opacity-80" />
+        <ChevronDown className="w-3 h-3 opacity-70" />
       </button>
 
       {isOpen && (

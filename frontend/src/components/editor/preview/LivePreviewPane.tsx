@@ -51,7 +51,7 @@ export const LivePreviewPane: React.FC = () => {
   return (
     <div
       ref={containerRef}
-      className="flex-1 bg-slate-200/70 overflow-auto p-8 flex flex-col items-center justify-start min-h-full relative select-none"
+      className="flex-1 bg-[#ECEEF2] overflow-auto p-6 sm:p-8 flex flex-col items-center justify-start min-h-full relative select-none"
     >
       {/* Floating Preview Controls Toolbar (Glass-1) */}
       <div className="sticky top-4 z-30 mb-6 glass-1 border border-border-subtle rounded-full shadow-card px-4 py-1.5 flex items-center gap-2 text-xs">

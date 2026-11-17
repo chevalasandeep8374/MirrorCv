@@ -16,7 +16,7 @@ import {
   Sparkles,
   Sliders,
   FileText,
-  TrendingUp,
+  LayoutGrid,
 } from 'lucide-react';
 
 interface EditorHeaderProps {
@@ -58,111 +58,106 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   };
 
   return (
-    <header className="h-14 border-b border-border-subtle glass-1 px-4 flex items-center justify-between z-30 select-none">
+    <header className="h-14 border-b border-slate-200/90 bg-white px-4 flex items-center justify-between z-30 select-none shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
       <h1 className="sr-only">Resume Editor - {title || 'Untitled Resume'}</h1>
-      {/* 1. Left: Back, Switcher Dropdown, Save Status */}
-      <div className="flex items-center space-x-3">
+      {/* 1. Left: Navigation Back & 4-Tab Navigation Shell */}
+      <div className="flex items-center space-x-2 sm:space-x-3">
         <Link
           href="/dashboard"
-          className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-btn transition-colors"
+          className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors"
           title="Back to Dashboard"
         >
           <ArrowLeft className="w-4 h-4" />
         </Link>
 
-        {/* In-header Resume Switcher Dropdown */}
-        <ResumeSelectorDropdown
-          currentResumeId={resumeId}
-          currentTitle={title}
-        />
+        {/* 4-Tab Navigation Shell */}
+        <nav className="flex items-center space-x-1 sm:space-x-1.5">
+          <button
+            type="button"
+            onClick={() => handleTabClick('overview')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${
+              isTabActive('overview')
+                ? 'bg-[#FFF0F5] text-[#FF2D6C] border border-[#FFD5DF] shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Overview</span>
+          </button>
 
-        {/* Save Status Indicator */}
-        <div className="flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white border border-border-subtle shadow-xs">
+          <button
+            type="button"
+            onClick={() => handleTabClick('content')}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-bold text-xs transition-all ${
+              isTabActive('content')
+                ? 'bg-[#FFF0F5] text-[#FF2D6C] border border-[#FFD5DF] shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Content</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleTabClick('customize')}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-bold text-xs transition-all ${
+              isTabActive('customize')
+                ? 'bg-[#FFF0F5] text-[#FF2D6C] border border-[#FFD5DF] shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>Customize</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleTabClick('ai')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${
+              isTabActive('ai')
+                ? 'bg-[#FFF0F5] text-[#FF2D6C] border border-[#FFD5DF] shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">AI Tools</span>
+          </button>
+        </nav>
+      </div>
+
+      {/* 2. Right: Save Status, Switcher Dropdown, Undo/Redo, Unified Download, Overflow Menu */}
+      <div className="flex items-center space-x-2 sm:space-x-2.5">
+        {/* Subtle Save Status Indicator */}
+        <div className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-50 border border-slate-200/80">
           {saveStatus === 'saved' && (
             <>
               <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-              <span className="text-slate-600 hidden sm:inline">Saved</span>
+              <span className="text-slate-600">Saved</span>
             </>
           )}
           {saveStatus === 'saving' && (
             <>
-              <Clock className="w-3 h-3 text-primary animate-spin" />
-              <span className="text-primary hidden sm:inline">Saving...</span>
+              <Clock className="w-3 h-3 text-[#FF2D6C] animate-spin" />
+              <span className="text-[#FF2D6C]">Saving...</span>
             </>
           )}
           {saveStatus === 'unsaved' && (
             <>
               <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              <span className="text-amber-600 hidden sm:inline">Unsaved</span>
+              <span className="text-amber-600">Unsaved</span>
             </>
           )}
           {saveStatus === 'conflict' && (
             <>
               <AlertCircle className="w-3 h-3 text-rose-500" />
-              <span className="text-rose-600 hidden sm:inline">Conflict</span>
+              <span className="text-rose-600">Conflict</span>
             </>
           )}
         </div>
-      </div>
 
-      {/* 2. Center: 4-Tab Navigation Shell */}
-      <nav className="flex items-center bg-slate-100/90 p-1 rounded-full border border-slate-200/80 shadow-xs">
-        <button
-          type="button"
-          onClick={() => handleTabClick('overview')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${
-            isTabActive('overview')
-              ? 'bg-white text-primary shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-          }`}
-        >
-          <TrendingUp className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Overview</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleTabClick('content')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${
-            isTabActive('content')
-              ? 'bg-white text-primary shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-          }`}
-        >
-          <FileText className="w-3.5 h-3.5" />
-          <span>Content</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleTabClick('customize')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${
-            isTabActive('customize')
-              ? 'bg-white text-primary shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-          }`}
-        >
-          <Sliders className="w-3.5 h-3.5" />
-          <span>Customize</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleTabClick('ai')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${
-            isTabActive('ai')
-              ? 'bg-white text-emerald-600 shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-          }`}
-        >
-          <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
-          <span className="hidden sm:inline">AI Tools</span>
-        </button>
-      </nav>
-
-      {/* 3. Right: Undo/Redo, Unified Download, Overflow Menu */}
-      <div className="flex items-center space-x-2">
-        <div className="hidden sm:flex items-center space-x-0.5">
+        {/* Undo/Redo Buttons */}
+        <div className="hidden lg:flex items-center space-x-0.5">
           <button
             type="button"
             onClick={undo}
@@ -182,6 +177,12 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
             <Redo2 className="w-4 h-4" />
           </button>
         </div>
+
+        {/* In-header Resume Switcher Dropdown */}
+        <ResumeSelectorDropdown
+          currentResumeId={resumeId}
+          currentTitle={title}
+        />
 
         {/* Unified Download Dropdown Menu */}
         <DownloadDropdown />

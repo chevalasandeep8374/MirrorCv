@@ -5,44 +5,14 @@ import { useResume } from '@/context/ResumeContext';
 import { SectionList } from './content/SectionList';
 import { CustomizeTab } from './customize/CustomizeTab';
 import { CoverLetterPanel } from './cover-letter/CoverLetterPanel';
-import { FileText, Sliders, Mail, AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 export const LeftPanel: React.FC = () => {
-  const { content, activeTab, setActiveTab, saveStatus, resolveConflict } = useResume();
+  const { content, activeTab, saveStatus, resolveConflict } = useResume();
   const isCoverLetter = Boolean(content.coverLetter);
-  const isCustomizeActive = activeTab === 'customize' || activeTab === 'style';
 
   return (
-    <aside className="w-full md:w-[480px] lg:w-[500px] flex-shrink-0 bg-slate-50 border-r border-border-subtle flex flex-col h-[calc(100vh-3.5rem)] select-none isolate-paint">
-      {/* Tab Switcher */}
-      <div className="h-12 border-b border-border-subtle bg-white px-4 flex items-center space-x-2">
-        <button
-          type="button"
-          onClick={() => setActiveTab('content')}
-          className={`flex-1 py-1.5 px-3 rounded-btn font-bold text-xs flex items-center justify-center space-x-1.5 transition-all ${
-            activeTab === 'content'
-              ? 'bg-primary text-white shadow-btn'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
-        >
-          {isCoverLetter ? <Mail className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
-          <span>{isCoverLetter ? 'Letter Content' : 'Resume Content'}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('customize')}
-          className={`flex-1 py-1.5 px-3 rounded-btn font-bold text-xs flex items-center justify-center space-x-1.5 transition-all ${
-            isCustomizeActive
-              ? 'bg-primary text-white shadow-btn'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
-        >
-          <Sliders className="w-3.5 h-3.5" />
-          <span>Customize Design</span>
-        </button>
-      </div>
-
+    <aside className="w-full md:w-[480px] lg:w-[500px] flex-shrink-0 bg-[#F8F9FA] border-r border-slate-200/90 flex flex-col h-[calc(100vh-3.5rem)] select-none isolate-paint">
       {/* Version Conflict Resolution Banner */}
       {saveStatus === 'conflict' && (
         <div className="bg-rose-50 border-b border-rose-200 p-3 flex flex-col gap-2 text-xs text-rose-900 animate-in fade-in">

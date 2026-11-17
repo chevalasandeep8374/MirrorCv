@@ -83,7 +83,7 @@ function EditorLayout() {
     activeTab === 'content' || activeTab === 'customize' || activeTab === 'style';
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden bg-slate-100">
+    <div className="h-screen w-screen flex flex-col overflow-hidden bg-[#F8F9FA]">
       {/* Top App Header */}
       <EditorHeader
         onOpenVersions={() => setVersionsOpen(true)}
@@ -97,7 +97,7 @@ function EditorLayout() {
       <main className="flex-1 flex overflow-hidden relative">
         {activeTab === 'overview' ? (
           /* Full Overview Dashboard Tab */
-          <div className="flex-1 overflow-y-auto bg-slate-100">
+          <div className="flex-1 overflow-y-auto bg-slate-50">
             <OverviewTab
               onOpenAts={() => setAtsOpen(true)}
               onOpenTailor={() => setTailorOpen(true)}
@@ -107,7 +107,7 @@ function EditorLayout() {
           </div>
         ) : activeTab === 'ai' ? (
           /* Full AI Tools Tab */
-          <div className="flex-1 overflow-y-auto bg-slate-100">
+          <div className="flex-1 overflow-y-auto bg-slate-50">
             <AiToolsTab
               onOpenTailorModal={() => setTailorOpen(true)}
               onOpenAtsModal={() => setAtsOpen(true)}

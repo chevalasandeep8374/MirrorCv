@@ -83,7 +83,7 @@ export const EditorOverflowMenu: React.FC<EditorOverflowMenuProps> = ({
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
-          className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors"
+          className="p-2 text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/90 rounded-xl shadow-2xs transition-colors cursor-pointer"
           title="More actions"
         >
           <MoreVertical className="w-4 h-4" />
