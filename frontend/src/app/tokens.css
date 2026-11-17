@@ -1,0 +1,129 @@
+/* ==========================================================================
+   MirrorCV Design Tokens - Phase F Editorial Redesign
+   Single source of truth for color, typography, radius, spacing, and shadows.
+   No magic values elsewhere.
+   ========================================================================== */
+
+:root {
+  /* Surface & Backgrounds */
+  --bg-paper: #EFEDE9;
+  --bg-surface: #F7F5F2;
+  --border-hairline: #DDD9D3;
+
+  /* Ink Typography Colors */
+  --ink-heading: #1D0F3A;
+  --ink-body: #5A5468;
+  --ink-muted: #8C8799;
+
+  /* Buttons & Brand Accents */
+  --color-primary: #1D0F3A;
+  --color-primary-text: #FFFFFF;
+  --color-accent: #E8456B;
+  --color-accent-subtle: rgba(232, 69, 107, 0.12);
+
+  /* Resume Preview Palette */
+  --navy-sidebar: #1F3347;
+  --preview-paper: #FFFFFF;
+  --preview-section-bar: #EAE7E2;
+  --preview-divider: #E2DFD9;
+
+  /* Radius Scale: 10 / 14 / 9999 */
+  --radius-sm: 10px;
+  --radius-card: 14px;
+  --radius-pill: 9999px;
+
+  /* Shadows: One soft, large, low-opacity shadow for the floating resume preview only */
+  --shadow-floating-preview: 0 32px 64px -16px rgba(29, 15, 58, 0.14), 0 16px 32px -12px rgba(0, 0, 0, 0.08);
+
+  /* Typography Line Heights & Letter Spacing */
+  --lh-headline: 1.02;
+  --lh-body: 1.6;
+  --tracking-headline: -0.03em;
+}
+
+/* Custom Base Classes for Editorial Design */
+.font-editorial-headline {
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  letter-spacing: var(--tracking-headline);
+  line-height: var(--lh-headline);
+  color: var(--ink-heading);
+}
+
+.font-editorial-body {
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  line-height: var(--lh-body);
+  color: var(--ink-body);
+}
+
+.hero-headline {
+  font-size: clamp(48px, 7vw, 92px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  color: var(--ink-heading);
+}
+
+/* Primary Button: solid ink, white text */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--color-primary);
+  color: var(--color-primary-text);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(29, 15, 58, 0.08);
+}
+.btn-primary:hover {
+  background-color: #2D1854;
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary Button: 1.5px outlined in same ink */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  color: var(--ink-heading);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--ink-heading);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-secondary:hover {
+  background-color: rgba(29, 15, 58, 0.04);
+  transform: translateY(-1px);
+}
+.btn-secondary:active {
+  transform: translateY(0);
+}
+
+/* 14px Card Button Variant */
+.btn-card {
+  border-radius: var(--radius-card);
+}
+
+/* Floating Resume Shadow */
+.shadow-preview {
+  box-shadow: var(--shadow-floating-preview);
+}
+
+/* Hairline Editorial Card */
+.editorial-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-card);
+}

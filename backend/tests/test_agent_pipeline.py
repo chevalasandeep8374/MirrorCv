@@ -6,6 +6,7 @@ Tests:
 4. End-to-end LangGraph StateGraph execution & stage_log privacy guarantee (no resume text).
 """
 
+import os
 import pytest
 
 from app.agents.template_guardian import TemplateGuardianAgent
@@ -148,10 +149,12 @@ async def test_agent_3_composer():
         template_profile=profile,
     )
 
+    sample_docx = os.path.join(os.path.dirname(__file__), "fixtures", "sample_single_column.docx")
     composer = ComposerAgent()
     result = await composer.compose(
         run_id="run_test_001",
         resume_id="res_test_001",
+        template_docx_path=sample_docx,
         original_content=SAMPLE_RESUME_CONTENT,
         original_style=SAMPLE_STYLE,
         template_profile=profile,
@@ -198,7 +201,7 @@ async def test_langgraph_pipeline_execution_and_privacy():
     stage_log = final_state["stage_log"]
     assert len(stage_log) == 3
     stages_called = [entry["stage"] for entry in stage_log]
-    assert stages_called == ["guardian", "tailor", "composer"]
+    assert stages_called == ["template_guardian", "analyst_tailor", "composer"]
 
     # 3. Privacy guarantee (Change #9: Zero resume text in stage_log)
     for entry in stage_log:

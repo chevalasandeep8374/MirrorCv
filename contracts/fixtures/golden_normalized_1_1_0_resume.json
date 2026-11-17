@@ -1,0 +1,246 @@
+{
+  "content": {
+    "schema_version": "1.1.0",
+    "header": {
+      "name": "Alex Mercer",
+      "title": "Senior Staff Software Engineer",
+      "email": "alex.mercer@example.com",
+      "phone": "+1 (555) 019-2834",
+      "location": "San Francisco, CA",
+      "website": "https://alexmercer.dev",
+      "photoUrl": "https://example.com/avatar.jpg",
+      "links": [
+        {
+          "id": "link-1",
+          "label": "GitHub",
+          "url": "https://github.com/alexmercer"
+        },
+        {
+          "id": "link-2",
+          "label": "LinkedIn",
+          "url": "https://linkedin.com/in/alexmercer"
+        }
+      ],
+      "fieldVisibility": {
+        "name": true,
+        "title": true,
+        "email": true,
+        "phone": true,
+        "location": true,
+        "website": true,
+        "photo": true
+      }
+    },
+    "sections": [
+      {
+        "id": "sec-summary",
+        "type": "summary",
+        "title": "Professional Summary",
+        "visible": true,
+        "pageBreakBefore": false,
+        "order": 0,
+        "items": [
+          {
+            "id": "item-sum-1",
+            "title": "",
+            "subtitle": "",
+            "location": "",
+            "dateRange": "",
+            "visible": true,
+            "itemType": "paragraph",
+            "bullets": [
+              {
+                "id": "b-sum-1",
+                "text": "Accomplished full-stack systems engineer with 10+ years architecting high-throughput document infrastructure.",
+                "level": 0,
+                "proficiency": null
+              }
+            ],
+            "groupId": null
+          }
+        ]
+      },
+      {
+        "id": "sec-experience",
+        "type": "experience",
+        "title": "Work Experience",
+        "visible": true,
+        "pageBreakBefore": false,
+        "order": 1,
+        "items": [
+          {
+            "id": "item-exp-1",
+            "title": "Principal Software Engineer",
+            "subtitle": "Apex Cloud Systems",
+            "location": "San Francisco, CA",
+            "dateRange": "May 2021 \u2013 Present",
+            "dates": {
+              "startMonth": 5,
+              "startYear": 2021,
+              "endMonth": null,
+              "endYear": null,
+              "isCurrent": true
+            },
+            "visible": true,
+            "itemType": "timeline",
+            "bullets": [
+              {
+                "id": "b-exp-1",
+                "text": "Spearheaded migration of multi-tenant document engine to micro-frontends, reducing load latency by 42%.",
+                "level": 0,
+                "proficiency": null
+              }
+            ],
+            "groupId": null
+          }
+        ]
+      }
+    ]
+  },
+  "style": {
+    "schema_version": "1.1.0",
+    "templateId": "classic-single-column",
+    "pageSize": "A4",
+    "margins": {
+      "top": 36,
+      "bottom": 36,
+      "left": 40,
+      "right": 40,
+      "unit": "pt"
+    },
+    "typography": {
+      "baseFontFamily": "Inter",
+      "headingFontFamily": "Inter",
+      "nameFontFamily": "Inter",
+      "fontSizeScale": 1.0,
+      "fontSizes": {
+        "name": 22,
+        "headerTitle": 12,
+        "contact": 9,
+        "sectionHeading": 12,
+        "itemTitle": 11,
+        "itemSubtitle": 10,
+        "body": 9.5,
+        "meta": 9,
+        "unit": "pt"
+      },
+      "lineHeight": 1.45,
+      "baseFontSize": 9.5,
+      "fontSizeOffsets": {
+        "name": 12.5,
+        "headerTitle": 2.5,
+        "contact": -0.5,
+        "sectionHeading": 2.5,
+        "itemTitle": 1.5,
+        "itemSubtitle": 0.5,
+        "body": 0.0,
+        "meta": -0.5
+      }
+    },
+    "spacing": {
+      "sectionSpacing": 14,
+      "itemSpacing": 10,
+      "bulletSpacing": 4,
+      "headerBottomSpacing": 12,
+      "unit": "pt"
+    },
+    "colors": {
+      "accent": "#2563eb",
+      "text": "#111827",
+      "muted": "#4b5563",
+      "background": "#ffffff",
+      "sidebarBackground": "#f8fafc",
+      "divider": "#e2e8f0",
+      "area": "full_page",
+      "mode": "single",
+      "backgroundOverlayOpacity": 0.6,
+      "accentToggles": {
+        "name": false,
+        "jobTitle": false,
+        "headings": true,
+        "headingsLine": true,
+        "headerIcons": true,
+        "bullets": true,
+        "dates": false,
+        "entryTitle": false,
+        "entrySubtitle": false,
+        "linkIcons": true
+      }
+    },
+    "bulletStyle": "disc",
+    "headingStyle": "bar",
+    "layout": {
+      "type": "single",
+      "sidebarWidthPercent": 32,
+      "sidebarSectionIds": [],
+      "mainSectionIds": [
+        "sec-summary",
+        "sec-experience"
+      ],
+      "sectionPlacement": {}
+    },
+    "dateFormat": "MMM YYYY",
+    "isLocked": false,
+    "entryLayout": {
+      "structure": "full_width",
+      "dateLocationPosition": "right",
+      "headerSplitRatio": "auto"
+    },
+    "heading": {
+      "capitalization": "none",
+      "iconStyle": "none"
+    },
+    "header": {
+      "alignment": "left",
+      "arrangement": "bullet"
+    },
+    "photo": {
+      "shape": "circle",
+      "size": "medium",
+      "border": "none",
+      "position": "right"
+    },
+    "linkStyling": {
+      "underline": true,
+      "colored": false,
+      "showIcon": true
+    },
+    "footer": {
+      "showPageNumbers": true,
+      "showEmail": false,
+      "showName": false
+    },
+    "sectionCustomizations": {
+      "summary": {
+        "inHeader": false,
+        "showHeading": true
+      },
+      "skills": {
+        "style": "compact",
+        "rowSpacing": "tight",
+        "startRowsWithBullets": false,
+        "subInfoStyle": "colon"
+      },
+      "experience": {
+        "titleSubtitleOrder": "title_first",
+        "groupPromotions": true
+      },
+      "education": {
+        "titleSubtitleOrder": "title_first"
+      },
+      "certificates": {
+        "style": "compact"
+      },
+      "languages": {
+        "style": "chips"
+      },
+      "interests": {
+        "style": "chips"
+      },
+      "declaration": {
+        "showPlace": true,
+        "showDate": true
+      }
+    }
+  }
+}

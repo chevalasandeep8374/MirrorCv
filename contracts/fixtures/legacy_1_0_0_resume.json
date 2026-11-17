@@ -1,0 +1,133 @@
+{
+  "content": {
+    "schema_version": "1.0.0",
+    "header": {
+      "name": "Alex Mercer",
+      "title": "Senior Staff Software Engineer",
+      "email": "alex.mercer@example.com",
+      "phone": "+1 (555) 019-2834",
+      "location": "San Francisco, CA",
+      "website": "https://alexmercer.dev",
+      "photoUrl": "https://example.com/avatar.jpg",
+      "links": [
+        { "id": "link-1", "label": "GitHub", "url": "https://github.com/alexmercer" },
+        { "id": "link-2", "label": "LinkedIn", "url": "https://linkedin.com/in/alexmercer" }
+      ]
+    },
+    "sections": [
+      {
+        "id": "sec-summary",
+        "type": "summary",
+        "title": "Professional Summary",
+        "visible": true,
+        "pageBreakBefore": false,
+        "order": 0,
+        "items": [
+          {
+            "id": "item-sum-1",
+            "title": "",
+            "subtitle": "",
+            "location": "",
+            "dateRange": "",
+            "visible": true,
+            "itemType": "paragraph",
+            "bullets": [
+              {
+                "id": "b-sum-1",
+                "text": "Accomplished full-stack systems engineer with 10+ years architecting high-throughput document infrastructure.",
+                "level": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sec-experience",
+        "type": "experience",
+        "title": "Work Experience",
+        "visible": true,
+        "pageBreakBefore": false,
+        "order": 1,
+        "items": [
+          {
+            "id": "item-exp-1",
+            "title": "Principal Software Engineer",
+            "subtitle": "Apex Cloud Systems",
+            "location": "San Francisco, CA",
+            "dateRange": "2021 - Present",
+            "dates": {
+              "startMonth": 5,
+              "startYear": 2021,
+              "endMonth": null,
+              "endYear": null,
+              "isCurrent": true
+            },
+            "visible": true,
+            "itemType": "timeline",
+            "bullets": [
+              {
+                "id": "b-exp-1",
+                "text": "Spearheaded migration of multi-tenant document engine to micro-frontends, reducing load latency by 42%.",
+                "level": 0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "style": {
+    "schema_version": "1.0.0",
+    "templateId": "classic-single-column",
+    "pageSize": "A4",
+    "margins": {
+      "top": 36,
+      "bottom": 36,
+      "left": 40,
+      "right": 40,
+      "unit": "pt"
+    },
+    "typography": {
+      "baseFontFamily": "Inter",
+      "headingFontFamily": "Inter",
+      "nameFontFamily": "Inter",
+      "fontSizeScale": 1.0,
+      "fontSizes": {
+        "name": 22,
+        "headerTitle": 12,
+        "contact": 9,
+        "sectionHeading": 12,
+        "itemTitle": 11,
+        "itemSubtitle": 10,
+        "body": 9.5,
+        "meta": 9,
+        "unit": "pt"
+      },
+      "lineHeight": 1.45
+    },
+    "spacing": {
+      "sectionSpacing": 14,
+      "itemSpacing": 10,
+      "bulletSpacing": 4,
+      "headerBottomSpacing": 12,
+      "unit": "pt"
+    },
+    "colors": {
+      "accent": "#2563eb",
+      "text": "#111827",
+      "muted": "#4b5563",
+      "background": "#ffffff",
+      "sidebarBackground": "#f8fafc",
+      "divider": "#e2e8f0"
+    },
+    "bulletStyle": "disc",
+    "headingStyle": "bar",
+    "layout": {
+      "type": "single",
+      "sidebarWidthPercent": 32,
+      "sidebarSectionIds": [],
+      "mainSectionIds": ["sec-summary", "sec-experience"]
+    },
+    "dateFormat": "MMM YYYY"
+  }
+}

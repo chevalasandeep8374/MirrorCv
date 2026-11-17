@@ -308,6 +308,15 @@ class TailorVerifier:
                     is_repairable=False,
                 ))
 
+        # Gate: Reject any modification targeting bullet proficiency (user self-rating protected)
+        if change.field in ("proficiency", "bullets[].proficiency", "bullet.proficiency") or "proficiency" in change.field:
+            return _record_failure(VerificationResult(
+                is_valid=False,
+                rejection_reason="Modifying bullet proficiency ratings via tailoring agent is forbidden. Proficiency is user-controlled only.",
+                gate_failed="disallowed_proficiency_modification",
+                is_repairable=False,
+            ))
+
         # Handle Reorder Changes (Gate e: Reordering)
         if change.type in (ChangeType.reorder_bullets, ChangeType.reorder_items, ChangeType.reorder_skills):
             return _record_failure(self._verify_reorder(change))

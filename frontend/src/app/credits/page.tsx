@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, ShieldCheck, FileText, Database, Code, BookOpen } from 'lucide-react';
+import { ArrowLeft, ExternalLink, ShieldCheck, FileText, Database, Code, BookOpen, Type } from 'lucide-react';
 
 export default function CreditsPage() {
   return (
@@ -138,6 +138,49 @@ export default function CreditsPage() {
               <p className="text-xs text-slate-600 leading-relaxed">
                 Relational persistence, vector embeddings, storage policies, and row-level security (RLS) isolation are powered
                 by PostgreSQL and Supabase.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Self-Hosted Fonts & SIL Open Font License (OFL) Notice */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-2xs">
+          <div className="flex items-start space-x-4">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+              <Type className="w-5 h-5" />
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <h2 className="text-lg font-bold text-slate-900">Self-Hosted Typography & SIL Open Font License (OFL)</h2>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                  SIL OFL 1.1 / Apache 2.0
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                MirrorCV bundles and self-hosts 16 curated open-source typeface families via <code>@fontsource</code> for zero-CDN,
+                high-privacy document rendering and deterministic print exports across web and headless PDF pipelines:
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div>• Inter (OFL 1.1)</div>
+                <div>• Roboto (Apache 2.0)</div>
+                <div>• Open Sans (OFL 1.1)</div>
+                <div>• Lato (OFL 1.1)</div>
+                <div>• Montserrat (OFL 1.1)</div>
+                <div>• Source Sans 3 (OFL 1.1)</div>
+                <div>• Poppins (OFL 1.1)</div>
+                <div>• Merriweather (OFL 1.1)</div>
+                <div>• Playfair Display (OFL)</div>
+                <div>• Lora (OFL 1.1)</div>
+                <div>• PT Serif (OFL 1.1)</div>
+                <div>• Fira Sans (OFL 1.1)</div>
+                <div>• Nunito (OFL 1.1)</div>
+                <div>• Raleway (OFL 1.1)</div>
+                <div>• Cinzel (OFL 1.1)</div>
+                <div>• Noto Sans Devanagari (OFL)</div>
+              </div>
+              <p className="text-[11px] text-slate-500">
+                All font families are self-hosted within the application package; no runtime third-party font CDN requests are made.
+                Licensed under the SIL Open Font License 1.1 and Apache 2.0.
               </p>
             </div>
           </div>

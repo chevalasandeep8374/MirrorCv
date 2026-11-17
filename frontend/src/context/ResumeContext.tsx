@@ -6,6 +6,7 @@ import { ResumeContent, ResumeSection, SectionItem, SectionType, HeaderContent, 
 import { ResumeStyle } from '@/types/style';
 import { Resume } from '@/types/resume';
 import { classicSingleColumnPreset, defaultResumeContent } from '@/lib/presets';
+import { formatStructuredDate } from '@/lib/migration';
 import {
   getActiveRepository,
   localRepo,
@@ -15,6 +16,7 @@ import {
 } from '@/repositories';
 
 type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error' | 'conflict';
+export type EditorTab = 'overview' | 'content' | 'customize' | 'style' | 'ai' | 'templates';
 
 interface ResumeContextType {
   resumeId: string;
@@ -25,7 +27,7 @@ interface ResumeContextType {
   saveStatus: SaveStatus;
   lastSaved: Date | null;
   zoom: number;
-  activeTab: 'content' | 'style' | 'templates';
+  activeTab: EditorTab;
   activeSectionId: string | null;
   loading: boolean;
   hasLocalResumes: boolean;
@@ -36,7 +38,7 @@ interface ResumeContextType {
 
   // View / UI
   setZoom: (zoom: number | ((prev: number) => number)) => void;
-  setActiveTab: (tab: 'content' | 'style' | 'templates') => void;
+  setActiveTab: (tab: EditorTab) => void;
   setActiveSectionId: (id: string | null) => void;
   setTitle: (title: string) => void;
 
@@ -47,9 +49,11 @@ interface ResumeContextType {
   toggleSectionVisibility: (sectionId: string) => void;
   toggleSectionPageBreak: (sectionId: string) => void;
   removeSection: (sectionId: string) => void;
+  duplicateSection: (sectionId: string) => void;
   addSection: (type: SectionType, title?: string) => void;
   updateSectionTitle: (sectionId: string, title: string) => void;
   addItem: (sectionId: string) => void;
+  duplicateItem: (sectionId: string, itemId: string) => void;
   removeItem: (sectionId: string, itemId: string) => void;
   reorderItems: (sectionId: string, oldIndex: number, newIndex: number) => void;
   updateItem: (sectionId: string, itemId: string, itemData: Partial<SectionItem>) => void;
@@ -68,6 +72,8 @@ interface ResumeContextType {
   canRedo: boolean;
   undo: () => void;
   redo: () => void;
+  startStyleDrag: () => void;
+  endStyleDrag: () => void;
 
   // One-Page Fit
   onePageFitActive: boolean;
@@ -108,14 +114,42 @@ export const ResumeProvider: React.FC<{
   const [hasLocalResumes, setHasLocalResumes] = useState<boolean>(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(new Date());
   const [zoom, setZoom] = useState(1);
-  const [activeTab, setActiveTab] = useState<'content' | 'style' | 'templates'>('content');
+  const [activeTab, setActiveTab] = useState<EditorTab>('content');
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
 
   // Undo / Redo history
-  const undoStackRef = useRef<ResumeContent[]>([]);
-  const redoStackRef = useRef<ResumeContent[]>([]);
+  interface HistorySnapshot {
+    content: ResumeContent;
+    style: ResumeStyle;
+  }
+  const undoStackRef = useRef<HistorySnapshot[]>([]);
+  const redoStackRef = useRef<HistorySnapshot[]>([]);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
+  const dragStartStyleRef = useRef<ResumeStyle | null>(null);
+
+  const startStyleDrag = useCallback(() => {
+    if (!dragStartStyleRef.current) {
+      dragStartStyleRef.current = JSON.parse(JSON.stringify(style));
+    }
+  }, [style]);
+
+  const endStyleDrag = useCallback(() => {
+    if (dragStartStyleRef.current) {
+      const prevStyle = dragStartStyleRef.current;
+      dragStartStyleRef.current = null;
+      if (JSON.stringify(prevStyle) !== JSON.stringify(style)) {
+        undoStackRef.current.push({
+          content: JSON.parse(JSON.stringify(content)),
+          style: prevStyle,
+        });
+        if (undoStackRef.current.length > 50) undoStackRef.current.shift();
+        redoStackRef.current = [];
+        setCanUndo(true);
+        setCanRedo(false);
+      }
+    }
+  }, [content, style]);
 
   // One-Page Fit
   const [onePageFitActive, setOnePageFitActive] = useState(false);
@@ -129,7 +163,10 @@ export const ResumeProvider: React.FC<{
     setContentState((prev) => {
       const next = typeof newContent === 'function' ? newContent(prev) : newContent;
       if (next !== prev) {
-        undoStackRef.current.push(prev);
+        undoStackRef.current.push({
+          content: prev,
+          style: JSON.parse(JSON.stringify(style)),
+        });
         if (undoStackRef.current.length > 50) undoStackRef.current.shift();
         redoStackRef.current = [];
         setCanUndo(true);
@@ -137,25 +174,33 @@ export const ResumeProvider: React.FC<{
       }
       return next;
     });
-  }, []);
+  }, [style]);
 
   const undo = useCallback(() => {
     if (undoStackRef.current.length === 0) return;
     const previous = undoStackRef.current.pop()!;
-    redoStackRef.current.push(content);
-    setContentState(previous);
+    redoStackRef.current.push({
+      content: JSON.parse(JSON.stringify(content)),
+      style: JSON.parse(JSON.stringify(style)),
+    });
+    setContentState(previous.content);
+    setStyleState(previous.style);
     setCanUndo(undoStackRef.current.length > 0);
     setCanRedo(true);
-  }, [content]);
+  }, [content, style]);
 
   const redo = useCallback(() => {
     if (redoStackRef.current.length === 0) return;
     const next = redoStackRef.current.pop()!;
-    undoStackRef.current.push(content);
-    setContentState(next);
+    undoStackRef.current.push({
+      content: JSON.parse(JSON.stringify(content)),
+      style: JSON.parse(JSON.stringify(style)),
+    });
+    setContentState(next.content);
+    setStyleState(next.style);
     setCanUndo(true);
     setCanRedo(redoStackRef.current.length > 0);
-  }, [content]);
+  }, [content, style]);
 
   // Keyboard shortcut listener
   useEffect(() => {
@@ -319,6 +364,14 @@ export const ResumeProvider: React.FC<{
   };
 
   const applyPreset = (preset: ResumeStyle) => {
+    undoStackRef.current.push({
+      content: JSON.parse(JSON.stringify(content)),
+      style: JSON.parse(JSON.stringify(style)),
+    });
+    if (undoStackRef.current.length > 50) undoStackRef.current.shift();
+    redoStackRef.current = [];
+    setCanUndo(true);
+    setCanRedo(false);
     setStyleState(preset);
   };
 
@@ -420,6 +473,34 @@ export const ResumeProvider: React.FC<{
     if (activeSectionId === sectionId) setActiveSectionId(null);
   };
 
+  const duplicateSection = (sectionId: string) => {
+    pushContentWithHistory((prev) => {
+      const idx = prev.sections.findIndex((s) => s.id === sectionId);
+      if (idx === -1) return prev;
+      const original = prev.sections[idx];
+      const clonedId = `sec-${Date.now()}`;
+      const cloned: ResumeSection = {
+        ...original,
+        id: clonedId,
+        title: `${original.title} (Copy)`,
+        items: original.items.map((item) => ({
+          ...item,
+          id: `item-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          bullets: item.bullets.map((b) => ({
+            ...b,
+            id: `b-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          })),
+        })),
+      };
+      const updated = [...prev.sections];
+      updated.splice(idx + 1, 0, cloned);
+      return {
+        ...prev,
+        sections: updated,
+      };
+    });
+  };
+
   const addSection = (type: SectionType, title?: string) => {
     const id = `sec-${Date.now()}`;
     const defaultTitles: Record<SectionType, string> = {
@@ -502,6 +583,29 @@ export const ResumeProvider: React.FC<{
     }));
   };
 
+  const duplicateItem = (sectionId: string, itemId: string) => {
+    pushContentWithHistory((prev) => ({
+      ...prev,
+      sections: prev.sections.map((s) => {
+        if (s.id !== sectionId) return s;
+        const idx = s.items.findIndex((item) => item.id === itemId);
+        if (idx === -1) return s;
+        const orig = s.items[idx];
+        const cloned: SectionItem = {
+          ...orig,
+          id: `item-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          bullets: orig.bullets.map((b) => ({
+            ...b,
+            id: `b-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          })),
+        };
+        const updated = [...s.items];
+        updated.splice(idx + 1, 0, cloned);
+        return { ...s, items: updated };
+      }),
+    }));
+  };
+
   const reorderItems = (sectionId: string, oldIndex: number, newIndex: number) => {
     pushContentWithHistory((prev) => ({
       ...prev,
@@ -516,6 +620,10 @@ export const ResumeProvider: React.FC<{
     itemId: string,
     itemData: Partial<SectionItem>
   ) => {
+    let patch = { ...itemData };
+    if (patch.dates && !patch.dateRange) {
+      patch.dateRange = formatStructuredDate(patch.dates, style.dateFormat || 'MM/YYYY');
+    }
     pushContentWithHistory((prev) => ({
       ...prev,
       sections: prev.sections.map((s) =>
@@ -523,7 +631,7 @@ export const ResumeProvider: React.FC<{
           ? {
               ...s,
               items: s.items.map((item) =>
-                item.id === itemId ? { ...item, ...itemData } : item
+                item.id === itemId ? { ...item, ...patch } : item
               ),
             }
           : s
@@ -684,9 +792,11 @@ export const ResumeProvider: React.FC<{
         toggleSectionVisibility,
         toggleSectionPageBreak,
         removeSection,
+        duplicateSection,
         addSection,
         updateSectionTitle,
         addItem,
+        duplicateItem,
         removeItem,
         reorderItems,
         updateItem,
@@ -698,6 +808,8 @@ export const ResumeProvider: React.FC<{
         canRedo,
         undo,
         redo,
+        startStyleDrag,
+        endStyleDrag,
         onePageFitActive,
         onePageFitWarning,
         toggleOnePageFit,

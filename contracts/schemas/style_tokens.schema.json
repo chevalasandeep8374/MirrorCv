@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://mirrorcv.dev/schemas/v1/style_tokens.schema.json",
   "title": "StyleTokens",
-  "description": "Standard schema for resume styling tokens, units, layout, and typography.",
+  "description": "Standard schema for resume styling tokens, units, layout, typography, and section customizations.",
   "type": "object",
   "required": [
     "schema_version",
@@ -19,10 +19,15 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "enum": ["1.0.0"],
-      "default": "1.0.0"
+      "enum": ["1.0.0", "1.1.0"],
+      "default": "1.1.0"
     },
     "templateId": { "type": "string" },
+    "isLocked": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when layout is locked to an uploaded DOCX template."
+    },
     "pageSize": {
       "type": "string",
       "enum": ["A4", "Letter"]
@@ -35,31 +40,35 @@
         "bottom": { "type": "number" },
         "left": { "type": "number" },
         "right": { "type": "number" },
-        "unit": { "type": "string", "enum": ["pt", "px"] }
+        "unit": { "type": "string", "enum": ["pt", "px"], "default": "pt" }
       },
       "additionalProperties": false
     },
     "typography": {
       "type": "object",
-      "required": ["baseFontFamily", "headingFontFamily", "fontSizes", "lineHeight"],
+      "required": ["baseFontFamily", "headingFontFamily", "lineHeight"],
       "properties": {
         "baseFontFamily": { "type": "string" },
         "headingFontFamily": { "type": "string" },
-        "nameFontFamily": { "type": "string" },
+        "nameFontFamily": { "type": ["string", "null"] },
+        "baseFontSize": { "type": "number", "default": 9.5 },
+        "fontSizeOffsets": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "number", "default": 12.5 },
+            "headerTitle": { "type": "number", "default": 1.5 },
+            "contact": { "type": "number", "default": -0.5 },
+            "sectionHeading": { "type": "number", "default": 3.0 },
+            "itemTitle": { "type": "number", "default": 1.0 },
+            "itemSubtitle": { "type": "number", "default": 0.0 },
+            "body": { "type": "number", "default": 0.0 },
+            "meta": { "type": "number", "default": -1.0 }
+          },
+          "additionalProperties": false
+        },
         "fontSizeScale": { "type": "number", "default": 1.0 },
         "fontSizes": {
           "type": "object",
-          "required": [
-            "name",
-            "headerTitle",
-            "contact",
-            "sectionHeading",
-            "itemTitle",
-            "itemSubtitle",
-            "body",
-            "meta",
-            "unit"
-          ],
           "properties": {
             "name": { "type": "number" },
             "headerTitle": { "type": "number" },
@@ -85,7 +94,7 @@
         "itemSpacing": { "type": "number" },
         "bulletSpacing": { "type": "number" },
         "headerBottomSpacing": { "type": "number" },
-        "unit": { "type": "string", "enum": ["pt", "px"] }
+        "unit": { "type": "string", "enum": ["pt", "px"], "default": "pt" }
       },
       "additionalProperties": false
     },
@@ -99,8 +108,28 @@
         "background": { "type": "string" },
         "sidebarBackground": { "type": "string" },
         "divider": { "type": "string" },
-        "headerBannerColor": { "type": "string" },
-        "headerBannerTextColor": { "type": "string" }
+        "headerBannerColor": { "type": ["string", "null"] },
+        "headerBannerTextColor": { "type": ["string", "null"] },
+        "area": { "type": "string", "enum": ["full_page", "header", "border"], "default": "full_page" },
+        "mode": { "type": "string", "enum": ["single", "multi", "image"], "default": "single" },
+        "backgroundImageUrl": { "type": ["string", "null"] },
+        "backgroundOverlayOpacity": { "type": "number", "default": 0.6 },
+        "accentToggles": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "boolean", "default": false },
+            "jobTitle": { "type": "boolean", "default": false },
+            "headings": { "type": "boolean", "default": true },
+            "headingsLine": { "type": "boolean", "default": true },
+            "headerIcons": { "type": "boolean", "default": true },
+            "bullets": { "type": "boolean", "default": true },
+            "dates": { "type": "boolean", "default": false },
+            "entryTitle": { "type": "boolean", "default": false },
+            "entrySubtitle": { "type": "boolean", "default": false },
+            "linkIcons": { "type": "boolean", "default": true }
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     },
@@ -110,7 +139,60 @@
     },
     "headingStyle": {
       "type": "string",
-      "enum": ["underline", "bar", "plain", "caps", "boxed", "pill"]
+      "enum": ["underline", "bar", "plain", "caps", "boxed", "side_line", "pill"]
+    },
+    "heading": {
+      "type": "object",
+      "properties": {
+        "capitalization": { "type": "string", "enum": ["none", "capitalize", "uppercase"], "default": "none" },
+        "iconStyle": { "type": "string", "enum": ["none", "outline", "filled"], "default": "none" }
+      },
+      "additionalProperties": false
+    },
+    "header": {
+      "type": "object",
+      "properties": {
+        "alignment": { "type": "string", "enum": ["left", "center"], "default": "left" },
+        "arrangement": { "type": "string", "enum": ["bullet", "pipe", "bar", "icon"], "default": "bullet" }
+      },
+      "additionalProperties": false
+    },
+    "photo": {
+      "type": "object",
+      "properties": {
+        "shape": { "type": "string", "enum": ["circle", "square", "rounded"], "default": "circle" },
+        "size": { "type": "string", "enum": ["small", "medium", "large"], "default": "medium" },
+        "border": { "type": "string", "enum": ["none", "thin", "thick", "accent"], "default": "none" },
+        "position": { "type": "string", "enum": ["left", "right", "top_center"], "default": "right" }
+      },
+      "additionalProperties": false
+    },
+    "linkStyling": {
+      "type": "object",
+      "properties": {
+        "underline": { "type": "boolean", "default": true },
+        "colored": { "type": "boolean", "default": false },
+        "showIcon": { "type": "boolean", "default": true }
+      },
+      "additionalProperties": false
+    },
+    "footer": {
+      "type": "object",
+      "properties": {
+        "showPageNumbers": { "type": "boolean", "default": true },
+        "showEmail": { "type": "boolean", "default": false },
+        "showName": { "type": "boolean", "default": false }
+      },
+      "additionalProperties": false
+    },
+    "entryLayout": {
+      "type": "object",
+      "properties": {
+        "structure": { "type": "string", "enum": ["full_width", "columns"], "default": "full_width" },
+        "dateLocationPosition": { "type": "string", "enum": ["right", "below_title"], "default": "right" },
+        "headerSplitRatio": { "type": "string", "enum": ["auto", "50/50", "70/30"], "default": "auto" }
+      },
+      "additionalProperties": false
     },
     "layout": {
       "type": "object",
@@ -122,6 +204,7 @@
             "single",
             "sidebar_left",
             "sidebar_right",
+            "mix",
             "header_banner",
             "compact",
             "creative",
@@ -137,6 +220,81 @@
         "mainSectionIds": {
           "type": "array",
           "items": { "type": "string" }
+        },
+        "sectionPlacement": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": ["main", "sidebar", "full"]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "sectionCustomizations": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "object",
+          "properties": {
+            "inHeader": { "type": "boolean", "default": false },
+            "showHeading": { "type": "boolean", "default": true }
+          },
+          "additionalProperties": false
+        },
+        "skills": {
+          "type": "object",
+          "properties": {
+            "style": { "type": "string", "enum": ["grid", "rows", "compact", "bubble", "level"], "default": "compact" },
+            "rowSpacing": { "type": "string", "enum": ["tight", "spacious"], "default": "tight" },
+            "startRowsWithBullets": { "type": "boolean", "default": false },
+            "subInfoStyle": { "type": "string", "enum": ["colon", "dash", "bracket"], "default": "colon" }
+          },
+          "additionalProperties": false
+        },
+        "experience": {
+          "type": "object",
+          "properties": {
+            "titleSubtitleOrder": { "type": "string", "enum": ["title_first", "subtitle_first"], "default": "title_first" },
+            "groupPromotions": { "type": "boolean", "default": true }
+          },
+          "additionalProperties": false
+        },
+        "education": {
+          "type": "object",
+          "properties": {
+            "titleSubtitleOrder": { "type": "string", "enum": ["title_first", "subtitle_first"], "default": "title_first" }
+          },
+          "additionalProperties": false
+        },
+        "certificates": {
+          "type": "object",
+          "properties": {
+            "style": { "type": "string", "enum": ["grid", "rows", "compact", "bubble"], "default": "compact" }
+          },
+          "additionalProperties": false
+        },
+        "languages": {
+          "type": "object",
+          "properties": {
+            "style": { "type": "string", "enum": ["chips", "list", "level"], "default": "chips" }
+          },
+          "additionalProperties": false
+        },
+        "interests": {
+          "type": "object",
+          "properties": {
+            "style": { "type": "string", "enum": ["chips", "list"], "default": "chips" }
+          },
+          "additionalProperties": false
+        },
+        "declaration": {
+          "type": "object",
+          "properties": {
+            "showPlace": { "type": "boolean", "default": true },
+            "showDate": { "type": "boolean", "default": true }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false
@@ -145,11 +303,11 @@
       "type": "object",
       "properties": {
         "headerBanner": { "type": "boolean" },
-        "headerBannerColor": { "type": "string" },
-        "headerBannerTextColor": { "type": "string" },
+        "headerBannerColor": { "type": ["string", "null"] },
+        "headerBannerTextColor": { "type": ["string", "null"] },
         "avatarShape": { "type": "string", "enum": ["circle", "square"] },
         "showAvatar": { "type": "boolean" },
-        "avatarUrl": { "type": "string" }
+        "avatarUrl": { "type": ["string", "null"] }
       },
       "additionalProperties": false
     },

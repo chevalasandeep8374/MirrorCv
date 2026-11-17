@@ -56,39 +56,44 @@ def evaluate_resume_ats(
 
     # 1. Contact Information Checks
     header = content.header
-    has_name = bool(header.name and len(header.name.strip()) >= 2)
+    vis = header.fieldVisibility or {}
+    has_name = bool(header.name and len(header.name.strip()) >= 2 and vis.get("name", True) is not False)
     checks.append(AtsCheckItem(
         category="contact",
         name="Candidate Name",
         passed=has_name,
         severity="critical" if not has_name else "info",
-        message="Full name is clearly provided at the top." if has_name else "Full candidate name is missing.",
-        suggestion="Add your full first and last name to the resume header." if not has_name else None,
+        message="Full name is clearly provided at the top." if has_name else "Full candidate name is missing or hidden.",
+        suggestion="Add and show your full first and last name in the resume header." if not has_name else None,
     ))
 
     email_pattern = r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+"
-    has_email = bool(header.email and re.search(email_pattern, header.email))
+    has_email = bool(header.email and re.search(email_pattern, header.email) and vis.get("email", True) is not False)
     checks.append(AtsCheckItem(
         category="contact",
         name="Email Address",
         passed=has_email,
         severity="critical" if not has_email else "info",
-        message="Valid contact email is present." if has_email else "Missing or invalid email address.",
-        suggestion="Add a professional personal email address (e.g., name@gmail.com)." if not has_email else None,
+        message="Valid contact email is present." if has_email else "Missing or hidden email address.",
+        suggestion="Add and show a professional personal email address (e.g., name@gmail.com)." if not has_email else None,
     ))
 
     digits = re.sub(r"\D", "", header.phone or "")
-    has_phone = len(digits) >= 7
+    has_phone = len(digits) >= 7 and vis.get("phone", True) is not False
     checks.append(AtsCheckItem(
         category="contact",
         name="Phone Number",
         passed=has_phone,
         severity="warning" if not has_phone else "info",
-        message="Contact phone number is present." if has_phone else "Missing or incomplete phone number.",
-        suggestion="Add a phone number with country or area code for recruiter callbacks." if not has_phone else None,
+        message="Contact phone number is present." if has_phone else "Missing or hidden phone number.",
+        suggestion="Add and show a phone number with country or area code for recruiter callbacks." if not has_phone else None,
     ))
 
-    has_loc_or_links = bool(header.location or (header.links and len(header.links) > 0) or header.website)
+    has_loc_or_links = bool(
+        (header.location and vis.get("location", True) is not False)
+        or (header.website and vis.get("website", True) is not False)
+        or (header.links and len(header.links) > 0)
+    )
     checks.append(AtsCheckItem(
         category="contact",
         name="Location & Professional Links",
@@ -138,6 +143,8 @@ def evaluate_resume_ats(
 
     for sec in exp_sections:
         for item in sec.items:
+            if not item.visible:
+                continue
             b_count = len(item.bullets) if item.bullets else 0
             if b_count == 0:
                 roles_with_zero_bullets += 1

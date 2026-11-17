@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { ResumeDocument } from '@/components/resume-renderer/ResumeDocument';
 import { Resume } from '@/types/resume';
-import { defaultResumeContent, classicSingleColumnPreset } from '@/lib/presets';
+import { defaultResumeContent, classicSingleColumnPreset, TEMPLATE_PRESETS } from '@/lib/presets';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -24,6 +24,45 @@ export default function RenderResumePage() {
     async function fetchResume() {
       if (!id) return;
       try {
+        if (id === 'custom') {
+          try {
+            const winObj = (window as unknown as { __CUSTOM_RESUME__?: Resume }).__CUSTOM_RESUME__;
+            const localStr = typeof window !== 'undefined' ? localStorage.getItem('matrix_resume') : null;
+            let data = winObj;
+            if (!data && localStr) {
+              let parsed = JSON.parse(localStr);
+              if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+              data = parsed;
+            }
+            if (data && typeof data === 'object') {
+              setResume(data);
+              setLoading(false);
+              return;
+            }
+          } catch (e) {
+            console.error('Error parsing custom matrix resume:', e);
+          }
+        }
+
+        if (id.startsWith('preset-')) {
+          const presetId = id.replace('preset-', '');
+          const matched = TEMPLATE_PRESETS.find((p) => p.id === presetId);
+          if (matched) {
+            setResume({
+              id,
+              userId: 'system',
+              title: matched.name,
+              content: defaultResumeContent,
+              style: matched.style,
+              version: 1,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            });
+            setLoading(false);
+            return;
+          }
+        }
+
         if (renderToken) {
           // Secure single-use, 60s render token endpoint
           const res = await axios.get<Resume>(

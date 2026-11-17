@@ -83,23 +83,28 @@ def extract_numeric_tokens(text: str) -> Set[str]:
 
 def build_resume_inventory(content: Dict[str, Any]) -> ResumeInventory:
     """Builds a comprehensive inventory of skills, entities, and numeric tokens
-
     from resume sections, items, and bullets with precise content IDs.
+    Respects visible=False on sections, items, and header fields.
     """
     inventory = ResumeInventory()
 
     # Extract header info
     header = content.get("header") or {}
-    if header.get("name"):
+    field_vis = header.get("fieldVisibility") or {}
+    if field_vis.get("name", True) is not False and header.get("name"):
         inventory.entities.add(header["name"].strip())
-    if header.get("title"):
+    if field_vis.get("title", True) is not False and header.get("title"):
         inventory.entities.add(header["title"].strip())
 
     for sec in content.get("sections", []):
+        if sec.get("visible") is False:
+            continue
         sec_id = sec.get("id") or str(sec.get("type", "section"))
         sec_type = str(sec.get("type", "")).lower()
 
         for item in sec.get("items", []):
+            if item.get("visible") is False:
+                continue
             item_id = item.get("id") or f"{sec_id}_item"
             inventory.item_map[item_id] = item
 

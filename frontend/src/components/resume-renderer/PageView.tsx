@@ -30,8 +30,8 @@ export const PageView: React.FC<PageViewProps> = ({
         minHeight: isA4 ? '297mm' : '11in',
         height: isA4 ? '297mm' : '11in',
         boxSizing: 'border-box',
-        pageBreakAfter: 'always',
-        breakAfter: 'page',
+        pageBreakAfter: pageNumber === totalPages ? 'auto' : 'always',
+        breakAfter: pageNumber === totalPages ? 'auto' : 'page',
       }}
     >
       {/* Printable Area with tokens margins */}

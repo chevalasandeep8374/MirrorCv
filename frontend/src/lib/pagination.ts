@@ -1,11 +1,55 @@
 import { ResumeContent, ResumeSection, SectionItem } from '@/types/content';
-import { ResumeStyle } from '@/types/style';
+import { ResumeStyle, Typography } from '@/types/style';
 
 export interface PageLayoutSlice {
   pageIndex: number;
   isFirstPage: boolean;
   mainSections: ResumeSection[];
   sidebarSections: ResumeSection[];
+}
+
+export function getResolvedFontSizes(typography: Typography) {
+  const base = typography.baseFontSize ?? 9.5;
+  const offsets = typography.fontSizeOffsets;
+  const scale = typography.fontSizeScale ?? 1.0;
+  const legacy = typography.fontSizes;
+
+  if (offsets) {
+    return {
+      name: base + (offsets.name ?? 12.5),
+      headerTitle: base + (offsets.headerTitle ?? 1.5),
+      contact: base + (offsets.contact ?? -0.5),
+      sectionHeading: base + (offsets.sectionHeading ?? 3.0),
+      itemTitle: base + (offsets.itemTitle ?? 1.0),
+      itemSubtitle: base + (offsets.itemSubtitle ?? 0.0),
+      body: base + (offsets.body ?? 0.0),
+      meta: base + (offsets.meta ?? -1.0),
+    };
+  }
+
+  if (legacy) {
+    return {
+      name: (legacy.name ?? 22) * scale,
+      headerTitle: (legacy.headerTitle ?? 12) * scale,
+      contact: (legacy.contact ?? 9) * scale,
+      sectionHeading: (legacy.sectionHeading ?? 12) * scale,
+      itemTitle: (legacy.itemTitle ?? 10) * scale,
+      itemSubtitle: (legacy.itemSubtitle ?? 9) * scale,
+      body: (legacy.body ?? 9.5) * scale,
+      meta: (legacy.meta ?? 8.5) * scale,
+    };
+  }
+
+  return {
+    name: base + 12.5,
+    headerTitle: base + 1.5,
+    contact: base - 0.5,
+    sectionHeading: base + 3.0,
+    itemTitle: base + 1.0,
+    itemSubtitle: base,
+    body: base,
+    meta: base - 1.0,
+  };
 }
 
 /**
@@ -23,11 +67,13 @@ export function paginateResume(
   const printableHeightPt =
     totalPageHeightPt - (style.margins.top + style.margins.bottom);
 
+  const fontSizes = getResolvedFontSizes(style.typography);
+
   // Estimate header height in points
   const headerHeightPt =
-    style.typography.fontSizes.name * 1.2 +
-    style.typography.fontSizes.headerTitle * 1.3 +
-    style.typography.fontSizes.contact * 2.5 +
+    fontSizes.name * 1.2 +
+    fontSizes.headerTitle * 1.3 +
+    fontSizes.contact * 2.5 +
     style.spacing.headerBottomSpacing * 1.5;
 
   if (content.coverLetter) {
@@ -73,18 +119,17 @@ export function paginateResume(
       if (section.pageBreakBefore && currentMainSections.length > 0) {
         flushPage();
       }
-      const sectionHeadingHeight =
-        style.typography.fontSizes.sectionHeading * 1.4 + 10;
+      const sectionHeadingHeight = fontSizes.sectionHeading * 1.4 + 10;
       let sectionItemsForCurrentPage: SectionItem[] = [];
       let currentSectionHeight = sectionHeadingHeight;
 
       for (const item of section.items) {
         // Estimate item height: title (1 line) + bullets
-        const titleHeight = style.typography.fontSizes.itemTitle * 1.3 + 4;
+        const titleHeight = fontSizes.itemTitle * 1.3 + 4;
         const bulletsCount = item.bullets ? item.bullets.length : 0;
         const bulletsHeight =
           bulletsCount *
-          (style.typography.fontSizes.body * style.typography.lineHeight +
+          (fontSizes.body * style.typography.lineHeight +
             style.spacing.bulletSpacing);
         const itemTotalHeight =
           titleHeight + bulletsHeight + style.spacing.itemSpacing;
@@ -96,7 +141,6 @@ export function paginateResume(
           (currentMainSections.length > 0 ||
             sectionItemsForCurrentPage.length > 0)
         ) {
-          // If we accumulated items in this section, push the section slice
           if (sectionItemsForCurrentPage.length > 0) {
             currentMainSections.push({
               ...section,
@@ -104,7 +148,6 @@ export function paginateResume(
             });
           }
           flushPage();
-          // Reset for new page
           sectionItemsForCurrentPage = [];
           currentSectionHeight = sectionHeadingHeight;
         }
@@ -137,7 +180,6 @@ export function paginateResume(
       sidebarSectionIdSet.has(s.id)
     );
 
-    // If sidebar sections are empty, treat sections with type skills/education as sidebar
     const finalSidebarSections =
       sidebarSectionsList.length > 0
         ? sidebarSectionsList
@@ -158,8 +200,6 @@ export function paginateResume(
               s.type !== 'certifications'
           );
 
-    // Estimate heights of both columns
-    // In two-column, usually pages hold both columns side-by-side
     return [
       {
         pageIndex: 0,

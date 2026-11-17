@@ -1,186 +1,190 @@
 {
-  "$defs": {
-    "BulletItem": {
-      "properties": {
-        "id": {
-          "title": "Id",
-          "type": "string"
-        },
-        "text": {
-          "title": "Text",
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "text"
-      ],
-      "title": "BulletItem",
-      "type": "object"
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mirrorcv.dev/schemas/v1/resume_content.schema.json",
+  "title": "ResumeContent",
+  "description": "Standard schema for resume content with stable UUIDs across headers, sections, items, and bullets.",
+  "type": "object",
+  "required": ["schema_version", "header", "sections"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.0.0", "1.1.0"],
+      "default": "1.1.0"
     },
-    "ContactLink": {
+    "header": {
+      "type": "object",
+      "required": ["name", "title", "email", "phone", "location", "website", "links"],
       "properties": {
-        "id": {
-          "title": "Id",
-          "type": "string"
-        },
-        "label": {
-          "title": "Label",
-          "type": "string"
-        },
-        "url": {
-          "title": "Url",
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "label",
-        "url"
-      ],
-      "title": "ContactLink",
-      "type": "object"
-    },
-    "HeaderContent": {
-      "properties": {
-        "name": {
-          "default": "",
-          "title": "Name",
-          "type": "string"
-        },
-        "title": {
-          "default": "",
-          "title": "Title",
-          "type": "string"
-        },
-        "email": {
-          "default": "",
-          "title": "Email",
-          "type": "string"
-        },
-        "phone": {
-          "default": "",
-          "title": "Phone",
-          "type": "string"
-        },
-        "location": {
-          "default": "",
-          "title": "Location",
-          "type": "string"
-        },
-        "website": {
-          "default": "",
-          "title": "Website",
-          "type": "string"
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "location": { "type": "string" },
+        "website": { "type": "string" },
+        "photoUrl": { "type": ["string", "null"] },
+        "fieldVisibility": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "boolean", "default": true },
+            "title": { "type": "boolean", "default": true },
+            "email": { "type": "boolean", "default": true },
+            "phone": { "type": "boolean", "default": true },
+            "location": { "type": "boolean", "default": true },
+            "website": { "type": "boolean", "default": true },
+            "photo": { "type": "boolean", "default": true }
+          },
+          "additionalProperties": false
         },
         "links": {
+          "type": "array",
           "items": {
-            "$ref": "#/$defs/ContactLink"
-          },
-          "title": "Links",
-          "type": "array"
+            "type": "object",
+            "required": ["id", "label", "url"],
+            "properties": {
+              "id": { "type": "string" },
+              "label": { "type": "string" },
+              "url": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
         }
       },
-      "title": "HeaderContent",
-      "type": "object"
-    },
-    "ResumeSection": {
-      "properties": {
-        "id": {
-          "title": "Id",
-          "type": "string"
-        },
-        "type": {
-          "enum": [
-            "summary",
-            "experience",
-            "skills",
-            "education",
-            "projects",
-            "certifications",
-            "custom"
-          ],
-          "title": "Type",
-          "type": "string"
-        },
-        "title": {
-          "title": "Title",
-          "type": "string"
-        },
-        "visible": {
-          "default": true,
-          "title": "Visible",
-          "type": "boolean"
-        },
-        "items": {
-          "items": {
-            "$ref": "#/$defs/SectionItem"
-          },
-          "title": "Items",
-          "type": "array"
-        }
-      },
-      "required": [
-        "id",
-        "type",
-        "title"
-      ],
-      "title": "ResumeSection",
-      "type": "object"
-    },
-    "SectionItem": {
-      "properties": {
-        "id": {
-          "title": "Id",
-          "type": "string"
-        },
-        "title": {
-          "default": "",
-          "title": "Title",
-          "type": "string"
-        },
-        "subtitle": {
-          "default": "",
-          "title": "Subtitle",
-          "type": "string"
-        },
-        "location": {
-          "default": "",
-          "title": "Location",
-          "type": "string"
-        },
-        "dateRange": {
-          "default": "",
-          "title": "Daterange",
-          "type": "string"
-        },
-        "bullets": {
-          "items": {
-            "$ref": "#/$defs/BulletItem"
-          },
-          "title": "Bullets",
-          "type": "array"
-        }
-      },
-      "required": [
-        "id"
-      ],
-      "title": "SectionItem",
-      "type": "object"
-    }
-  },
-  "properties": {
-    "header": {
-      "$ref": "#/$defs/HeaderContent"
+      "additionalProperties": false
     },
     "sections": {
+      "type": "array",
       "items": {
-        "$ref": "#/$defs/ResumeSection"
+        "type": "object",
+        "required": ["id", "type", "title", "visible", "items"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": [
+              "summary",
+              "experience",
+              "skills",
+              "education",
+              "projects",
+              "certifications",
+              "custom",
+              "languages",
+              "awards",
+              "publications",
+              "volunteering",
+              "interests",
+              "references",
+              "links"
+            ]
+          },
+          "title": { "type": "string" },
+          "visible": { "type": "boolean" },
+          "pageBreakBefore": { "type": "boolean", "default": false },
+          "order": { "type": "integer" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "title", "subtitle", "location", "dateRange", "bullets"],
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" },
+                "subtitle": { "type": "string" },
+                "location": { "type": "string" },
+                "dateRange": { "type": "string" },
+                "groupId": {
+                  "type": ["string", "null"],
+                  "description": "Optional identifier grouping multiple promotional roles or related entries under one organization."
+                },
+                "dates": {
+                  "type": ["object", "null"],
+                  "description": "Structured date representation. When present, dateRange is synchronized and the renderer prefers dates.",
+                  "properties": {
+                    "startMonth": { "type": ["integer", "null"], "minimum": 1, "maximum": 12 },
+                    "startYear": { "type": ["integer", "null"] },
+                    "endMonth": { "type": ["integer", "null"], "minimum": 1, "maximum": 12 },
+                    "endYear": { "type": ["integer", "null"] },
+                    "isCurrent": { "type": "boolean", "default": false }
+                  },
+                  "additionalProperties": false
+                },
+                "link": {
+                  "type": ["object", "null"],
+                  "properties": {
+                    "label": { "type": "string" },
+                    "url": { "type": "string" }
+                  },
+                  "additionalProperties": false
+                },
+                "visible": { "type": "boolean", "default": true },
+                "itemType": {
+                  "type": "string",
+                  "enum": ["timeline", "list", "paragraph", "tags"],
+                  "default": "timeline"
+                },
+                "bullets": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["id", "text"],
+                    "properties": {
+                      "id": { "type": "string" },
+                      "text": { "type": "string" },
+                      "level": { "type": "integer", "default": 0 },
+                      "proficiency": {
+                        "type": ["integer", "null"],
+                        "minimum": 1,
+                        "maximum": 5,
+                        "description": "User-set proficiency rating 1-5. Agent 2 and verifier must never touch it."
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "coverLetter": {
+      "type": ["object", "null"],
+      "properties": {
+        "sender": {
+          "$ref": "#/properties/header"
+        },
+        "recipient": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "title": { "type": "string" },
+            "company": { "type": "string" },
+            "address": { "type": "string" },
+            "email": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "date": { "type": "string" },
+        "salutation": { "type": "string" },
+        "paragraphs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "text"],
+            "properties": {
+              "id": { "type": "string" },
+              "text": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "closing": { "type": "string" },
+        "signature": { "type": "string" }
       },
-      "title": "Sections",
-      "type": "array"
+      "additionalProperties": false
     }
   },
-  "title": "ResumeContent",
-  "type": "object"
+  "additionalProperties": false
 }

@@ -1,18 +1,22 @@
+@import './tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #f1f5f9;
-  --foreground: #0f172a;
+  --background: var(--bg-paper);
+  --foreground: var(--ink-heading);
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink-body);
+  background-color: var(--bg-paper);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Print Styles for Playwright Headless and Browser Print */
@@ -32,12 +36,20 @@ body {
   .print-page {
     box-shadow: none !important;
     margin: 0 !important;
-    page-break-after: always !important;
-    break-after: page !important;
     height: 100% !important;
   }
 
-  header, nav, .no-print, .print\\:hidden {
+  .print-page:not(:last-child) {
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+
+  .print-page:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+
+  header, nav, .no-print, .print\:hidden {
     display: none !important;
   }
 }

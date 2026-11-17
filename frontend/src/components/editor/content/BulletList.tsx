@@ -173,6 +173,25 @@ const SortableBullet: React.FC<SortableBulletProps> = ({
             <Sparkles className="w-3 h-3" />
             <span>AI</span>
           </button>
+          <div className="h-3 w-px bg-slate-300 mx-1" />
+          <div className="flex items-center gap-0.5" title="Proficiency rating (1-5, user-set only)">
+            {[1, 2, 3, 4, 5].map((lvl) => (
+              <button
+                key={lvl}
+                type="button"
+                onClick={() =>
+                  onUpdate({
+                    proficiency: bullet.proficiency === lvl ? null : lvl,
+                  })
+                }
+                className={`w-2 h-2 rounded-full transition-transform hover:scale-125 ${
+                  bullet.proficiency != null && bullet.proficiency >= lvl
+                    ? 'bg-blue-600'
+                    : 'bg-slate-300 hover:bg-slate-400'
+                }`}
+              />
+            ))}
+          </div>
           {currentLevel > 0 && (
             <span className="text-[9px] font-bold text-blue-600 bg-blue-100 px-1 rounded ml-auto">
               L{currentLevel}

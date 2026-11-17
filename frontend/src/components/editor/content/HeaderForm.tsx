@@ -2,6 +2,7 @@
 
 import React, { useRef } from 'react';
 import { useResume } from '@/context/ResumeContext';
+import { FieldVisibility, ContactLink } from '@/types/content';
 import {
   Plus,
   Trash2,
@@ -12,12 +13,45 @@ import {
   EyeOff,
   Circle,
   Square,
+  Sparkles,
 } from 'lucide-react';
+
+const LINK_PRESETS = [
+  { label: 'LinkedIn', urlPrefix: 'https://linkedin.com/in/' },
+  { label: 'GitHub', urlPrefix: 'https://github.com/' },
+  { label: 'Portfolio', urlPrefix: 'https://' },
+  { label: 'Twitter / X', urlPrefix: 'https://x.com/' },
+  { label: 'Website', urlPrefix: 'https://' },
+];
 
 export const HeaderForm: React.FC = () => {
   const { content, style, updateHeader, updateStyle } = useResume();
   const header = content.header;
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fieldVisibility = header.fieldVisibility || {
+    name: true,
+    title: true,
+    email: true,
+    phone: true,
+    location: true,
+    website: true,
+    photo: true,
+  };
+
+  const isVisible = (field: keyof FieldVisibility): boolean => {
+    return fieldVisibility[field] !== false;
+  };
+
+  const toggleFieldVisibility = (field: keyof FieldVisibility) => {
+    const current = isVisible(field);
+    updateHeader({
+      fieldVisibility: {
+        ...fieldVisibility,
+        [field]: !current,
+      },
+    });
+  };
 
   const handleLinkChange = (id: string, field: 'label' | 'url', val: string) => {
     const updatedLinks = header.links.map((link) =>
@@ -26,11 +60,11 @@ export const HeaderForm: React.FC = () => {
     updateHeader({ links: updatedLinks });
   };
 
-  const handleAddLink = () => {
-    const newLink = {
+  const handleAddLink = (preset?: { label: string; urlPrefix: string }) => {
+    const newLink: ContactLink = {
       id: `link-${Date.now()}`,
-      label: 'LinkedIn',
-      url: 'https://linkedin.com/in/',
+      label: preset?.label || 'LinkedIn',
+      url: preset?.urlPrefix || 'https://linkedin.com/in/',
     };
     updateHeader({ links: [...(header.links || []), newLink] });
   };
@@ -43,6 +77,19 @@ export const HeaderForm: React.FC = () => {
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Security: Validate image MIME type and file size (max 5MB)
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Only JPEG, PNG, and WebP images are allowed.');
+      e.target.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Photo must be smaller than 5MB.');
+      e.target.value = '';
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -58,10 +105,22 @@ export const HeaderForm: React.FC = () => {
           const offsetY = (img.height - size) / 2;
           ctx.drawImage(img, offsetX, offsetY, size, size, 0, 0, 300, 300);
           const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-          updateHeader({ photoUrl: dataUrl });
-          // Enable avatar visibility in style
+          updateHeader({
+            photoUrl: dataUrl,
+            fieldVisibility: {
+              ...fieldVisibility,
+              photo: true,
+            },
+          });
+          // Update photo style tokens
           updateStyle({
             ...style,
+            photo: {
+              ...style.photo,
+              shape: style.photo?.shape || 'circle',
+              border: style.photo?.border || 'thin',
+              size: style.photo?.size || 'medium',
+            },
             decorations: {
               ...style.decorations,
               showAvatar: true,
@@ -77,7 +136,13 @@ export const HeaderForm: React.FC = () => {
   };
 
   const handleRemovePhoto = () => {
-    updateHeader({ photoUrl: undefined });
+    updateHeader({
+      photoUrl: undefined,
+      fieldVisibility: {
+        ...fieldVisibility,
+        photo: false,
+      },
+    });
     updateStyle({
       ...style,
       decorations: {
@@ -87,56 +152,54 @@ export const HeaderForm: React.FC = () => {
     });
   };
 
-  const toggleAvatarShape = (shape: 'circle' | 'square') => {
+  const photoShape = style.photo?.shape || (style.decorations?.avatarShape === 'square' ? 'square' : 'circle');
+  const showPhoto = isVisible('photo') && Boolean(header.photoUrl);
+
+  const setPhotoShape = (shape: 'circle' | 'square' | 'rounded') => {
     updateStyle({
       ...style,
+      photo: {
+        ...style.photo,
+        shape,
+      },
       decorations: {
         ...style.decorations,
-        avatarShape: shape,
+        avatarShape: shape === 'square' ? 'square' : 'circle',
         showAvatar: true,
       },
     });
   };
 
-  const toggleAvatarVisibility = () => {
-    const current = style.decorations?.showAvatar ?? Boolean(header.photoUrl);
-    updateStyle({
-      ...style,
-      decorations: {
-        ...style.decorations,
-        showAvatar: !current,
-      },
-    });
-  };
-
-  const showAvatar = style.decorations?.showAvatar ?? Boolean(header.photoUrl);
-  const avatarShape = style.decorations?.avatarShape || 'circle';
-
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm mb-4">
-      <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 text-slate-800">
+    <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs mb-4 space-y-4">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100 text-slate-800">
         <div className="flex items-center space-x-2">
-          <User className="w-4 h-4 text-blue-600" />
-          <h3 className="font-bold text-sm">Personal & Contact Info</h3>
+          <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
+            <User className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="font-bold text-sm">Personal & Contact Details</h3>
+            <p className="text-[11px] text-slate-400">Toggle eye icons to show or hide fields on your resume</p>
+          </div>
         </div>
       </div>
 
       {/* Photo Upload Section */}
-      <div className="flex items-center gap-4 mb-4 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+      <div className="flex items-center gap-4 p-3 bg-slate-50 border border-slate-200 rounded-xl">
         <div className="relative shrink-0">
           {header.photoUrl ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={header.photoUrl}
               alt={header.name || 'Profile'}
-              className={`w-14 h-14 object-cover border-2 border-white shadow-sm ${
-                avatarShape === 'circle' ? 'rounded-full' : 'rounded-lg'
-              }`}
+              className={`w-14 h-14 object-cover border-2 border-white shadow-xs ${
+                photoShape === 'circle' ? 'rounded-full' : photoShape === 'rounded' ? 'rounded-xl' : 'rounded-md'
+              } ${!showPhoto ? 'opacity-40 grayscale' : ''}`}
             />
           ) : (
             <div
-              className={`w-14 h-14 bg-slate-200 border-2 border-white shadow-sm flex items-center justify-center text-slate-400 ${
-                avatarShape === 'circle' ? 'rounded-full' : 'rounded-lg'
+              className={`w-14 h-14 bg-slate-200 border-2 border-white shadow-xs flex items-center justify-center text-slate-400 ${
+                photoShape === 'circle' ? 'rounded-full' : photoShape === 'rounded' ? 'rounded-xl' : 'rounded-md'
               }`}
             >
               <Camera className="w-6 h-6" />
@@ -151,9 +214,9 @@ export const HeaderForm: React.FC = () => {
               <div className="flex items-center space-x-1">
                 <button
                   type="button"
-                  onClick={() => toggleAvatarShape('circle')}
+                  onClick={() => setPhotoShape('circle')}
                   className={`p-1 rounded ${
-                    avatarShape === 'circle'
+                    photoShape === 'circle'
                       ? 'bg-blue-100 text-blue-600'
                       : 'text-slate-400 hover:text-slate-600'
                   }`}
@@ -163,9 +226,9 @@ export const HeaderForm: React.FC = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => toggleAvatarShape('square')}
+                  onClick={() => setPhotoShape('square')}
                   className={`p-1 rounded ${
-                    avatarShape === 'square'
+                    photoShape === 'square'
                       ? 'bg-blue-100 text-blue-600'
                       : 'text-slate-400 hover:text-slate-600'
                   }`}
@@ -175,13 +238,13 @@ export const HeaderForm: React.FC = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={toggleAvatarVisibility}
-                  className={`p-1 rounded ${
-                    showAvatar ? 'text-blue-600' : 'text-slate-400'
+                  onClick={() => toggleFieldVisibility('photo')}
+                  className={`p-1 rounded transition-colors ${
+                    showPhoto ? 'text-blue-600' : 'text-slate-400'
                   }`}
-                  title={showAvatar ? 'Hide Photo on Resume' : 'Show Photo on Resume'}
+                  title={showPhoto ? 'Hide Photo on Resume' : 'Show Photo on Resume'}
                 >
-                  {showAvatar ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                  {showPhoto ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                 </button>
               </div>
             )}
@@ -215,101 +278,184 @@ export const HeaderForm: React.FC = () => {
         </div>
       </div>
 
+      {/* Inputs with Field-Level Visibility Toggles */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Full Name */}
         <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">
-            Full Name
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-semibold text-slate-600">Full Name</label>
+            <button
+              type="button"
+              onClick={() => toggleFieldVisibility('name')}
+              className={`p-0.5 rounded transition-colors ${
+                isVisible('name') ? 'text-blue-600' : 'text-slate-300 hover:text-slate-500'
+              }`}
+              title={isVisible('name') ? 'Shown on resume' : 'Hidden on resume'}
+            >
+              {isVisible('name') ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+            </button>
+          </div>
           <input
             type="text"
             value={header.name || ''}
             onChange={(e) => updateHeader({ name: e.target.value })}
             placeholder="Alex Mercer"
-            className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className={`w-full text-xs px-3 py-2 border rounded-lg focus:outline-hidden focus:ring-1 focus:ring-blue-500 transition-colors ${
+              isVisible('name') ? 'border-slate-200 bg-white' : 'border-slate-200 bg-slate-50 text-slate-400'
+            }`}
           />
         </div>
 
+        {/* Title / Headline */}
         <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">
-            Professional Title / Headline
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-semibold text-slate-600">Professional Headline</label>
+            <button
+              type="button"
+              onClick={() => toggleFieldVisibility('title')}
+              className={`p-0.5 rounded transition-colors ${
+                isVisible('title') ? 'text-blue-600' : 'text-slate-300 hover:text-slate-500'
+              }`}
+              title={isVisible('title') ? 'Shown on resume' : 'Hidden on resume'}
+            >
+              {isVisible('title') ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+            </button>
+          </div>
           <input
             type="text"
             value={header.title || ''}
             onChange={(e) => updateHeader({ title: e.target.value })}
-            placeholder="Senior Staff Software Engineer"
-            className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="Principal Staff Software Engineer"
+            className={`w-full text-xs px-3 py-2 border rounded-lg focus:outline-hidden focus:ring-1 focus:ring-blue-500 transition-colors ${
+              isVisible('title') ? 'border-slate-200 bg-white' : 'border-slate-200 bg-slate-50 text-slate-400'
+            }`}
           />
         </div>
 
+        {/* Email */}
         <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">
-            Email Address
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-semibold text-slate-600">Email Address</label>
+            <button
+              type="button"
+              onClick={() => toggleFieldVisibility('email')}
+              className={`p-0.5 rounded transition-colors ${
+                isVisible('email') ? 'text-blue-600' : 'text-slate-300 hover:text-slate-500'
+              }`}
+              title={isVisible('email') ? 'Shown on resume' : 'Hidden on resume'}
+            >
+              {isVisible('email') ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+            </button>
+          </div>
           <input
             type="email"
             value={header.email || ''}
             onChange={(e) => updateHeader({ email: e.target.value })}
             placeholder="alex.mercer@example.com"
-            className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className={`w-full text-xs px-3 py-2 border rounded-lg focus:outline-hidden focus:ring-1 focus:ring-blue-500 transition-colors ${
+              isVisible('email') ? 'border-slate-200 bg-white' : 'border-slate-200 bg-slate-50 text-slate-400'
+            }`}
           />
         </div>
 
+        {/* Phone */}
         <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">
-            Phone Number
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-semibold text-slate-600">Phone Number</label>
+            <button
+              type="button"
+              onClick={() => toggleFieldVisibility('phone')}
+              className={`p-0.5 rounded transition-colors ${
+                isVisible('phone') ? 'text-blue-600' : 'text-slate-300 hover:text-slate-500'
+              }`}
+              title={isVisible('phone') ? 'Shown on resume' : 'Hidden on resume'}
+            >
+              {isVisible('phone') ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+            </button>
+          </div>
           <input
             type="text"
             value={header.phone || ''}
             onChange={(e) => updateHeader({ phone: e.target.value })}
             placeholder="+1 (555) 019-2834"
-            className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className={`w-full text-xs px-3 py-2 border rounded-lg focus:outline-hidden focus:ring-1 focus:ring-blue-500 transition-colors ${
+              isVisible('phone') ? 'border-slate-200 bg-white' : 'border-slate-200 bg-slate-50 text-slate-400'
+            }`}
           />
         </div>
 
+        {/* Location */}
         <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">
-            Location
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-semibold text-slate-600">Location</label>
+            <button
+              type="button"
+              onClick={() => toggleFieldVisibility('location')}
+              className={`p-0.5 rounded transition-colors ${
+                isVisible('location') ? 'text-blue-600' : 'text-slate-300 hover:text-slate-500'
+              }`}
+              title={isVisible('location') ? 'Shown on resume' : 'Hidden on resume'}
+            >
+              {isVisible('location') ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+            </button>
+          </div>
           <input
             type="text"
             value={header.location || ''}
             onChange={(e) => updateHeader({ location: e.target.value })}
             placeholder="San Francisco, CA"
-            className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className={`w-full text-xs px-3 py-2 border rounded-lg focus:outline-hidden focus:ring-1 focus:ring-blue-500 transition-colors ${
+              isVisible('location') ? 'border-slate-200 bg-white' : 'border-slate-200 bg-slate-50 text-slate-400'
+            }`}
           />
         </div>
 
+        {/* Website */}
         <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">
-            Portfolio / Website URL
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-semibold text-slate-600">Portfolio / Website</label>
+            <button
+              type="button"
+              onClick={() => toggleFieldVisibility('website')}
+              className={`p-0.5 rounded transition-colors ${
+                isVisible('website') ? 'text-blue-600' : 'text-slate-300 hover:text-slate-500'
+              }`}
+              title={isVisible('website') ? 'Shown on resume' : 'Hidden on resume'}
+            >
+              {isVisible('website') ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+            </button>
+          </div>
           <input
             type="text"
             value={header.website || ''}
             onChange={(e) => updateHeader({ website: e.target.value })}
             placeholder="https://alexmercer.dev"
-            className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className={`w-full text-xs px-3 py-2 border rounded-lg focus:outline-hidden focus:ring-1 focus:ring-blue-500 transition-colors ${
+              isVisible('website') ? 'border-slate-200 bg-white' : 'border-slate-200 bg-slate-50 text-slate-400'
+            }`}
           />
         </div>
       </div>
 
       {/* Social / Portfolio Links */}
-      <div className="mt-4 pt-3 border-t border-slate-100">
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
-            <LinkIcon className="w-3.5 h-3.5 text-slate-400" />
+      <div className="pt-3 border-t border-slate-100 space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+            <LinkIcon className="w-3.5 h-3.5 text-blue-600" />
             <span>Social & Professional Links</span>
           </label>
-          <button
-            type="button"
-            onClick={handleAddLink}
-            className="text-xs text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-1"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add Link</span>
-          </button>
+          <div className="flex items-center gap-1">
+            {LINK_PRESETS.map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => handleAddLink(preset)}
+                className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 rounded transition-colors"
+              >
+                + {preset.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -320,19 +466,20 @@ export const HeaderForm: React.FC = () => {
                 value={link.label}
                 onChange={(e) => handleLinkChange(link.id, 'label', e.target.value)}
                 placeholder="Label (e.g. GitHub)"
-                className="w-1/3 text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-1/3 text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-blue-500 bg-white"
               />
               <input
                 type="text"
                 value={link.url}
                 onChange={(e) => handleLinkChange(link.id, 'url', e.target.value)}
                 placeholder="https://..."
-                className="flex-1 text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="flex-1 text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-blue-500 bg-white"
               />
               <button
                 type="button"
                 onClick={() => handleRemoveLink(link.id)}
                 className="p-1 text-slate-400 hover:text-rose-500 transition-colors"
+                title="Remove link"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>

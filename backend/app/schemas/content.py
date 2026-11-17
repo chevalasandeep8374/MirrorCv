@@ -34,6 +34,7 @@ class HeaderContent(BaseModel):
     location: str = ""
     website: str = ""
     photoUrl: Optional[str] = None
+    fieldVisibility: Optional[dict] = None
     links: List[ContactLink] = Field(default_factory=list)
 
 

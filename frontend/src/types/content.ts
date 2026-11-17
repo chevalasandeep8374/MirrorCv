@@ -1,3 +1,38 @@
+/**
+ * Generated from contracts/schemas/resume_content.schema.json (v1.1.0)
+ * Single source of truth for resume content structure.
+ */
+
+export type SchemaVersion = '1.0.0' | '1.1.0';
+
+export interface FieldVisibility {
+  name?: boolean;
+  title?: boolean;
+  email?: boolean;
+  phone?: boolean;
+  location?: boolean;
+  website?: boolean;
+  photo?: boolean;
+}
+
+export interface ContactLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
+export interface HeaderContent {
+  name: string;
+  title: string;
+  email: string;
+  phone: string;
+  location: string;
+  website: string;
+  photoUrl?: string | null;
+  fieldVisibility?: FieldVisibility;
+  links: ContactLink[];
+}
+
 export type SectionType =
   | 'summary'
   | 'experience'
@@ -14,30 +49,28 @@ export type SectionType =
   | 'references'
   | 'links';
 
-export interface ContactLink {
-  id: string;
-  label: string;
-  url: string;
+export type ItemType = 'timeline' | 'list' | 'paragraph' | 'tags';
+
+export interface StructuredDates {
+  startMonth?: number | null;
+  startYear?: number | null;
+  endMonth?: number | null;
+  endYear?: number | null;
+  isCurrent?: boolean;
 }
 
-export interface HeaderContent {
-  name: string;
-  title: string;
-  email: string;
-  phone: string;
-  location: string;
-  website: string;
-  photoUrl?: string;
-  links: ContactLink[];
+export interface ItemLink {
+  label?: string;
+  url?: string;
 }
 
 export interface BulletItem {
   id: string;
   text: string;
   level?: number;
+  /** User-set proficiency rating 1-5. Agent 2 and verifier must never touch it. */
+  proficiency?: number | null;
 }
-
-export type ItemType = 'timeline' | 'list' | 'paragraph' | 'tags';
 
 export interface SectionItem {
   id: string;
@@ -45,6 +78,11 @@ export interface SectionItem {
   subtitle: string;
   location: string;
   dateRange: string;
+  /** Optional identifier grouping multiple promotional roles or related entries under one organization */
+  groupId?: string | null;
+  /** Structured date representation. When present, dateRange is synchronized and the renderer prefers dates. */
+  dates?: StructuredDates | null;
+  link?: ItemLink | null;
   visible?: boolean;
   itemType?: ItemType;
   bullets: BulletItem[];
@@ -56,6 +94,7 @@ export interface ResumeSection {
   title: string;
   visible: boolean;
   pageBreakBefore?: boolean;
+  order?: number;
   items: SectionItem[];
 }
 
@@ -83,7 +122,8 @@ export interface CoverLetterContent {
 }
 
 export interface ResumeContent {
+  schema_version?: SchemaVersion;
   header: HeaderContent;
   sections: ResumeSection[];
-  coverLetter?: CoverLetterContent;
+  coverLetter?: CoverLetterContent | null;
 }

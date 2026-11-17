@@ -1,11 +1,22 @@
 import React from 'react';
 import { ResumeSection, SectionItem, BulletItem } from '@/types/content';
-import { HeadingStyle, BulletStyle } from '@/types/style';
+import {
+  HeadingStyle,
+  BulletStyle,
+  HeadingConfig,
+  EntryLayoutConfig,
+  SectionCustomizations,
+} from '@/types/style';
+import { formatStructuredDate } from '@/lib/migration';
 
 interface SectionRendererProps {
   section: ResumeSection;
   headingStyle: HeadingStyle;
   bulletStyle: BulletStyle;
+  headingConfig?: HeadingConfig;
+  entryLayout?: EntryLayoutConfig;
+  sectionCustomizations?: SectionCustomizations;
+  dateFormat?: string;
 }
 
 /**
@@ -15,11 +26,9 @@ interface SectionRendererProps {
 export function renderInlineMarkup(rawText: string): React.ReactNode {
   if (!rawText) return null;
 
-  // Pattern matches:
-  // 1: **bold**
-  // 2: *italic*
-  // 3: [link text](url)
-  const tokens = rawText.split(/(\*\*[\s\S]+?\*\*|\*[^\s\*][\s\S]*?\*|\[[\s\S]+?\]\([^\s\)]+?\))/g);
+  const tokens = rawText.split(
+    /(\*\*[\s\S]+?\*\*|\*[^\s\*][\s\S]*?\*|\[[\s\S]+?\]\([^\s\)]+?\))/g
+  );
 
   return tokens.map((token, idx) => {
     if (token.startsWith('**') && token.endsWith('**') && token.length >= 4) {
@@ -29,7 +38,12 @@ export function renderInlineMarkup(rawText: string): React.ReactNode {
         </strong>
       );
     }
-    if (token.startsWith('*') && token.endsWith('*') && token.length >= 2 && !token.startsWith('**')) {
+    if (
+      token.startsWith('*') &&
+      token.endsWith('*') &&
+      token.length >= 2 &&
+      !token.startsWith('**')
+    ) {
       return (
         <em key={idx} className="italic">
           {token.slice(1, -1)}
@@ -38,11 +52,16 @@ export function renderInlineMarkup(rawText: string): React.ReactNode {
     }
     const linkMatch = token.match(/^\[([\s\S]+?)\]\(([^\s\)]+?)\)$/);
     if (linkMatch) {
-      const [, label, href] = linkMatch;
+      const [, label, rawHref] = linkMatch;
+      const cleanHref = (rawHref || '').trim();
+      const lower = cleanHref.toLowerCase();
+      // Security: Strictly reject javascript:, data:, and vbscript: URIs
+      const isDangerous = lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('vbscript:');
+      const safeHref = isDangerous ? '#' : cleanHref;
       return (
         <a
           key={idx}
-          href={href}
+          href={safeHref}
           target="_blank"
           rel="noopener noreferrer"
           className="underline hover:text-[var(--color-accent)] transition-colors"
@@ -59,6 +78,10 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
   section,
   headingStyle,
   bulletStyle,
+  headingConfig,
+  entryLayout,
+  sectionCustomizations,
+  dateFormat = 'MMM YYYY',
 }) => {
   if (section.visible === false || !section.items || section.items.length === 0) {
     return null;
@@ -70,37 +93,47 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
     return null;
   }
 
+  // Heading Capitalization
+  const capitalizationClass =
+    headingConfig?.capitalization === 'uppercase'
+      ? 'uppercase tracking-wider'
+      : headingConfig?.capitalization === 'capitalize'
+      ? 'capitalize'
+      : '';
+
   // Heading style decoration
   const getHeadingClasses = () => {
     switch (headingStyle) {
       case 'underline':
-        return 'border-b-2 border-[var(--color-accent)] pb-1 mb-2 font-bold';
+        return 'border-b-2 border-[var(--accent-headings-line,var(--color-accent))] pb-1 mb-2 font-bold';
       case 'bar':
-        return 'border-l-4 rtl:border-l-0 rtl:border-r-4 border-[var(--color-accent)] pl-2 rtl:pl-0 rtl:pr-2 mb-2 font-bold';
+        return 'border-l-4 rtl:border-l-0 rtl:border-r-4 border-[var(--accent-headings-line,var(--color-accent))] pl-2 rtl:pl-0 rtl:pr-2 mb-2 font-bold';
+      case 'side_line':
+        return 'border-l-4 rtl:border-l-0 rtl:border-r-4 border-[var(--accent-headings-line,var(--color-accent))] pl-3 rtl:pl-0 rtl:pr-3 py-0.5 mb-2 font-bold';
       case 'caps':
-        return 'uppercase tracking-wider border-b border-[var(--color-divider)] pb-1 mb-2 font-semibold text-[var(--color-accent)]';
+        return 'uppercase tracking-wider border-b border-[var(--color-divider)] pb-1 mb-2 font-semibold';
       case 'boxed':
         return 'bg-[var(--color-accent)] text-white px-2.5 py-0.5 rounded font-bold inline-block mb-2 shadow-xs';
       case 'pill':
         return 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] border border-[var(--color-accent)]/30 px-3 py-0.5 rounded-full font-bold inline-block mb-2';
       case 'plain':
       default:
-        return 'mb-1.5 font-bold text-[var(--color-text)]';
+        return 'mb-1.5 font-bold';
     }
   };
 
   const renderBulletMarker = () => {
     switch (bulletStyle) {
       case 'disc':
-        return <span className="text-[var(--color-accent)] mr-2 select-none">•</span>;
+        return <span className="text-[var(--accent-bullets,var(--color-accent))] mr-2 select-none">•</span>;
       case 'circle':
-        return <span className="text-[var(--color-accent)] mr-2 select-none">◦</span>;
+        return <span className="text-[var(--accent-bullets,var(--color-accent))] mr-2 select-none">◦</span>;
       case 'square':
-        return <span className="text-[var(--color-accent)] mr-2 select-none">▪</span>;
+        return <span className="text-[var(--accent-bullets,var(--color-accent))] mr-2 select-none">▪</span>;
       case 'dash':
-        return <span className="text-[var(--color-accent)] mr-2 select-none">–</span>;
+        return <span className="text-[var(--accent-bullets,var(--color-accent))] mr-2 select-none">–</span>;
       case 'arrow':
-        return <span className="text-[var(--color-accent)] mr-2 select-none">➤</span>;
+        return <span className="text-[var(--accent-bullets,var(--color-accent))] mr-2 select-none">➤</span>;
       case 'none':
       default:
         return null;
@@ -110,7 +143,33 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
   const isTagsSection =
     section.type === 'skills' ||
     section.type === 'interests' ||
+    section.type === 'languages' ||
     section.items.some((i) => i.itemType === 'tags');
+
+  const skillsMode = sectionCustomizations?.skills?.style || 'compact';
+
+  // Section specific ordering: experience or education title/subtitle inversion
+  const isSubtitleFirst =
+    (section.type === 'experience' &&
+      sectionCustomizations?.experience?.titleSubtitleOrder === 'subtitle_first') ||
+    (section.type === 'education' &&
+      sectionCustomizations?.education?.titleSubtitleOrder === 'subtitle_first');
+
+  const isDateBelowTitle = entryLayout?.dateLocationPosition === 'below_title';
+
+  // Render Proficiency dots (1-5)
+  const renderProficiency = (level: number) => (
+    <span className="inline-flex items-center gap-1 ml-2 select-none">
+      {[1, 2, 3, 4, 5].map((dot) => (
+        <span
+          key={dot}
+          className={`w-1.5 h-1.5 rounded-full ${
+            dot <= level ? 'bg-[var(--color-accent)]' : 'bg-[var(--color-divider)]'
+          }`}
+        />
+      ))}
+    </span>
+  );
 
   return (
     <section
@@ -121,8 +180,8 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
     >
       {/* Section Title */}
       <h2
-        className={`font-[family-name:var(--font-heading)] leading-none text-[var(--color-text)] ${getHeadingClasses()}`}
-        style={{ fontSize: 'var(--font-size-sectionHeading, var(--font-size-section-heading))' }}
+        className={`font-[family-name:var(--font-heading)] leading-none text-[var(--accent-headings,var(--color-text))] ${getHeadingClasses()} ${capitalizationClass}`}
+        style={{ fontSize: 'var(--font-size-section-heading)' }}
       >
         {section.title}
       </h2>
@@ -133,67 +192,91 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
           const isItemTags = item.itemType === 'tags' || isTagsSection;
           const isParagraph = item.itemType === 'paragraph' || section.type === 'summary';
 
+          // Format structured dates or fallback to dateRange
+          const displayDate =
+            (item.dates && (item.dates.startYear || item.dates.isCurrent))
+              ? formatStructuredDate(item.dates, dateFormat)
+              : item.dateRange;
+
+          // Header fields: first & second based on order setting
+          const firstField = isSubtitleFirst ? item.subtitle : item.title;
+          const secondField = isSubtitleFirst ? item.title : item.subtitle;
+
           return (
             <div
               key={item.id || itemIdx}
               className="resume-item"
               style={{
                 marginBottom:
-                  itemIdx === visibleItems.length - 1
-                    ? 0
-                    : 'var(--spacing-item)',
+                  itemIdx === visibleItems.length - 1 ? 0 : 'var(--spacing-item)',
               }}
             >
               {/* Item Title & Subtitle + Meta */}
-              {(item.title || item.subtitle || item.dateRange || item.location) && (
-                <div className="flex justify-between items-baseline flex-wrap gap-x-2 leading-tight">
+              {(firstField || secondField || displayDate || item.location) && (
+                <div
+                  className={`leading-tight ${
+                    isDateBelowTitle
+                      ? 'flex flex-col gap-0.5'
+                      : 'flex justify-between items-baseline flex-wrap gap-x-2'
+                  }`}
+                >
                   <div className="flex flex-wrap items-baseline gap-x-1.5">
-                    {item.title && (
+                    {firstField && (
                       <span
-                        className="font-bold text-[var(--color-text)]"
+                        className="font-bold text-[var(--accent-entry-title,var(--color-text))]"
                         style={{ fontSize: 'var(--font-size-item-title)' }}
                       >
-                        {renderInlineMarkup(item.title)}
+                        {renderInlineMarkup(firstField)}
                       </span>
                     )}
-                    {item.title && item.subtitle && (
+                    {firstField && secondField && (
                       <span className="text-[var(--color-muted)] text-xs select-none">|</span>
                     )}
-                    {item.subtitle && (
+                    {secondField && (
                       <span
-                        className="font-medium text-[var(--color-text)]"
+                        className="font-medium text-[var(--accent-entry-subtitle,var(--color-text))]"
                         style={{ fontSize: 'var(--font-size-item-subtitle)' }}
                       >
-                        {renderInlineMarkup(item.subtitle)}
+                        {renderInlineMarkup(secondField)}
                       </span>
                     )}
                   </div>
 
-                  {/* Right aligned Meta: Date & Location */}
+                  {/* Meta: Date & Location */}
                   <div
-                    className="text-right rtl:text-left text-[var(--color-muted)] whitespace-nowrap ms-auto"
+                    className={`text-[var(--accent-dates,var(--color-muted))] whitespace-nowrap ${
+                      isDateBelowTitle ? 'text-xs' : 'text-right rtl:text-left ms-auto'
+                    }`}
                     style={{ fontSize: 'var(--font-size-meta)' }}
                   >
-                    {item.dateRange && <span>{item.dateRange}</span>}
-                    {item.dateRange && item.location && <span>, </span>}
+                    {displayDate && <span>{displayDate}</span>}
+                    {displayDate && item.location && <span>, </span>}
                     {item.location && <span>{item.location}</span>}
                   </div>
                 </div>
               )}
 
-              {/* Tag Badges Variant */}
+              {/* Tag Badges Variant for Skills / Languages / Interests */}
               {isItemTags && item.bullets && item.bullets.length > 0 && !isParagraph && (
-                <div className="mt-1 flex flex-wrap gap-1.5">
+                <div
+                  className={`mt-1 flex flex-wrap gap-1.5 ${
+                    skillsMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-3 gap-2' : ''
+                  }`}
+                >
                   {item.bullets.map((bullet, bIdx) => {
-                    // Bullets in skills might be comma-separated or single tags
                     const tags = bullet.text.split(/,\s*/);
                     return tags.map((tag, tIdx) => (
                       <span
                         key={`${bullet.id || bIdx}-${tIdx}`}
-                        className="px-2 py-0.5 rounded text-xs border border-[var(--color-divider)] bg-[var(--color-sidebar-background)] text-[var(--color-text)]"
+                        className={`text-xs ${
+                          skillsMode === 'bubble'
+                            ? 'px-3 py-0.5 rounded-full border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/5 text-[var(--color-text)]'
+                            : 'px-2 py-0.5 rounded border border-[var(--color-divider)] bg-[var(--color-sidebar-background)] text-[var(--color-text)]'
+                        }`}
                         style={{ fontSize: 'var(--font-size-body)' }}
                       >
                         {renderInlineMarkup(tag.trim())}
+                        {bullet.proficiency ? renderProficiency(bullet.proficiency) : null}
                       </span>
                     ));
                   })}
@@ -202,8 +285,15 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
 
               {/* Paragraph Variant */}
               {isParagraph && item.bullets && item.bullets.length > 0 && (
-                <div className="mt-1 leading-relaxed text-[var(--color-text)]" style={{ fontSize: 'var(--font-size-body)' }}>
-                  {item.bullets.map((b) => renderInlineMarkup(b.text))}
+                <div
+                  className="mt-1 leading-relaxed text-[var(--color-text)]"
+                  style={{ fontSize: 'var(--font-size-body)' }}
+                >
+                  {item.bullets.map((b) => (
+                    <React.Fragment key={b.id}>
+                      {renderInlineMarkup(b.text)}
+                    </React.Fragment>
+                  ))}
                 </div>
               )}
 
@@ -231,6 +321,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
                           style={{ fontSize: 'var(--font-size-body)' }}
                         >
                           {renderInlineMarkup(bullet.text)}
+                          {bullet.proficiency ? renderProficiency(bullet.proficiency) : null}
                         </span>
                       </div>
                     );
