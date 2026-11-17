@@ -58,13 +58,13 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   };
 
   return (
-    <header className="h-14 border-b border-slate-200 bg-white px-4 flex items-center justify-between z-30 select-none">
+    <header className="h-14 border-b border-border-subtle glass-1 px-4 flex items-center justify-between z-30 select-none">
       <h1 className="sr-only">Resume Editor - {title || 'Untitled Resume'}</h1>
       {/* 1. Left: Back, Switcher Dropdown, Save Status */}
       <div className="flex items-center space-x-3">
         <Link
           href="/dashboard"
-          className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors"
+          className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-btn transition-colors"
           title="Back to Dashboard"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -77,7 +77,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
         />
 
         {/* Save Status Indicator */}
-        <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100">
+        <div className="flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white border border-border-subtle shadow-xs">
           {saveStatus === 'saved' && (
             <>
               <CheckCircle2 className="w-3 h-3 text-emerald-500" />
@@ -86,8 +86,8 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           )}
           {saveStatus === 'saving' && (
             <>
-              <Clock className="w-3 h-3 text-blue-500 animate-spin" />
-              <span className="text-blue-600 hidden sm:inline">Saving...</span>
+              <Clock className="w-3 h-3 text-primary animate-spin" />
+              <span className="text-primary hidden sm:inline">Saving...</span>
             </>
           )}
           {saveStatus === 'unsaved' && (
@@ -106,13 +106,13 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
       </div>
 
       {/* 2. Center: 4-Tab Navigation Shell */}
-      <nav className="flex items-center bg-slate-100/90 p-1 rounded-2xl border border-slate-200/60 shadow-2xs">
+      <nav className="flex items-center bg-slate-100/90 p-1 rounded-full border border-slate-200/80 shadow-xs">
         <button
           type="button"
           onClick={() => handleTabClick('overview')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${
             isTabActive('overview')
-              ? 'bg-white text-blue-600 shadow-xs'
+              ? 'bg-white text-primary shadow-sm'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
           }`}
         >
@@ -123,9 +123,9 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
         <button
           type="button"
           onClick={() => handleTabClick('content')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${
             isTabActive('content')
-              ? 'bg-white text-blue-600 shadow-xs'
+              ? 'bg-white text-primary shadow-sm'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
           }`}
         >
@@ -136,9 +136,9 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
         <button
           type="button"
           onClick={() => handleTabClick('customize')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${
             isTabActive('customize')
-              ? 'bg-white text-blue-600 shadow-xs'
+              ? 'bg-white text-primary shadow-sm'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
           }`}
         >
@@ -149,9 +149,9 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
         <button
           type="button"
           onClick={() => handleTabClick('ai')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${
             isTabActive('ai')
-              ? 'bg-white text-emerald-600 shadow-xs'
+              ? 'bg-white text-emerald-600 shadow-sm'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
           }`}
         >

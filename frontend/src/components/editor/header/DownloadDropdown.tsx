@@ -159,7 +159,7 @@ export const DownloadDropdown: React.FC = () => {
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         disabled={downloadingPdf || downloadingDocx}
-        className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs hover:shadow-sm disabled:opacity-50"
+        className="btn-primary !text-xs !py-1.5 !px-3.5 shadow-btn"
       >
         {downloadingPdf || downloadingDocx ? (
           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -171,7 +171,7 @@ export const DownloadDropdown: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 p-2 space-y-1 animate-in fade-in zoom-in-95">
+        <div className="absolute right-0 top-full mt-2 w-80 glass-2 rounded-card shadow-card border border-border-subtle z-50 p-2 space-y-1 animate-in fade-in zoom-in-95">
           {/* Faithful PDF Download */}
           <button
             type="button"

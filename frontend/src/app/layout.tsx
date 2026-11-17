@@ -1,7 +1,14 @@
 import type { Metadata } from 'next';
-import { Plus_Jakarta_Sans } from 'next/font/google';
+import { Plus_Jakarta_Sans, Manrope } from 'next/font/google';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['500', '600', '700', '800'],
+  variable: '--font-heading',
+  display: 'swap',
+});
+
+const manrope = Manrope({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   variable: '--font-sans',
@@ -62,7 +69,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${plusJakartaSans.variable} font-sans min-h-screen bg-paper text-ink-body antialiased selection:bg-accent/15 selection:text-ink`}>
+      <body className={`${manrope.variable} ${plusJakartaSans.variable} font-sans min-h-screen bg-page text-slate-900 antialiased`}>
         {children}
       </body>
     </html>

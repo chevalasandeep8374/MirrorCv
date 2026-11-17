@@ -9,48 +9,52 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        paper: {
-          DEFAULT: "var(--bg-paper)",
-          surface: "var(--bg-surface)",
-          border: "var(--border-hairline)",
+        page: "var(--bg-page)",
+        stage: {
+          DEFAULT: "var(--bg-stage)",
+          border: "var(--border-stage)",
         },
-        ink: {
-          DEFAULT: "var(--ink-heading)",
-          body: "var(--ink-body)",
-          muted: "var(--ink-muted)",
+        border: {
+          subtle: "var(--border-subtle)",
+          hairline: "var(--border-hairline)",
         },
-        accent: {
-          DEFAULT: "var(--color-accent)",
-          subtle: "var(--color-accent-subtle)",
+        slate: {
+          950: "#0F172A",
+          900: "#1E293B",
+          600: "#475569",
+          500: "#64748B",
+          400: "#94A3B8",
         },
-        navy: {
-          sidebar: "var(--navy-sidebar)",
+        primary: {
+          DEFAULT: "var(--primary)",
+          bevel: "var(--primary-bevel)",
+          hover: "var(--primary-hover)",
         },
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        pill: {
+          purple: "var(--accent-pill-text)",
+          "purple-bg": "var(--accent-pill-bg)",
+        },
+        dark: {
+          footer: "var(--bg-footer)",
+        },
       },
       borderRadius: {
-        sm: "var(--radius-sm)", // 10px
-        card: "var(--radius-card)", // 14px
+        sm: "var(--radius-sm)", // 6px
+        btn: "var(--radius-btn)", // 8px
+        card: "var(--radius-card)", // 12px
+        stage: "var(--radius-stage)", // 14px
         pill: "var(--radius-pill)", // 9999px
       },
       boxShadow: {
+        "btn-bevel": "var(--shadow-btn)",
+        "btn-active": "var(--shadow-btn-active)",
+        card: "var(--shadow-card)",
+        stage: "var(--shadow-stage)",
         "floating-preview": "var(--shadow-floating-preview)",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "-apple-system", "sans-serif"],
-      },
-      letterSpacing: {
-        tighter: "-0.03em",
-      },
-      lineHeight: {
-        headline: "1.02",
-        body: "1.6",
-      },
-      spacing: {
-        30: "7.5rem", // 120px
-        35: "8.75rem", // 140px
-        40: "10rem", // 160px
+        heading: ["var(--font-heading)", "var(--font-sans)", "system-ui", "-apple-system", "sans-serif"],
       },
     },
   },

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { FileText, Loader2, ArrowRight } from 'lucide-react';
+import { FileText, Loader2, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -40,7 +40,7 @@ export default function RegisterPage() {
         if (data?.session?.access_token) {
           localStorage.setItem('mirrorcv_token', data.session.access_token);
           localStorage.setItem('mirrorcv_user', JSON.stringify(data.user));
-          router.push('/');
+          router.push('/dashboard');
           return;
         } else if (data?.user) {
           setSuccessMsg('Account created successfully! Please check your email or proceed to sign in.');
@@ -59,7 +59,7 @@ export default function RegisterPage() {
         if (res.data?.access_token) {
           localStorage.setItem('mirrorcv_token', res.data.access_token);
           localStorage.setItem('mirrorcv_user', JSON.stringify(res.data.user));
-          router.push('/');
+          router.push('/dashboard');
           return;
         }
       } catch {
@@ -81,42 +81,43 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-sm shadow-blue-500/20">
-            <FileText className="w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-              Create an Account
-            </h1>
-            <p className="text-xs text-slate-500">
-              Start building custom decoupled resumes
-            </p>
-          </div>
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: 'var(--ambient-hero)' }}
+    >
+      <div className="w-full max-w-md bg-white border border-border-subtle rounded-card p-8 shadow-card">
+        {/* Brand Header */}
+        <div className="flex flex-col items-center text-center mb-8">
+          <Link href="/" className="flex items-center gap-2 mb-3 group">
+            <span className="font-heading font-extrabold text-2xl tracking-tight text-slate-950">
+              MirrorCV
+            </span>
+            <span className="w-2 h-2 rounded-full bg-primary inline-block" />
+          </Link>
+          <h1 className="font-heading font-extrabold text-xl text-slate-900 tracking-tight">
+            Create Your Account
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Start tailoring resumes with verified facts and sub-millimeter parity
+          </p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700">
+          <div className="mb-5 p-3.5 bg-rose-50 border border-rose-200 rounded-btn text-xs text-rose-700 font-medium leading-relaxed">
             {error}
           </div>
         )}
 
         {successMsg && (
-          <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-medium">
-            {successMsg}
-            <div className="mt-2">
-              <Link href="/login" className="text-emerald-900 underline font-bold">
-                Go to Sign In &rarr;
-              </Link>
-            </div>
+          <div className="mb-5 p-3.5 bg-emerald-50 border border-emerald-200 rounded-btn text-xs text-emerald-800 font-medium leading-relaxed flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{successMsg}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">
+            <label className="block font-bold text-slate-700 mb-1.5">
               Full Name
             </label>
             <input
@@ -124,13 +125,13 @@ export default function RegisterPage() {
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="Alex Mercer"
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+              placeholder="Alex Rivera"
+              className="w-full px-3.5 py-2.5 bg-white border border-border-subtle rounded-btn focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm text-slate-900 transition-all"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">
+            <label className="block font-bold text-slate-700 mb-1.5">
               Email Address
             </label>
             <input
@@ -139,12 +140,12 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="alex@example.com"
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+              className="w-full px-3.5 py-2.5 bg-white border border-border-subtle rounded-btn focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm text-slate-900 transition-all"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">
+            <label className="block font-bold text-slate-700 mb-1.5">
               Password
             </label>
             <input
@@ -153,29 +154,29 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+              className="w-full px-3.5 py-2.5 bg-white border border-border-subtle rounded-btn focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm text-slate-900 transition-all"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-sm transition disabled:opacity-50 flex items-center justify-center space-x-2"
+            className="w-full py-3 bg-primary hover:bg-primary-hover text-white font-bold text-sm rounded-btn shadow-btn transition-all disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <>
-                <span>Register</span>
+                <span>Get Started Free</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
         </form>
 
-        <div className="mt-6 pt-4 border-t border-slate-100 text-center text-xs text-slate-500">
+        <div className="mt-8 pt-5 border-t border-slate-100 text-center text-xs text-slate-500">
           <span>Already have an account? </span>
-          <Link href="/login" className="text-blue-600 font-semibold hover:underline">
+          <Link href="/login" className="text-primary font-bold hover:underline">
             Sign in
           </Link>
         </div>

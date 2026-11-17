@@ -256,17 +256,17 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-paper flex flex-col font-sans selection:bg-accent/15 selection:text-ink">
-      {/* Editorial Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-paper/90 backdrop-blur-md border-b border-paper-border px-6 md:px-12 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-page flex flex-col font-sans selection:bg-primary/10 selection:text-primary">
+      {/* MirrorCV Glass-1 Navigation Bar */}
+      <header className="sticky top-0 z-40 glass-1 border-b border-border-subtle px-6 md:px-12 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="font-editorial-headline text-xl text-ink tracking-tighter">
+            <span className="font-heading font-extrabold text-xl text-slate-950 tracking-tight">
               MirrorCV
             </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-accent inline-block"></span>
+            <span className="w-2 h-2 rounded-full bg-primary inline-block"></span>
           </Link>
-          <span className="hidden sm:inline-block text-xs font-semibold uppercase tracking-wider text-ink-muted bg-paper-surface px-2.5 py-1 rounded-sm border border-paper-border">
+          <span className="hidden sm:inline-block text-[11px] font-bold uppercase tracking-wider text-primary bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
             Workspace
           </span>
         </div>
@@ -274,26 +274,26 @@ export default function DashboardPage() {
         <nav className="flex items-center gap-3">
           <Link
             href="/"
-            className="text-sm font-medium text-ink-body hover:text-ink transition-colors px-3 py-1.5 rounded-sm"
+            className="text-xs font-semibold text-slate-600 hover:text-slate-950 transition-colors px-3 py-1.5 rounded-btn"
           >
-            Overview
+            Home
           </Link>
           <Link
             href="/templates"
-            className="text-sm font-medium text-ink-body hover:text-ink transition-colors px-3 py-1.5 rounded-sm hidden sm:inline-block"
+            className="text-xs font-semibold text-slate-600 hover:text-slate-950 transition-colors px-3 py-1.5 rounded-btn hidden sm:inline-block"
           >
             Templates
           </Link>
           <Link
             href="/tailor"
-            className="text-sm font-medium text-ink-body hover:text-ink transition-colors px-3 py-1.5 rounded-sm hidden md:inline-block"
+            className="text-xs font-semibold text-slate-600 hover:text-slate-950 transition-colors px-3 py-1.5 rounded-btn hidden md:inline-block"
           >
             Tailor
           </Link>
 
           <button
             onClick={() => setImportModalOpen(true)}
-            className="btn-secondary !text-xs !py-1.5 !px-3.5 !rounded-pill hidden sm:inline-flex"
+            className="btn-secondary !text-xs !py-1.5 !px-3.5 hidden sm:inline-flex"
             title="Import Resume (JSON or DOCX)"
           >
             <Upload className="w-3.5 h-3.5" />
@@ -302,7 +302,7 @@ export default function DashboardPage() {
 
           <button
             onClick={() => setAccountModalOpen(true)}
-            className="p-2 text-ink-body hover:text-ink hover:bg-paper-surface rounded-pill transition-colors border border-paper-border"
+            className="p-2 text-slate-600 hover:text-slate-950 hover:bg-slate-100 rounded-btn transition-colors border border-border-subtle bg-white"
             title="Account Settings"
           >
             <User className="w-4 h-4" />
@@ -311,7 +311,7 @@ export default function DashboardPage() {
           <button
             onClick={handleCreate}
             disabled={creating}
-            className="btn-primary !text-xs !py-1.5 !px-4"
+            className="btn-primary !text-xs !py-1.5 !px-4 shadow-btn"
           >
             {creating ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -343,15 +343,15 @@ export default function DashboardPage() {
       {/* Main Workspace Area */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-6 md:px-12 py-10 space-y-8">
         {/* Workspace Title & Quick Stats */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-paper-border">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-border-subtle">
           <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-ink-muted mb-1.5">
+            <div className="text-xs font-bold uppercase tracking-wider text-primary mb-1.5">
               Document Portfolio
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tighter text-ink">
+            <h1 className="font-heading font-extrabold text-3xl md:text-4xl text-slate-950 tracking-tight">
               Your Documents
             </h1>
-            <p className="text-sm text-ink-body mt-1">
+            <p className="text-sm text-slate-600 mt-1">
               Select a resume to edit styling tokens, calibrate typography, or export pixel-perfect PDFs.
             </p>
           </div>
@@ -359,20 +359,20 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveTab('all')}
-              className={`px-4 py-2 text-xs font-semibold rounded-pill transition-all ${
+              className={`px-4 py-2 text-xs font-bold rounded-full transition-all ${
                 activeTab === 'all'
-                  ? 'bg-ink text-white'
-                  : 'bg-paper-surface text-ink-body border border-paper-border hover:text-ink'
+                  ? 'bg-primary text-white shadow-btn'
+                  : 'bg-white text-slate-600 border border-border-subtle hover:text-slate-900'
               }`}
             >
               Active ({resumes.filter((r) => !r.is_archived).length})
             </button>
             <button
               onClick={() => setActiveTab('archived')}
-              className={`px-4 py-2 text-xs font-semibold rounded-pill transition-all ${
+              className={`px-4 py-2 text-xs font-bold rounded-full transition-all ${
                 activeTab === 'archived'
-                  ? 'bg-ink text-white'
-                  : 'bg-paper-surface text-ink-body border border-paper-border hover:text-ink'
+                  ? 'bg-primary text-white shadow-btn'
+                  : 'bg-white text-slate-600 border border-border-subtle hover:text-slate-900'
               }`}
             >
               Archived ({resumes.filter((r) => r.is_archived).length})
@@ -383,18 +383,18 @@ export default function DashboardPage() {
         {/* Filter & Search Bar */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search by title, target role, or tags..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-xs bg-paper-surface border border-paper-border rounded-card text-ink placeholder:text-ink-muted focus:outline-hidden focus:border-ink transition-colors"
+              className="w-full pl-10 pr-4 py-2.5 text-xs bg-white border border-border-subtle rounded-btn text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink text-xs"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-semibold"
               >
                 Clear
               </button>
@@ -405,7 +405,7 @@ export default function DashboardPage() {
             <select
               value={selectedFolder}
               onChange={(e) => setSelectedFolder(e.target.value)}
-              className="text-xs bg-paper-surface border border-paper-border rounded-card px-3 py-2 text-ink focus:outline-hidden"
+              className="text-xs bg-white border border-border-subtle rounded-btn px-3 py-2.5 text-slate-700 focus:outline-none focus:border-primary"
             >
               <option value="all">All Folders</option>
               {allFolders.map((f) => (
@@ -420,7 +420,7 @@ export default function DashboardPage() {
             <select
               value={selectedTag}
               onChange={(e) => setSelectedTag(e.target.value)}
-              className="text-xs bg-paper-surface border border-paper-border rounded-card px-3 py-2 text-ink focus:outline-hidden"
+              className="text-xs bg-white border border-border-subtle rounded-btn px-3 py-2.5 text-slate-700 focus:outline-none focus:border-primary"
             >
               <option value="all">All Tags</option>
               {allTags.map((t) => (
@@ -438,30 +438,30 @@ export default function DashboardPage() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="editorial-card p-6 h-48 animate-pulse flex flex-col justify-between"
+                className="bg-white border border-border-subtle rounded-card p-6 h-48 animate-pulse flex flex-col justify-between"
               >
                 <div className="space-y-2.5">
-                  <div className="h-4 bg-paper-border/60 rounded-sm w-3/4" />
-                  <div className="h-3 bg-paper-border/40 rounded-sm w-1/2" />
+                  <div className="h-4 bg-slate-200 rounded w-3/4" />
+                  <div className="h-3 bg-slate-100 rounded w-1/2" />
                 </div>
-                <div className="h-8 bg-paper-border/30 rounded-pill w-full" />
+                <div className="h-8 bg-slate-100 rounded-btn w-full" />
               </div>
             ))}
           </div>
         ) : filteredResumes.length === 0 ? (
-          <div className="editorial-card p-12 text-center space-y-4 max-w-lg mx-auto my-12">
-            <div className="w-12 h-12 rounded-pill bg-paper border border-paper-border flex items-center justify-center mx-auto text-ink-muted">
+          <div className="bg-white border border-border-subtle rounded-card p-12 text-center space-y-4 max-w-lg mx-auto my-12 shadow-sm">
+            <div className="w-12 h-12 rounded-full bg-slate-50 border border-border-subtle flex items-center justify-center mx-auto text-slate-400">
               <FileText className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-ink">No documents found</h3>
-              <p className="text-xs text-ink-body mt-1">
+              <h3 className="font-heading font-extrabold text-lg text-slate-900">No documents found</h3>
+              <p className="text-xs text-slate-500 mt-1">
                 {searchQuery || selectedFolder !== 'all' || selectedTag !== 'all'
                   ? 'Try clearing your search or filter tags.'
                   : 'Start composing your first precision resume.'}
               </p>
             </div>
-            <button onClick={handleCreate} disabled={creating} className="btn-primary !text-xs !py-2 !px-5">
+            <button onClick={handleCreate} disabled={creating} className="btn-primary !text-xs !py-2 !px-5 shadow-btn">
               <Plus className="w-3.5 h-3.5" />
               <span>Create New Resume</span>
             </button>
@@ -474,28 +474,28 @@ export default function DashboardPage() {
                 <div
                   key={resume.id}
                   onClick={() => router.push(`/editor/${resume.id}`)}
-                  className="editorial-card group p-5 cursor-pointer hover:border-ink/40 transition-all flex flex-col justify-between h-56 relative"
+                  className="bg-white border border-border-subtle rounded-card group p-5 cursor-pointer hover:border-slate-300 hover:shadow-card transition-all flex flex-col justify-between h-56 relative shadow-sm"
                 >
                   {/* Top Bar: Title, Target Job, Quick Menu */}
                   <div>
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-bold text-base text-ink truncate group-hover:text-accent transition-colors">
+                        <h3 className="font-heading font-bold text-base text-slate-900 truncate group-hover:text-primary transition-colors">
                           {resume.title}
                         </h3>
                         {resume.target_job_title && (
-                          <p className="text-xs text-ink-muted truncate mt-0.5 flex items-center gap-1.5">
-                            <Briefcase className="w-3 h-3 text-ink-muted" />
+                          <p className="text-xs text-slate-500 truncate mt-0.5 flex items-center gap-1.5">
+                            <Briefcase className="w-3 h-3 text-slate-400" />
                             <span>{resume.target_job_title}</span>
                           </p>
                         )}
                       </div>
 
-                      <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100">
+                      <div className="flex items-center gap-1 opacity-70 group-hover:opacity-100">
                         <button
                           type="button"
                           onClick={(e) => openEditModal(resume, e)}
-                          className="p-1 text-ink-muted hover:text-ink rounded-sm hover:bg-paper"
+                          className="p-1 text-slate-400 hover:text-slate-700 rounded hover:bg-slate-100"
                           title="Rename & Organize"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -504,7 +504,7 @@ export default function DashboardPage() {
                           type="button"
                           onClick={(e) => handleDuplicate(resume.id, e)}
                           disabled={isBusy}
-                          className="p-1 text-ink-muted hover:text-ink rounded-sm hover:bg-paper"
+                          className="p-1 text-slate-400 hover:text-slate-700 rounded hover:bg-slate-100"
                           title="Duplicate"
                         >
                           <Copy className="w-3.5 h-3.5" />
@@ -513,7 +513,7 @@ export default function DashboardPage() {
                           type="button"
                           onClick={(e) => handleArchiveToggle(resume.id, Boolean(resume.is_archived), e)}
                           disabled={isBusy}
-                          className="p-1 text-ink-muted hover:text-ink rounded-sm hover:bg-paper"
+                          className="p-1 text-slate-400 hover:text-slate-700 rounded hover:bg-slate-100"
                           title={resume.is_archived ? 'Restore' : 'Archive'}
                         >
                           {resume.is_archived ? (
@@ -526,7 +526,7 @@ export default function DashboardPage() {
                           type="button"
                           onClick={(e) => handleDelete(resume.id, resume.title, e)}
                           disabled={isBusy}
-                          className="p-1 text-ink-muted hover:text-accent rounded-sm hover:bg-paper"
+                          className="p-1 text-slate-400 hover:text-rose-600 rounded hover:bg-rose-50"
                           title="Delete"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -537,14 +537,14 @@ export default function DashboardPage() {
                     {/* Metadata Tags & Folder */}
                     <div className="flex flex-wrap items-center gap-1.5 mt-3">
                       {resume.folder && (
-                        <span className="text-[10px] font-semibold text-ink-muted bg-paper px-2 py-0.5 rounded-sm border border-paper-border flex items-center gap-1">
+                        <span className="text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 flex items-center gap-1">
                           <Folder className="w-2.5 h-2.5" /> {resume.folder}
                         </span>
                       )}
                       {(resume.tags || []).slice(0, 3).map((t) => (
                         <span
                           key={t}
-                          className="text-[10px] font-medium text-ink-body bg-paper px-2 py-0.5 rounded-sm border border-paper-border"
+                          className="text-[10px] font-semibold text-pill-purple bg-purple-50 px-2 py-0.5 rounded border border-purple-100"
                         >
                           #{t}
                         </span>
@@ -553,8 +553,8 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Bottom Actions Bar */}
-                  <div className="pt-3 border-t border-paper-border flex items-center justify-between">
-                    <span className="text-[11px] text-ink-muted flex items-center gap-1">
+                  <div className="pt-3 border-t border-border-subtle flex items-center justify-between">
+                    <span className="text-[11px] text-slate-400 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       <span>{new Date(resume.updated_at || Date.now()).toLocaleDateString()}</span>
                     </span>
@@ -566,7 +566,7 @@ export default function DashboardPage() {
                           e.stopPropagation();
                           setCoverLetterModalResumeId(resume.id);
                         }}
-                        className="text-[11px] font-semibold text-ink-muted hover:text-ink transition-colors"
+                        className="text-[11px] font-bold text-slate-500 hover:text-primary transition-colors"
                         title="Generate Grounded Cover Letter"
                       >
                         Cover Letter
@@ -574,7 +574,7 @@ export default function DashboardPage() {
                       <button
                         type="button"
                         onClick={(e) => handleTailorJump(resume.id, e)}
-                        className="text-[11px] font-bold text-accent hover:underline flex items-center gap-0.5"
+                        className="text-[11px] font-bold text-primary hover:underline flex items-center gap-0.5"
                       >
                         <span>Tailor</span>
                         <ArrowUpRight className="w-3 h-3" />
@@ -590,13 +590,13 @@ export default function DashboardPage() {
 
       {/* Edit Resume Metadata Modal */}
       {editingResume && (
-        <div className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="editorial-card bg-paper-surface p-6 max-w-md w-full shadow-floating-preview space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-paper-border">
-              <h3 className="font-bold text-base text-ink">Edit Document Details</h3>
+        <div className="fixed inset-0 z-50 glass-scrim flex items-center justify-center p-4">
+          <div className="bg-white border border-border-subtle rounded-card p-6 max-w-md w-full shadow-card space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
+              <h3 className="font-heading font-extrabold text-base text-slate-900">Edit Document Details</h3>
               <button
                 onClick={() => setEditingResume(null)}
-                className="text-ink-muted hover:text-ink text-sm p-1"
+                className="text-slate-400 hover:text-slate-700 text-sm p-1 rounded hover:bg-slate-100"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -604,61 +604,61 @@ export default function DashboardPage() {
 
             <form onSubmit={handleSaveEdit} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-semibold text-ink mb-1">Resume Title</label>
+                <label className="block font-bold text-slate-700 mb-1">Resume Title</label>
                 <input
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full px-3 py-2 rounded-card bg-paper border border-paper-border text-ink focus:outline-hidden focus:border-ink"
+                  className="w-full px-3 py-2 rounded-btn bg-white border border-border-subtle text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   required
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-ink mb-1">Target Job Title</label>
+                <label className="block font-bold text-slate-700 mb-1">Target Job Title</label>
                 <input
                   type="text"
                   value={editTargetTitle}
                   onChange={(e) => setEditTargetTitle(e.target.value)}
                   placeholder="e.g. Lead Distributed Systems Engineer"
-                  className="w-full px-3 py-2 rounded-card bg-paper border border-paper-border text-ink focus:outline-hidden focus:border-ink"
+                  className="w-full px-3 py-2 rounded-btn bg-white border border-border-subtle text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-ink mb-1">Folder (Grouping)</label>
+                <label className="block font-bold text-slate-700 mb-1">Folder (Grouping)</label>
                 <input
                   type="text"
                   value={editFolder}
                   onChange={(e) => setEditFolder(e.target.value)}
                   placeholder="e.g. Big Tech, Startups, 2026"
-                  className="w-full px-3 py-2 rounded-card bg-paper border border-paper-border text-ink focus:outline-hidden focus:border-ink"
+                  className="w-full px-3 py-2 rounded-btn bg-white border border-border-subtle text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-ink mb-1">Tags (Comma-separated)</label>
+                <label className="block font-bold text-slate-700 mb-1">Tags (Comma-separated)</label>
                 <input
                   type="text"
                   value={editTagsInput}
                   onChange={(e) => setEditTagsInput(e.target.value)}
                   placeholder="e.g. typescript, rust, kubernetes"
-                  className="w-full px-3 py-2 rounded-card bg-paper border border-paper-border text-ink focus:outline-hidden focus:border-ink"
+                  className="w-full px-3 py-2 rounded-btn bg-white border border-border-subtle text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
 
-              <div className="pt-3 border-t border-paper-border flex justify-end gap-2">
+              <div className="pt-3 border-t border-border-subtle flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setEditingResume(null)}
-                  className="btn-secondary !text-xs !py-1.5 !px-3.5 !rounded-card"
+                  className="btn-secondary !text-xs !py-1.5 !px-3.5"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={savingEdit}
-                  className="btn-primary !text-xs !py-1.5 !px-4 !rounded-card"
+                  className="btn-primary !text-xs !py-1.5 !px-4 shadow-btn"
                 >
                   {savingEdit ? 'Saving...' : 'Save Changes'}
                 </button>

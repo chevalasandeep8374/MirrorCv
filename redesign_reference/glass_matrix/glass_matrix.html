@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MirrorCV Glass System Matrix</title>
+  <style>
+    :root {
+      --primary: #2563EB;
+      --primary-bevel: #1D4FBA;
+      --text-main: #0F172A;
+      --text-muted: #475569;
+
+      /* Glass Tiers */
+      --glass-1-bg: rgba(255, 255, 255, 0.70);
+      --glass-1-blur: 16px;
+      --glass-1-border: rgba(255, 255, 255, 0.65);
+      --glass-1-edge: rgba(15, 23, 42, 0.06);
+
+      --glass-2-bg: rgba(255, 255, 255, 0.82);
+      --glass-2-blur: 20px;
+      --glass-2-border: rgba(255, 255, 255, 0.80);
+      --glass-2-edge: rgba(15, 23, 42, 0.08);
+
+      --glass-3-bg: rgba(255, 255, 255, 0.88);
+      --glass-3-blur: 24px;
+      --glass-3-border: rgba(255, 255, 255, 0.85);
+      --glass-3-edge: rgba(15, 23, 42, 0.10);
+
+      --glass-card-bg: rgba(255, 255, 255, 0.75);
+      --glass-card-blur: 16px;
+      --glass-card-border: rgba(255, 255, 255, 0.70);
+
+      --glass-dark-bg: rgba(255, 255, 255, 0.08);
+      --glass-dark-blur: 16px;
+      --glass-dark-border: rgba(255, 255, 255, 0.14);
+      --glass-dark-edge: rgba(0, 0, 0, 0.30);
+
+      --frosted-solid-bg: rgba(255, 255, 255, 0.92);
+      --frosted-solid-border: #E2E8F0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: #F1F5F9;
+      padding: 30px 20px;
+      color: var(--text-main);
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    p.sub {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .backdrop-column {
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .col-title {
+      font-size: 14px;
+      font-weight: 700;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      margin-bottom: 2px;
+    }
+
+    /* 4 Distinct Backdrops */
+    .bg-light {
+      background: radial-gradient(circle at 50% 0%, #FFFFFF 0%, #F1F5F9 100%);
+      border: 1px solid #E2E8F0;
+    }
+    .bg-lavender {
+      background: radial-gradient(circle at 50% 0%, #E9E3FA 0%, #D8D1F4 100%);
+      border: 1px solid #D8D1F4;
+    }
+    .bg-dark {
+      background: #161718;
+      border: 1px solid #2A2C30;
+      color: #F8FAFC;
+    }
+    .bg-dark .col-title {
+      border-bottom-color: rgba(255, 255, 255, 0.15);
+      color: #F8FAFC;
+    }
+    .bg-image {
+      background: linear-gradient(135deg, #1E293B 0%, #3B82F6 50%, #EC4899 100%);
+      border: 1px solid #CBD5E1;
+      color: #FFFFFF;
+    }
+    .bg-image .col-title {
+      border-bottom-color: rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+    }
+
+    /* Glass Elements */
+    .glass-box {
+      border-radius: 8px;
+      padding: 12px;
+      position: relative;
+    }
+    .tier-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      display: inline-block;
+    }
+    .glass-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .glass-desc {
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    /* Glass-1 */
+    .box-glass-1 {
+      background: var(--glass-1-bg);
+      -webkit-backdrop-filter: blur(var(--glass-1-blur)) saturate(160%);
+      backdrop-filter: blur(var(--glass-1-blur)) saturate(160%);
+      border: 1px solid var(--glass-1-border);
+      outline: 1px solid var(--glass-1-edge);
+      outline-offset: -1px;
+      color: var(--text-main);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+    .box-glass-1 .glass-desc { color: var(--text-muted); }
+
+    /* Glass-2 */
+    .box-glass-2 {
+      background: var(--glass-2-bg);
+      -webkit-backdrop-filter: blur(var(--glass-2-blur)) saturate(160%);
+      backdrop-filter: blur(var(--glass-2-blur)) saturate(160%);
+      border: 1px solid var(--glass-2-border);
+      outline: 1px solid var(--glass-2-edge);
+      outline-offset: -1px;
+      color: var(--text-main);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+    .box-glass-2 .glass-desc { color: var(--text-muted); }
+
+    /* Glass-3 */
+    .box-glass-3 {
+      background: var(--glass-3-bg);
+      -webkit-backdrop-filter: blur(var(--glass-3-blur)) saturate(160%);
+      backdrop-filter: blur(var(--glass-3-blur)) saturate(160%);
+      border: 1px solid var(--glass-3-border);
+      outline: 1px solid var(--glass-3-edge);
+      outline-offset: -1px;
+      color: var(--text-main);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.98), 0 12px 28px rgba(15, 23, 42, 0.12);
+    }
+    .box-glass-3 .glass-desc { color: var(--text-muted); }
+
+    /* Glass-Dark */
+    .box-glass-dark {
+      background: var(--glass-dark-bg);
+      -webkit-backdrop-filter: blur(var(--glass-dark-blur)) saturate(150%);
+      backdrop-filter: blur(var(--glass-dark-blur)) saturate(150%);
+      border: 1px solid var(--glass-dark-border);
+      outline: 1px solid var(--glass-dark-edge);
+      outline-offset: -1px;
+      color: #F8FAFC;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+    .box-glass-dark .glass-desc { color: #CBD5E1; }
+
+    /* Frosted Solid */
+    .box-frosted {
+      background: var(--frosted-solid-bg);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--frosted-solid-border);
+      color: var(--text-main);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+    }
+    .box-frosted .glass-desc { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <h1>MirrorCV Glass System Matrix</h1>
+  <p class="sub">Visual matrix rendering all 5 glass levels across 4 real backdrops: Light Ambient, Lavender Stage, Dark Band, and Image Backdrop.</p>
+
+  <div class="matrix-grid">
+    <!-- 1. LIGHT AMBIENT BACKDROP -->
+    <div class="backdrop-column bg-light">
+      <div class="col-title">1. Light Ambient</div>
+      <div class="glass-box box-glass-1">
+        <span class="tier-badge" style="color: #2563EB;">Glass-1 Chrome</span>
+        <div class="glass-title">App Topbar & Header</div>
+        <div class="glass-desc">70% white, 16px blur. Contrast: 17.85:1 AAA.</div>
+      </div>
+      <div class="glass-box box-glass-2">
+        <span class="tier-badge" style="color: #775BCC;">Glass-2 Floating</span>
+        <div class="glass-title">Dropdowns & Popovers</div>
+        <div class="glass-desc">82% white, 20px blur. Contrast: 17.85:1 AAA.</div>
+      </div>
+      <div class="glass-box box-glass-3">
+        <span class="tier-badge" style="color: #0F172A;">Glass-3 Overlay</span>
+        <div class="glass-title">Modal Container</div>
+        <div class="glass-desc">88% white, 24px blur. Contrast: 17.85:1 AAA.</div>
+      </div>
+      <div class="glass-box box-frosted">
+        <span class="tier-badge" style="color: #166534;">Frosted-Solid</span>
+        <div class="glass-title">Editor Section Card</div>
+        <div class="glass-desc">92% solid surface for typing. Contrast: 17.85:1 AAA.</div>
+      </div>
+    </div>
+
+    <!-- 2. LAVENDER STAGE BACKDROP -->
+    <div class="backdrop-column bg-lavender">
+      <div class="col-title" style="color: #1E293B;">2. Lavender Stage</div>
+      <div class="glass-box box-glass-1">
+        <span class="tier-badge" style="color: #2563EB;">Glass-1 Chrome</span>
+        <div class="glass-title">Stage Window Header</div>
+        <div class="glass-desc">70% white, 16px blur. Contrast: 16.77:1 AAA.</div>
+      </div>
+      <div class="glass-box box-glass-2">
+        <span class="tier-badge" style="color: #775BCC;">Glass-2 Floating</span>
+        <div class="glass-title">Filter / Template Menu</div>
+        <div class="glass-desc">82% white, 20px blur. Contrast: 17.18:1 AAA.</div>
+      </div>
+      <div class="glass-box box-glass-3">
+        <span class="tier-badge" style="color: #0F172A;">Glass-3 Overlay</span>
+        <div class="glass-title">Template Gallery Sheet</div>
+        <div class="glass-desc">88% white, 24px blur. Contrast: 17.42:1 AAA.</div>
+      </div>
+      <div class="glass-box box-frosted">
+        <span class="tier-badge" style="color: #166534;">Frosted-Solid</span>
+        <div class="glass-title">Tailoring Diff Box</div>
+        <div class="glass-desc">92% solid surface on stage. Contrast: 17.57:1 AAA.</div>
+      </div>
+    </div>
+
+    <!-- 3. DARK BAND BACKDROP -->
+    <div class="backdrop-column bg-dark">
+      <div class="col-title">3. Dark Band</div>
+      <div class="glass-box box-glass-dark">
+        <span class="tier-badge" style="color: #60A5FA;">Glass-Dark Chip</span>
+        <div class="glass-title">ATS Readability Pill</div>
+        <div class="glass-desc">8% white on dark. Text #F8FAFC. Contrast: 13.76:1 AAA.</div>
+      </div>
+      <div class="glass-box box-glass-2">
+        <span class="tier-badge" style="color: #775BCC;">Glass-2 Floating</span>
+        <div class="glass-title">Dark Band Context Menu</div>
+        <div class="glass-desc">82% white over dark. Contrast: 12.16:1 AAA.</div>
+      </div>
+      <div class="glass-box box-glass-3">
+        <span class="tier-badge" style="color: #0F172A;">Glass-3 Overlay</span>
+        <div class="glass-title">Dark Scrim Modal</div>
+        <div class="glass-desc">88% white over dark. Contrast: 13.91:1 AAA.</div>
+      </div>
+      <div class="glass-box box-glass-dark">
+        <span class="tier-badge" style="color: #34D399;">Glass-Dark Tag</span>
+        <div class="glass-title">Export Parity Badge</div>
+        <div class="glass-desc">Muted #CBD5E1. Contrast: 9.70:1 AAA.</div>
+      </div>
+    </div>
+
+    <!-- 4. IMAGE / TEXTURED BACKDROP -->
+    <div class="backdrop-column bg-image">
+      <div class="col-title">4. Vibrant Image</div>
+      <div class="glass-box box-glass-1">
+        <span class="tier-badge" style="color: #2563EB;">Glass-1 Chrome</span>
+        <div class="glass-title">Floating Navigation Bar</div>
+        <div class="glass-desc">Smooth 16px diffusion over vivid tones.</div>
+      </div>
+      <div class="glass-box box-glass-2">
+        <span class="tier-badge" style="color: #775BCC;">Glass-2 Floating</span>
+        <div class="glass-title">Quick Action Palette</div>
+        <div class="glass-desc">20px optical dispersion, legible text.</div>
+      </div>
+      <div class="glass-box box-glass-3">
+        <span class="tier-badge" style="color: #0F172A;">Glass-3 Overlay</span>
+        <div class="glass-title">Focus Dialog Surface</div>
+        <div class="glass-desc">24px deep blur, 88% white isolation.</div>
+      </div>
+      <div class="glass-box box-frosted">
+        <span class="tier-badge" style="color: #166534;">Frosted-Solid</span>
+        <div class="glass-title">Readable Content Sheet</div>
+        <div class="glass-desc">92% solid ensures zero color vibration.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

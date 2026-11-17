@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MirrorCV — Resume Editor Mockup</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+
+    :root {
+      --bg-page: #F8FAFC;
+      --border-subtle: #E2E8F0;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --primary: #2563EB;
+      --primary-bevel: #1D4FBA;
+      --accent-purple: #775BCC;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', -apple-system, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Nav */
+    header.editor-navbar {
+      height: 56px;
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+    .status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      background: #DCFCE7;
+      color: #166534;
+    }
+    .actions-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-action {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: #FFF;
+      cursor: pointer;
+    }
+    .btn-primary-action {
+      background: var(--primary);
+      color: #FFF;
+      border: 1px solid var(--primary-bevel);
+      box-shadow: 0 2px 0 var(--primary-bevel);
+    }
+
+    /* Main Dual Pane View */
+    .editor-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 240px 480px 1fr;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    aside.app-sidebar {
+      background: #FFFFFF;
+      border-right: 1px solid var(--border-subtle);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+    .sidebar-section-title {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      color: #94A3B8;
+      text-transform: uppercase;
+      margin: 16px 0 8px 0;
+    }
+    .side-tab {
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .side-tab.active {
+      background: #EEEAFF;
+      color: #5B3FB8;
+    }
+
+    /* Middle Pane: Form Controls */
+    .controls-pane {
+      background: #FAF9FE;
+      border-right: 1px solid var(--border-subtle);
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .pane-tabs {
+      display: flex;
+      background: #F1EDFC;
+      border-radius: 8px;
+      padding: 3px;
+      gap: 4px;
+    }
+    .pane-tab-btn {
+      flex: 1;
+      padding: 7px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      border: none;
+      border-radius: 6px;
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .pane-tab-btn.active {
+      background: #FFFFFF;
+      color: #1E293B;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .form-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .category-chip {
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: #EEEAFF;
+      color: #5B3FB8;
+    }
+    .card-fraction {
+      font-size: 11px;
+      font-weight: 700;
+      color: #10B981;
+    }
+    .input-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .text-input {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      font-size: 12px;
+      background: #F8FAFC;
+    }
+
+    /* Right Pane: Live Document Preview */
+    .preview-pane {
+      background: #E2E8F0;
+      padding: 32px;
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .paper-sheet {
+      width: 520px;
+      background: #FFFFFF;
+      border-radius: 6px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      padding: 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      font-size: 11px;
+    }
+    .resume-header-mock {
+      border-bottom: 2px solid #1E293B;
+      padding-bottom: 12px;
+    }
+    .resume-name {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #1E293B;
+    }
+    .resume-role {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .section-bar {
+      background: #F1F5F9;
+      padding: 4px 8px;
+      font-weight: 800;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      color: #1E293B;
+      text-transform: uppercase;
+      border-left: 3px solid var(--primary);
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="editor-navbar">
+    <div class="brand-group">
+      <span>MirrorCV</span>
+      <div class="breadcrumb">
+        <span>/</span>
+        <span>Resumes</span>
+        <span>/</span>
+        <strong style="color: #1E293B;">Staff Infrastructure Architect</strong>
+        <span class="status-badge">Tailored (100% Fit)</span>
+      </div>
+    </div>
+    <div class="actions-group">
+      <span style="font-size: 11px; color: var(--text-muted); margin-right: 12px;">&bull; All changes saved</span>
+      <button class="btn-action">Share Link</button>
+      <button class="btn-action btn-primary-action">Download PDF</button>
+    </div>
+  </header>
+
+  <!-- Editor Layout -->
+  <div class="editor-layout">
+    <!-- Left Navigation Sidebar -->
+    <aside class="app-sidebar">
+      <div>
+        <div style="font-weight: 800; font-size: 13px; margin-bottom: 12px;">Alex's Workspace</div>
+        <div class="side-tab active">Overview</div>
+        <div class="side-tab">To Review <span style="background: var(--primary); color:#FFF; border-radius:9999px; font-size:10px; padding:1px 6px; margin-left:auto;">2</span></div>
+        <div class="side-tab">Job Targets</div>
+
+        <div class="sidebar-section-title">Resumes</div>
+        <div class="side-tab" style="color: #1E293B; font-weight:700;">&bull; Staff Infrastructure</div>
+        <div class="side-tab">&bull; Cloud Solutions Lead</div>
+      </div>
+      <div style="font-size: 11px; color: var(--text-muted);">
+        <div>Help & Shortcuts (Ctrl+Z)</div>
+      </div>
+    </aside>
+
+    <!-- Center Controls Pane -->
+    <main class="controls-pane">
+      <div class="pane-tabs">
+        <button class="pane-tab-btn active">Content</button>
+        <button class="pane-tab-btn">Customize</button>
+        <button class="pane-tab-btn">AI Tools</button>
+        <button class="pane-tab-btn">Overview</button>
+      </div>
+
+      <!-- Experience Card Styled like TaskFlow Task Card -->
+      <div class="form-card">
+        <div class="card-top">
+          <span class="category-chip">Work Experience</span>
+          <span class="card-fraction">3/3 Bullets</span>
+        </div>
+        <div class="input-label">Company & Title</div>
+        <input type="text" class="text-input" value="Apex Cloud Systems &bull; Staff Infrastructure Architect" />
+        <div class="input-label">Date Range & Location</div>
+        <input type="text" class="text-input" value="Jan 2022 — Present &bull; Zurich, Switzerland" />
+        <div class="input-label">Bullet Points (3)</div>
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 8px; border-radius: 6px; font-size: 11px;">
+          &bull; Spearheaded zero-downtime consensus engine migration across 28 global regions.
+        </div>
+      </div>
+
+      <!-- Skills Card -->
+      <div class="form-card">
+        <div class="card-top">
+          <span class="category-chip" style="background: #E0E7FF; color: #3730A3;">Technical Skills</span>
+          <span class="card-fraction">5 Items</span>
+        </div>
+        <div class="input-label">Languages & Frameworks</div>
+        <input type="text" class="text-input" value="Rust, Go, TypeScript, Kubernetes, Raft" />
+      </div>
+    </main>
+
+    <!-- Right Live Preview Pane -->
+    <section class="preview-pane">
+      <div class="paper-sheet">
+        <div class="resume-header-mock">
+          <div class="resume-name">Alex Mercer</div>
+          <div class="resume-role">Staff Infrastructure Architect</div>
+          <div style="font-size: 10px; color: #64748B; margin-top: 4px;">alex.mercer@systems.io &bull; +41 44 123 4567 &bull; Zurich, CH</div>
+        </div>
+
+        <div>
+          <div class="section-bar">Executive Summary</div>
+          <p style="color: #475569; line-height: 1.5;">
+            Infrastructure architect with 12+ years of experience leading distributed consensus, zero-copy serialization, and low-latency storage engines.
+          </p>
+        </div>
+
+        <div>
+          <div class="section-bar">Work Experience</div>
+          <div style="font-weight: 700; color: #1E293B;">Apex Cloud Systems &mdash; Staff Infrastructure Architect</div>
+          <div style="font-size: 10px; color: #64748B; margin-bottom: 4px;">Jan 2022 &mdash; Present | Zurich</div>
+          <ul style="padding-left: 14px; color: #475569; line-height: 1.5;">
+            <li>Spearheaded zero-downtime consensus migration across 28 global regions with 99.999% availability.</li>
+            <li>Eliminated p99 tail latency spikes by 42% via custom zero-copy memory buffers.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

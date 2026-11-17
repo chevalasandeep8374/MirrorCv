@@ -13,15 +13,15 @@ export const LeftPanel: React.FC = () => {
   const isCustomizeActive = activeTab === 'customize' || activeTab === 'style';
 
   return (
-    <aside className="w-full md:w-[480px] lg:w-[500px] flex-shrink-0 bg-slate-50 border-r border-slate-200 flex flex-col h-[calc(100vh-3.5rem)] select-none">
+    <aside className="w-full md:w-[480px] lg:w-[500px] flex-shrink-0 bg-slate-50 border-r border-border-subtle flex flex-col h-[calc(100vh-3.5rem)] select-none isolate-paint">
       {/* Tab Switcher */}
-      <div className="h-12 border-b border-slate-200 bg-white px-4 flex items-center space-x-2">
+      <div className="h-12 border-b border-border-subtle bg-white px-4 flex items-center space-x-2">
         <button
           type="button"
           onClick={() => setActiveTab('content')}
-          className={`flex-1 py-1.5 px-3 rounded-lg font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all ${
+          className={`flex-1 py-1.5 px-3 rounded-btn font-bold text-xs flex items-center justify-center space-x-1.5 transition-all ${
             activeTab === 'content'
-              ? 'bg-blue-600 text-white shadow-sm'
+              ? 'bg-primary text-white shadow-btn'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
@@ -32,9 +32,9 @@ export const LeftPanel: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveTab('customize')}
-          className={`flex-1 py-1.5 px-3 rounded-lg font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all ${
+          className={`flex-1 py-1.5 px-3 rounded-btn font-bold text-xs flex items-center justify-center space-x-1.5 transition-all ${
             isCustomizeActive
-              ? 'bg-blue-600 text-white shadow-sm'
+              ? 'bg-primary text-white shadow-btn'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >

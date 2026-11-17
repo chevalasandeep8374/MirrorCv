@@ -105,16 +105,16 @@ export const ResumeSelectorDropdown: React.FC<ResumeSelectorDropdownProps> = ({
       <button
         type="button"
         onClick={handleToggle}
-        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-semibold transition-colors border border-slate-200/60 max-w-[200px] truncate"
+        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-btn text-xs font-bold transition-colors border border-border-subtle max-w-[200px] truncate"
         title="Switch or create resume"
       >
-        <FileText className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+        <FileText className="w-3.5 h-3.5 text-primary shrink-0" />
         <span className="truncate">{currentTitle || 'Untitled Resume'}</span>
         <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-0.5" />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1.5 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 z-50 overflow-hidden animate-in fade-in zoom-in-95">
+        <div className="absolute top-full left-0 mt-1.5 w-72 glass-2 rounded-card shadow-card border border-border-subtle z-50 overflow-hidden animate-in fade-in zoom-in-95">
           {/* Search Box */}
           <div className="p-2.5 border-b border-slate-100 bg-slate-50">
             <div className="relative">

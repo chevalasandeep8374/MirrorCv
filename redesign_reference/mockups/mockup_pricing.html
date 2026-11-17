@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MirrorCV — Pricing Mockup</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+
+    :root {
+      --bg-page: #FFFFFF;
+      --border-subtle: #EEF0F6;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --primary: #2563EB;
+      --primary-bevel: #1D4FBA;
+      --accent-purple: #775BCC;
+      --shadow-btn: 0px 3px 0px 0px var(--primary-bevel);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', -apple-system, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      padding-bottom: 80px;
+    }
+
+    header.site-header {
+      padding: 16px 48px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--text-main);
+      text-decoration: none;
+    }
+
+    .pricing-hero {
+      text-align: center;
+      padding: 64px 24px 48px 24px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--accent-purple);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    h1.pricing-h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      margin-bottom: 16px;
+    }
+    p.pricing-subcopy {
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+
+    /* 3 Tiers Grid matching TaskFlow */
+    .pricing-grid {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+      padding: 0 24px;
+    }
+    .pricing-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      position: relative;
+    }
+    .pricing-card.featured {
+      border: 2px solid var(--primary);
+      box-shadow: 0 12px 30px rgba(37, 99, 235, 0.08);
+      background: #FAF9FE;
+    }
+    .featured-tag {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary);
+      color: #FFF;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      letter-spacing: 0.5px;
+    }
+    .plan-name {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .plan-pitch {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      min-height: 40px;
+    }
+    .plan-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+    .plan-price {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+    }
+    .plan-cadence {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 13px;
+      color: #334155;
+      margin-bottom: 32px;
+    }
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .check-icon {
+      color: #10B981;
+      font-weight: bold;
+    }
+    .btn-plan {
+      width: 100%;
+      padding: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      border-radius: 7px;
+      border: 1px solid #CBD5E1;
+      background: #FFFFFF;
+      color: var(--text-main);
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+    }
+    .btn-plan.primary {
+      background: var(--primary);
+      color: #FFFFFF;
+      border: 1px solid var(--primary-bevel);
+      box-shadow: var(--shadow-btn);
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="#" class="brand">MirrorCV<span style="color:var(--primary);">&bull;</span></a>
+    <div><a href="#" style="font-size: 13px; font-weight: 600; color: #64748B; text-decoration: none;">Back to Workspace</a></div>
+  </header>
+
+  <div class="pricing-hero">
+    <div class="eyebrow">SIMPLE PLANS. NO SUBSCRIPTION LOCK-IN.</div>
+    <h1 class="pricing-h1">A plan for every stage of your career.</h1>
+    <p class="pricing-subcopy">
+      Build with total privacy. Free forever with local browser storage. Upgrade only when you need deep automated DOCX XML tailoring.
+    </p>
+  </div>
+
+  <div class="pricing-grid">
+    <!-- Free Tier -->
+    <div class="pricing-card">
+      <div>
+        <div class="plan-name">Free</div>
+        <div class="plan-pitch">Complete local resume builder with zero tracking or limits.</div>
+        <div class="plan-price-row">
+          <span class="plan-price">$0</span>
+          <span class="plan-cadence">free forever</span>
+        </div>
+        <ul class="feature-list">
+          <li class="feature-item"><span class="check-icon">&check;</span> Unlimited local resumes</li>
+          <li class="feature-item"><span class="check-icon">&check;</span> 15 curated self-hosted fonts</li>
+          <li class="feature-item"><span class="check-icon">&check;</span> Live vector PDF export</li>
+          <li class="feature-item"><span class="check-icon">&check;</span> Content &amp; style separation</li>
+          <li class="feature-item"><span class="check-icon">&check;</span> Zero cloud data sharing</li>
+        </ul>
+      </div>
+      <a href="#" class="btn-plan">Get started free</a>
+    </div>
+
+    <!-- Pro Tier (Featured) -->
+    <div class="pricing-card featured">
+      <div class="featured-tag">Most Popular</div>
+      <div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-pitch">AI-assisted in-place DOCX tailoring and ATS match verification.</div>
+        <div class="plan-price-row">
+          <span class="plan-price">$12</span>
+          <span class="plan-cadence">/ month</span>
+        </div>
+        <ul class="feature-list">
+          <li class="feature-item"><span class="check-icon">&check;</span> Everything in Free</li>
+          <li class="feature-item"><span class="check-icon">&check;</span> DOCX in-place XML tailoring</li>
+          <li class="feature-item"><span class="check-icon">&check;</span> Adversarial fact verifier</li>
+          <li class="feature-item"><span class="check-icon">&check;</span> Keyword &amp; ATS score breakdown</li>
+          <li class="feature-item"><span class="check-icon">&check;</span> Cloud sync &amp; share links</li>
+        </ul>
+      </div>
+      <a href="#" class="btn-plan primary">Start 14-day Pro trial</a>
+    </div>
+
+    <!-- Team / Lifetime Tier -->
+    <div class="pricing-card">
+      <div>
+        <div class="plan-name">Lifetime Pass</div>
+        <div class="plan-pitch">Pay once, own forever. For ambitious professionals and consultants.</div>
+        <div class="plan-price-row">
+          <span class="plan-price">$79</span>
+          <span class="plan-cadence">one-time payment</span>
+        </div>
+        <ul class="feature-list">
+          <li class="feature-item"><span class="check-icon">&check;</span> Everything in Pro</li>
+          <li class="feature-item"><span class="check-icon">&check;</span> Lifetime model updates</li>
+          <li class="feature-item"><span class="check-icon">&check;</span> Priority rendering queue</li>
+          <li class="feature-item"><span class="check-icon">&check;</span> Unlimited custom template locks</li>
+          <li class="feature-item"><span class="check-icon">&check;</span> Offline CLI access</li>
+        </ul>
+      </div>
+      <a href="#" class="btn-plan">Get Lifetime Pass</a>
+    </div>
+  </div>
+</body>
+</html>

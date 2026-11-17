@@ -53,13 +53,13 @@ export const LivePreviewPane: React.FC = () => {
       ref={containerRef}
       className="flex-1 bg-slate-200/70 overflow-auto p-8 flex flex-col items-center justify-start min-h-full relative select-none"
     >
-      {/* Floating Preview Controls Toolbar */}
-      <div className="sticky top-4 z-30 mb-6 bg-white/90 backdrop-blur-md border border-slate-300/80 rounded-2xl shadow-lg px-3 py-1.5 flex items-center gap-2 text-xs">
+      {/* Floating Preview Controls Toolbar (Glass-1) */}
+      <div className="sticky top-4 z-30 mb-6 glass-1 border border-border-subtle rounded-full shadow-card px-4 py-1.5 flex items-center gap-2 text-xs">
         {/* Zoom Out */}
         <button
           type="button"
           onClick={handleZoomOut}
-          className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors"
+          className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors"
           title="Zoom out"
         >
           <ZoomOut className="w-3.5 h-3.5" />
@@ -74,7 +74,7 @@ export const LivePreviewPane: React.FC = () => {
         <button
           type="button"
           onClick={handleZoomIn}
-          className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors"
+          className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors"
           title="Zoom in"
         >
           <ZoomIn className="w-3.5 h-3.5" />
@@ -86,7 +86,7 @@ export const LivePreviewPane: React.FC = () => {
         <button
           type="button"
           onClick={handleFitToWidth}
-          className="px-2.5 py-1 text-slate-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl font-semibold text-[11px] transition-colors flex items-center gap-1"
+          className="px-2.5 py-1 text-slate-700 hover:text-primary hover:bg-blue-50 rounded-full font-bold text-[11px] transition-colors flex items-center gap-1"
           title="Fit document to available window width"
         >
           <Maximize2 className="w-3 h-3" />
@@ -97,7 +97,7 @@ export const LivePreviewPane: React.FC = () => {
         <button
           type="button"
           onClick={handleResetZoom}
-          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors"
           title="Reset to 100%"
         >
           <RotateCcw className="w-3 h-3" />
