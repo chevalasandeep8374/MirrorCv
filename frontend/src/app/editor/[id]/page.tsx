@@ -111,7 +111,7 @@ function EditorLayout() {
             <div
               className={`h-full ${
                 mobileTab === 'preview' ? 'hidden md:flex' : 'flex'
-              } w-full md:w-[480px] lg:w-[500px] shrink-0`}
+              } w-full md:w-[540px] lg:w-[580px] xl:w-[620px] shrink-0`}
             >
               <LeftPanel
                 onOpenTailorModal={() => setTailorOpen(true)}

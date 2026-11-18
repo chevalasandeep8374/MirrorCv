@@ -23,7 +23,7 @@ export const PageView: React.FC<PageViewProps> = ({
       className={`relative bg-[var(--color-background)] text-[var(--color-text)] font-[family-name:var(--font-base)] leading-[var(--line-height)] mx-auto overflow-hidden transition-shadow select-text ${
         isPrint
           ? 'print-page shadow-none'
-          : 'shadow-2xl rounded-sm mb-8 ring-1 ring-black/5'
+          : `shadow-2xl rounded-sm ring-1 ring-black/5 ${pageNumber < totalPages ? 'mb-8' : ''}`
       }`}
       style={{
         width: isA4 ? '210mm' : '8.5in',

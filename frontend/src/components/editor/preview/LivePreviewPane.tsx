@@ -132,7 +132,7 @@ export const LivePreviewPane: React.FC = () => {
 
       {/* Rendered Scaled Document Container */}
       <div
-        className="transition-transform duration-150 origin-top flex flex-col items-center shadow-2xl rounded-sm"
+        className="transition-transform duration-150 origin-top flex flex-col items-center"
         style={{
           transform: `scale(${zoom})`,
           marginBottom: '100px',

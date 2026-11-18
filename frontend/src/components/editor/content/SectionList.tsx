@@ -578,6 +578,15 @@ export const SectionList: React.FC = () => {
         <div className="flex items-center gap-1.5">
           <button
             type="button"
+            onClick={() => setShowAddMenu((v) => !v)}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[#FF2D6C] bg-pink-50 hover:bg-pink-100/80 border border-pink-200/80 transition-all cursor-pointer px-2.5 py-1 rounded-md active:scale-95 shadow-2xs"
+            title="Add a new section"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Add Section</span>
+          </button>
+          <button
+            type="button"
             onClick={handleToggleCollapseAll}
             className="text-xs font-medium text-slate-600 hover:text-slate-900 transition-all cursor-pointer px-2.5 py-1 rounded-md hover:bg-white hover:shadow-2xs active:scale-95"
             title={allCollapsed ? 'Expand all sections' : 'Collapse all sections'}
@@ -598,7 +607,7 @@ export const SectionList: React.FC = () => {
       <div className="h-4 bg-gradient-to-b from-slate-200/30 to-transparent sticky top-[49px] z-10 -mb-4 pointer-events-none" />
 
       {/* Scrollable Stage Cards Container with Smooth Scroll */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 sm:p-5 pb-28">
+      <div id="resume-sections-scroll-container" className="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 sm:p-5 pb-12">
         {/* STAGE 1: Personal Details */}
         <HeaderForm
           isExpanded={personalExpanded}
@@ -628,28 +637,28 @@ export const SectionList: React.FC = () => {
             ))}
           </SortableContext>
         </DndContext>
-      </div>
 
-      {/* Bottom Floating Bar with Gradient Dissolve & Breathing CTA */}
-      <div className="absolute bottom-0 left-0 right-0 pt-8 pb-4 px-5 bg-gradient-to-t from-[#F8F9FA] via-[#F8F9FA]/90 to-transparent pointer-events-none z-30 flex items-center justify-start">
-        <button
-          type="button"
-          onClick={() => setShowAddMenu((v) => !v)}
-          className="pointer-events-auto inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF2D6C] to-[#FF5E62] text-white font-bold text-sm shadow-[0_4px_16px_rgba(255,45,108,0.35)] animate-cta-breath hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 cursor-pointer select-none"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>Add Content</span>
-        </button>
+        {/* + Add Content Button Placed Cleanly Below Sections (Never Covering Any Card) */}
+        <div className="pt-3 pb-32 flex items-center justify-start">
+          <button
+            type="button"
+            onClick={() => setShowAddMenu((v) => !v)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF2D6C] to-[#FF5E62] text-white font-bold text-sm shadow-[0_4px_16px_rgba(255,45,108,0.35)] animate-cta-breath hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 cursor-pointer select-none"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <span>Add Content</span>
+          </button>
+        </div>
       </div>
 
       {/* Popup 2-Column Menu for Adding Sections */}
       {showAddMenu && (
         <>
           <div
-            className="fixed inset-0 z-35"
+            className="fixed inset-0 z-35 bg-black/10 backdrop-blur-[1px]"
             onClick={() => setShowAddMenu(false)}
           />
-          <div className="absolute bottom-20 left-4 right-4 sm:left-5 sm:right-5 bg-white/98 backdrop-blur-md rounded-2xl border border-slate-200 shadow-2xl p-4 z-40 animate-modal-pop">
+          <div className="absolute bottom-16 left-4 right-4 sm:left-5 sm:right-5 bg-white/98 backdrop-blur-md rounded-2xl border border-slate-200 shadow-2xl p-4 z-40 animate-modal-pop">
             <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-200/80">
               <div>
                 <span className="font-bold text-sm text-slate-900 block">Add Resume Section</span>

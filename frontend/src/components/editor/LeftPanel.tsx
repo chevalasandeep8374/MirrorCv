@@ -21,7 +21,7 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
   const isCoverLetter = Boolean(content.coverLetter);
 
   return (
-    <aside className="w-full md:w-[480px] lg:w-[500px] flex-shrink-0 bg-[#F8F9FA] border-r border-slate-200/90 flex flex-col h-[calc(100vh-3.5rem)] select-none isolate-paint">
+    <aside className="w-full md:w-[540px] lg:w-[580px] xl:w-[620px] flex-shrink-0 bg-[#F8F9FA] border-r border-slate-200/90 flex flex-col h-[calc(100vh-3.5rem)] select-none isolate-paint">
       {/* Version Conflict Resolution Banner */}
       {saveStatus === 'conflict' && (
         <div className="bg-rose-50 border-b border-rose-200 p-3 flex flex-col gap-2 text-xs text-rose-900 animate-in fade-in">
