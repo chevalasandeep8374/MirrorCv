@@ -1,4 +1,4 @@
-# MirrorCV - FlowCV-style Resume Builder
+# MirrorCV - Resume Builder
 
 MirrorCV is an open-source, modern resume builder built with strict separation of **Content** (structured JSON) and **Style** (style-token object). A single rendering engine renders both the interactive live preview and the pixel-perfect headless Playwright PDF export.
 
