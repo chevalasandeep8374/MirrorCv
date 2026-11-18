@@ -482,6 +482,25 @@ const SortableSection: React.FC<SortableSectionProps> = ({
 );
 };
 
+const AVAILABLE_SECTION_DEFS: {
+  type: SectionType;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}[] = [
+  { type: 'summary', label: 'Summary', icon: FileText },
+  { type: 'experience', label: 'Work Experience', icon: Briefcase },
+  { type: 'skills', label: 'Skills', icon: Lightbulb },
+  { type: 'education', label: 'Education', icon: GraduationCap },
+  { type: 'projects', label: 'Projects', icon: Folder },
+  { type: 'certifications', label: 'Certifications', icon: Award },
+  { type: 'languages', label: 'Languages', icon: Languages },
+  { type: 'awards', label: 'Awards & Honors', icon: Award },
+  { type: 'publications', label: 'Publications', icon: BookOpen },
+  { type: 'volunteering', label: 'Volunteering', icon: HeartHandshake },
+  { type: 'interests', label: 'Interests', icon: Compass },
+  { type: 'references', label: 'References', icon: Users },
+];
+
 export const SectionList: React.FC = () => {
   const { content, reorderSections, addSection, activeSectionId, setActiveSectionId } =
     useResume();
@@ -489,6 +508,14 @@ export const SectionList: React.FC = () => {
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [allCollapsed, setAllCollapsed] = useState(false);
   const [personalExpanded, setPersonalExpanded] = useState(true);
+
+  // Set of section types already inserted in this resume (prevent duplicates)
+  const existingTypes = new Set(content.sections.map((s) => s.type));
+
+  // Filter available sections to ONLY include ones NOT already inserted
+  const availableSections = AVAILABLE_SECTION_DEFS.filter(
+    (def) => !existingTypes.has(def.type)
+  );
 
   const sectionSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -627,7 +654,9 @@ export const SectionList: React.FC = () => {
               <div>
                 <span className="font-bold text-sm text-slate-900 block">Add Resume Section</span>
                 <span className="text-xs text-slate-500">
-                  Choose a module to append to your resume
+                  {availableSections.length > 0
+                    ? 'Choose an unadded section to append to your resume'
+                    : 'All standard sections have been added to your resume'}
                 </span>
               </div>
               <button
@@ -638,80 +667,38 @@ export const SectionList: React.FC = () => {
                 ×
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-left">
-              <button
-                type="button"
-                onClick={() => handleAdd('summary')}
-                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
-              >
-                <FileText className="w-4 h-4 text-slate-800" />
-                <span>Summary</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAdd('experience')}
-                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
-              >
-                <Briefcase className="w-4 h-4 text-slate-800" />
-                <span>Work Experience</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAdd('skills')}
-                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
-              >
-                <Lightbulb className="w-4 h-4 text-slate-800" />
-                <span>Skills</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAdd('education')}
-                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
-              >
-                <GraduationCap className="w-4 h-4 text-slate-800" />
-                <span>Education</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAdd('projects')}
-                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
-              >
-                <Folder className="w-4 h-4 text-slate-800" />
-                <span>Projects</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAdd('certifications')}
-                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
-              >
-                <Award className="w-4 h-4 text-slate-800" />
-                <span>Certifications</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAdd('languages')}
-                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
-              >
-                <Languages className="w-4 h-4 text-slate-800" />
-                <span>Languages</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAdd('awards')}
-                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
-              >
-                <Award className="w-4 h-4 text-slate-800" />
-                <span>Awards &amp; Honors</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAdd('custom')}
-                className="col-span-2 flex items-center justify-center gap-2 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-200 active:scale-[0.99] transition-all cursor-pointer"
-              >
-                <Plus className="w-4 h-4" />
-                <span>+ Custom Section</span>
-              </button>
-            </div>
+
+            {availableSections.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2 text-left mb-2.5 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+                {availableSections.map((sec) => {
+                  const Icon = sec.icon;
+                  return (
+                    <button
+                      key={sec.type}
+                      type="button"
+                      onClick={() => handleAdd(sec.type)}
+                      className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
+                    >
+                      <Icon className="w-4 h-4 text-slate-800 shrink-0" />
+                      <span className="truncate">{sec.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-3 px-2 text-center text-xs text-slate-500 bg-slate-50 rounded-xl mb-2.5">
+                All standard sections are currently in your resume.
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => handleAdd('custom')}
+              className="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-200 active:scale-[0.99] transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>+ Custom Section</span>
+            </button>
           </div>
         </>
       )}
