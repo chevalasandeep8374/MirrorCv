@@ -80,7 +80,7 @@ function EditorLayout() {
   };
 
   const isSplitPaneMode =
-    activeTab === 'content' || activeTab === 'customize' || activeTab === 'style';
+    activeTab === 'content' || activeTab === 'customize' || activeTab === 'style' || activeTab === 'ai';
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-[#F8F9FA]">
@@ -105,23 +105,18 @@ function EditorLayout() {
               onOpenShare={() => setShareOpen(true)}
             />
           </div>
-        ) : activeTab === 'ai' ? (
-          /* Full AI Tools Tab */
-          <div className="flex-1 overflow-y-auto bg-slate-50">
-            <AiToolsTab
-              onOpenTailorModal={() => setTailorOpen(true)}
-              onOpenAtsModal={() => setAtsOpen(true)}
-            />
-          </div>
         ) : (
-          /* Split Viewport (Desktop) & Tabbed Viewport (Mobile) for Content & Customize */
+          /* Split Viewport (Desktop) & Tabbed Viewport (Mobile) for Content, Customize & AI Tools */
           <>
             <div
               className={`h-full ${
                 mobileTab === 'preview' ? 'hidden md:flex' : 'flex'
               } w-full md:w-[480px] lg:w-[500px] shrink-0`}
             >
-              <LeftPanel />
+              <LeftPanel
+                onOpenTailorModal={() => setTailorOpen(true)}
+                onOpenAtsModal={() => setAtsOpen(true)}
+              />
             </div>
 
             <div

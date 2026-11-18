@@ -5,9 +5,18 @@ import { useResume } from '@/context/ResumeContext';
 import { SectionList } from './content/SectionList';
 import { CustomizeTab } from './customize/CustomizeTab';
 import { CoverLetterPanel } from './cover-letter/CoverLetterPanel';
+import { AiResumeCopilot } from './ai/AiResumeCopilot';
 import { AlertCircle } from 'lucide-react';
 
-export const LeftPanel: React.FC = () => {
+interface LeftPanelProps {
+  onOpenTailorModal?: () => void;
+  onOpenAtsModal?: () => void;
+}
+
+export const LeftPanel: React.FC<LeftPanelProps> = ({
+  onOpenTailorModal,
+  onOpenAtsModal,
+}) => {
   const { content, activeTab, saveStatus, resolveConflict } = useResume();
   const isCoverLetter = Boolean(content.coverLetter);
 
@@ -50,6 +59,11 @@ export const LeftPanel: React.FC = () => {
           ) : (
             <SectionList />
           )
+        ) : activeTab === 'ai' ? (
+          <AiResumeCopilot
+            onOpenTailorModal={onOpenTailorModal}
+            onOpenAtsModal={onOpenAtsModal}
+          />
         ) : (
           <div className="h-full overflow-y-auto p-4">
             <CustomizeTab />

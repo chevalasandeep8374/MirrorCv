@@ -19,6 +19,7 @@ export const LivePreviewPane: React.FC = () => {
     style,
     zoom,
     setZoom,
+    activeTab,
     onePageFitActive,
     onePageFitWarning,
     toggleOnePageFit,
@@ -53,6 +54,16 @@ export const LivePreviewPane: React.FC = () => {
       ref={containerRef}
       className="flex-1 bg-[#ECEEF2] overflow-auto p-6 sm:p-8 flex flex-col items-center justify-start min-h-full relative select-none"
     >
+      {/* Center Glassmorphic Indicator for AI Mode */}
+      {activeTab === 'ai' && (
+        <div className="sticky top-2 z-40 mb-3 pointer-events-none">
+          <div className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 border border-pink-200 shadow-md text-slate-900 text-xs font-semibold animate-in fade-in zoom-in-95">
+            <span className="w-2 h-2 rounded-full bg-[#FF2D6C] animate-pulse" />
+            <span className="text-[#FF2D6C] font-semibold">AI Diff Mode: 3 Optimizations Highlighted</span>
+          </div>
+        </div>
+      )}
+
       {/* Floating Preview Controls Toolbar (Glass-1) */}
       <div className="sticky top-4 z-30 mb-6 glass-1 border border-border-subtle rounded-full shadow-card px-4 py-1.5 flex items-center gap-2 text-xs">
         {/* Zoom Out */}
