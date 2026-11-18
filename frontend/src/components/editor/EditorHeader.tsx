@@ -157,16 +157,17 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
         )}
 
         {/* Subtle Save Status Indicator */}
-        <div className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-50 border border-slate-200/80">
+        <div className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-white border border-slate-200 text-slate-800">
           {saveStatus === 'saved' && (
             <>
-              <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-              <span className="text-slate-600">Saved</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Saved</span>
             </>
           )}
           {saveStatus === 'saving' && (
             <>
-              <Clock className="w-3 h-3 text-[#FF2D6C] animate-spin" />
+              <Clock className="w-3.5 h-3.5 text-[#FF2D6C] animate-spin" />
               <span className="text-[#FF2D6C]">Saving...</span>
             </>
           )}
@@ -178,31 +179,31 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           )}
           {saveStatus === 'conflict' && (
             <>
-              <AlertCircle className="w-3 h-3 text-rose-500" />
+              <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
               <span className="text-rose-600">Conflict</span>
             </>
           )}
         </div>
 
         {/* Undo/Redo Buttons */}
-        <div className="hidden lg:flex items-center space-x-0.5">
+        <div className="hidden lg:flex items-center gap-0.5 bg-slate-100 rounded-md p-0.5 border border-slate-200">
           <button
             type="button"
             onClick={undo}
             disabled={!canUndo}
-            className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded text-slate-500 hover:text-slate-900 hover:bg-white transition-colors cursor-pointer disabled:opacity-30 disabled:hover:bg-transparent"
             title="Undo (Ctrl+Z)"
           >
-            <Undo2 className="w-4 h-4" />
+            <Undo2 className="w-3.5 h-3.5" />
           </button>
           <button
             type="button"
             onClick={redo}
             disabled={!canRedo}
-            className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded text-slate-500 hover:text-slate-900 hover:bg-white transition-colors cursor-pointer disabled:opacity-30 disabled:hover:bg-transparent"
             title="Redo (Ctrl+Y)"
           >
-            <Redo2 className="w-4 h-4" />
+            <Redo2 className="w-3.5 h-3.5" />
           </button>
         </div>
 

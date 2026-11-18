@@ -141,10 +141,10 @@ export const SectionItemCard: React.FC<SectionItemCardProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`border rounded-2xl p-3.5 shadow-2xs mb-3 group/item transition-all ${
+      className={`border rounded-xl p-3 shadow-2xs mb-2.5 group/item transition-all ${
         isHidden
           ? 'bg-slate-50 border-dashed border-amber-300 opacity-60'
-          : 'bg-white border-slate-200 hover:border-slate-300'
+          : 'bg-white border-slate-200/90 hover:border-slate-300'
       }`}
     >
       {/* Top Bar with Drag Handle, Summary, Collapse, Duplicate, Eye, and Delete */}

@@ -155,20 +155,31 @@ export const DownloadDropdown: React.FC = () => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
-        type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
-        disabled={downloadingPdf || downloadingDocx}
-        className="bg-[#181824] hover:bg-[#282638] text-white text-xs font-semibold py-2 px-3.5 rounded-xl shadow-xs flex items-center gap-2 transition-colors cursor-pointer"
-      >
-        {downloadingPdf || downloadingDocx ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        ) : (
-          <Download className="w-3.5 h-3.5" />
-        )}
-        <span>Download</span>
-        <ChevronDown className="w-3 h-3 opacity-70" />
-      </button>
+      <div className="inline-flex items-center rounded-md bg-[#181824] hover:bg-black text-white shadow-xs transition-colors duration-150">
+        <button
+          type="button"
+          id="downloadMainBtn"
+          onClick={handleDownloadPdf}
+          disabled={downloadingPdf || downloadingDocx}
+          className="flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-white cursor-pointer hover:bg-white/10 rounded-l-md transition-colors"
+        >
+          {downloadingPdf || downloadingDocx ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Download className="w-3.5 h-3.5" />
+          )}
+          <span>Download</span>
+        </button>
+        <div className="h-4 border-r border-slate-700" />
+        <button
+          type="button"
+          aria-label="Download formats"
+          onClick={() => setIsOpen((prev) => !prev)}
+          className="px-2 py-1.5 text-slate-300 hover:text-white cursor-pointer rounded-r-md transition-colors"
+        >
+          <ChevronDown className="w-3.5 h-3.5" />
+        </button>
+      </div>
 
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-80 glass-2 rounded-card shadow-card border border-border-subtle z-50 p-2 space-y-1 animate-in fade-in zoom-in-95">

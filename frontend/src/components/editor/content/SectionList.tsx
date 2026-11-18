@@ -25,18 +25,12 @@ import {
   GripVertical,
   Eye,
   EyeOff,
-  Copy,
   Trash2,
   ChevronDown,
-  ChevronRight,
   Plus,
   Briefcase,
   GraduationCap,
-  Code,
-  Folder,
-  FolderGit2,
   Award,
-  FileSpreadsheet,
   FileText,
   Lightbulb,
   Scissors,
@@ -46,7 +40,13 @@ import {
   Compass,
   Users,
   CheckSquare,
-  Columns,
+  Sparkles,
+  Edit2,
+  Check,
+  ArrowUpDown,
+  Folder,
+  SlidersHorizontal,
+  Bot,
 } from 'lucide-react';
 
 interface SortableSectionProps {
@@ -75,9 +75,11 @@ const SortableSection: React.FC<SortableSectionProps> = ({
     toggleSectionVisibility,
     toggleSectionPageBreak,
     removeSection,
-    duplicateSection,
     updateSectionTitle,
   } = useResume();
+
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(section.title);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: section.id });
@@ -106,57 +108,109 @@ const SortableSection: React.FC<SortableSectionProps> = ({
 
   const getSectionIcon = (type: SectionType) => {
     switch (type) {
-      case 'experience':
-        return <Briefcase className="w-5 h-5 text-slate-800" />;
-      case 'education':
-        return <GraduationCap className="w-5 h-5 text-slate-800" />;
-      case 'skills':
-        return <Lightbulb className="w-5 h-5 text-slate-800" />;
-      case 'projects':
-        return <Folder className="w-5 h-5 text-slate-800" />;
-      case 'certifications':
-      case 'awards':
-        return <Award className="w-5 h-5 text-slate-800" />;
       case 'summary':
-        return <FileText className="w-5 h-5 text-slate-800" />;
+        return (
+          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
+            <FileText className="w-4 h-4" />
+          </div>
+        );
+      case 'experience':
+        return (
+          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
+            <Briefcase className="w-4 h-4" />
+          </div>
+        );
+      case 'skills':
+        return (
+          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0">
+            <Lightbulb className="w-4 h-4" />
+          </div>
+        );
+      case 'education':
+        return (
+          <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+            <GraduationCap className="w-4 h-4" />
+          </div>
+        );
+      case 'projects':
+        return (
+          <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
+            <Folder className="w-4 h-4" />
+          </div>
+        );
+      case 'certifications':
+        return (
+          <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center shrink-0">
+            <Award className="w-4 h-4" />
+          </div>
+        );
       case 'languages':
-        return <Languages className="w-5 h-5 text-slate-800" />;
-      case 'publications':
-        return <BookOpen className="w-5 h-5 text-slate-800" />;
-      case 'volunteering':
-        return <HeartHandshake className="w-5 h-5 text-slate-800" />;
-      case 'interests':
-        return <Compass className="w-5 h-5 text-slate-800" />;
-      case 'references':
-        return <Users className="w-5 h-5 text-slate-800" />;
+        return (
+          <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+            <Languages className="w-4 h-4" />
+          </div>
+        );
       default:
-        return <FileText className="w-5 h-5 text-slate-800" />;
+        return (
+          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+            <FileText className="w-4 h-4" />
+          </div>
+        );
     }
   };
 
-  const currentPlacement = resumeStyle.layout?.sectionPlacement?.[section.id] || 'main';
-
-  const handlePlacementChange = (newPlacement: 'main' | 'sidebar' | 'full') => {
-    updateStyle({
-      ...resumeStyle,
-      layout: {
-        ...resumeStyle.layout,
-        sectionPlacement: {
-          ...resumeStyle.layout?.sectionPlacement,
-          [section.id]: newPlacement,
-        },
-      },
-    });
+  const getAddButtonLabel = (type: SectionType) => {
+    switch (type) {
+      case 'experience':
+        return 'Add Role';
+      case 'skills':
+        return 'Add Entry';
+      case 'education':
+        return 'Add Education';
+      case 'projects':
+        return 'Add Project';
+      case 'certifications':
+        return 'Add Certification';
+      default:
+        return 'Add Entry';
+    }
   };
+
+  const getAiButtonLabel = (type: SectionType) => {
+    switch (type) {
+      case 'summary':
+        return 'AI Polish';
+      case 'skills':
+        return 'AI Skill Suggestions';
+      case 'experience':
+        return 'AI Suggestions';
+      default:
+        return 'AI Suggestions';
+    }
+  };
+
+  const handleSaveTitle = () => {
+    if (editedTitle.trim()) {
+      updateSectionTitle(section.id, editedTitle.trim());
+    }
+    setIsEditingTitle(false);
+  };
+
+  // Special handling for summary section
+  const isSummarySection = section.type === 'summary';
+  const summaryItem = section.items?.[0];
+  const summaryText = summaryItem?.bullets?.[0]?.text || '';
+  const wordCount = summaryText ? summaryText.trim().split(/\s+/).length : 0;
+  const charCount = summaryText.length;
 
   return (
     <div
       ref={setNodeRef}
       style={sortableStyle}
-      className={`border rounded-2xl mb-3.5 overflow-hidden transition-all bg-white group ${
+      className={`border rounded-xl mb-3.5 overflow-hidden transition-all bg-white group shadow-sm ${
         isExpanded
-          ? 'border-slate-300 shadow-sm ring-1 ring-slate-100'
-          : 'border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:border-slate-300'
+          ? 'border-slate-300 ring-1 ring-slate-100'
+          : 'border-slate-200/90 hover:border-slate-300'
       } ${!section.visible ? 'opacity-65 bg-slate-50/70' : ''}`}
     >
       {/* Forced Page Break Indicator */}
@@ -169,19 +223,19 @@ const SortableSection: React.FC<SortableSectionProps> = ({
           <button
             type="button"
             onClick={() => toggleSectionPageBreak(section.id)}
-            className="hover:underline opacity-80"
+            className="hover:underline opacity-80 cursor-pointer"
           >
             Remove
           </button>
         </div>
       )}
 
-      {/* Dropdown Stage Trigger Bar */}
+      {/* Stage Summary Trigger Header */}
       <div
         onClick={onToggleExpand}
-        className="p-4 sm:p-4.5 flex items-center justify-between cursor-pointer select-none bg-white hover:bg-slate-50/50 transition-colors"
+        className="p-3.5 sm:p-4 flex items-center justify-between cursor-pointer select-none bg-white hover:bg-slate-50/60 transition-colors"
       >
-        <div className="flex items-center space-x-2.5 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
           <button
             type="button"
             {...attributes}
@@ -193,41 +247,77 @@ const SortableSection: React.FC<SortableSectionProps> = ({
             <GripVertical className="w-4 h-4" />
           </button>
 
-          <span className="shrink-0">{getSectionIcon(section.type)}</span>
+          {getSectionIcon(section.type)}
 
-          <div className="min-w-0">
-            <h3 className="font-bold text-slate-900 text-[15px] sm:text-[16px] tracking-tight truncate">
-              {section.title}
-            </h3>
+          <div className="flex items-center gap-2 min-w-0">
+            {isEditingTitle ? (
+              <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="text"
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveTitle();
+                    if (e.key === 'Escape') setIsEditingTitle(false);
+                  }}
+                  autoFocus
+                  className="font-bold text-[16px] text-slate-900 border border-blue-400 rounded px-2 py-0.5 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={handleSaveTitle}
+                  className="p-1 text-emerald-600 hover:bg-emerald-50 rounded"
+                >
+                  <Check className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <h3 className="font-bold text-[16px] text-slate-900 tracking-tight truncate">
+                  {section.title}
+                </h3>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditedTitle(section.title);
+                    setIsEditingTitle(true);
+                  }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 text-xs font-medium transition-colors shadow-2xs ml-1 cursor-pointer"
+                  title="Edit Heading Name"
+                >
+                  <Edit2 className="w-3 h-3 text-slate-400" />
+                  <span>Edit Heading</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
 
         {/* Right Actions & Chevron */}
-        <div className="flex items-center space-x-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-          {/* Quick Visibility Eye Toggle */}
+        <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
             onClick={() => toggleSectionVisibility(section.id)}
-            aria-label={section.visible ? "Hide section on resume" : "Show section on resume"}
-            className={`p-1.5 rounded-lg transition-colors ${
+            aria-label={section.visible ? 'Hide section on resume' : 'Show section on resume'}
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
               section.visible
-                ? 'text-slate-400 hover:text-slate-700 opacity-0 group-hover:opacity-100 hover:bg-slate-100'
+                ? 'text-slate-400 hover:text-slate-800 hover:bg-slate-100'
                 : 'text-amber-500 bg-amber-50 hover:bg-amber-100'
             }`}
-            title={section.visible ? 'Hide section' : 'Show section'}
+            title={section.visible ? 'Toggle visibility in resume' : 'Show section'}
           >
             {section.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
           </button>
 
-          {/* Chevron */}
           <button
             type="button"
             onClick={onToggleExpand}
-            aria-label={isExpanded ? "Collapse section" : "Expand section"}
-            className="p-1 text-slate-400 group-hover:text-slate-700 transition-colors"
+            aria-label={isExpanded ? 'Collapse section' : 'Expand section'}
+            className="p-1 text-slate-400 hover:text-slate-800 transition-colors cursor-pointer"
           >
             <ChevronDown
-              className={`w-5 h-5 transition-transform duration-200 ${
+              className={`w-4 h-4 transition-transform duration-200 ${
                 isExpanded ? 'rotate-180' : ''
               }`}
             />
@@ -237,107 +327,142 @@ const SortableSection: React.FC<SortableSectionProps> = ({
 
       {/* Expanded Stage Body */}
       {isExpanded && (
-        <div className="p-3 sm:p-4 bg-[#FAFBFD] border-t border-slate-100 space-y-3">
-          {/* Internal Section Toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-white border border-slate-200/80 rounded-xl">
-            <div className="flex items-center space-x-2 flex-1 min-w-[180px]">
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Title:</span>
-              <input
-                type="text"
-                value={section.title}
-                aria-label="Section title"
-                onChange={(e) => updateSectionTitle(section.id, e.target.value)}
-                className="text-xs font-bold text-slate-800 bg-slate-50 focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 border border-slate-200 outline-hidden flex-1"
-              />
-            </div>
+        <div className="border-t border-slate-100">
+          {/* Summary Section Special View */}
+          {isSummarySection ? (
+            <div className="px-4 pb-4 pt-3 space-y-3">
+              <div className="flex items-center justify-between pb-1">
+                <span className="text-xs font-medium text-slate-400">Editorial Rich Text</span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!summaryItem) {
+                        addItem(section.id);
+                      }
+                    }}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#FFF0F5] border border-[#FFD5DF] text-[#FF2D6C] text-xs font-semibold hover:bg-pink-100 transition-colors cursor-pointer"
+                    title="Improve phrasing and impact with AI"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>AI Polish</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition-colors cursor-pointer"
+                    title="Highlight tailored job keywords"
+                  >
+                    <SlidersHorizontal className="w-3 h-3 text-slate-400" />
+                    <span>Match JD</span>
+                  </button>
+                </div>
+              </div>
 
-            <div className="flex items-center space-x-1.5 shrink-0">
-              {/* Column Target Selector */}
-              <select
-                value={currentPlacement}
-                aria-label="Column placement on resume"
-                onChange={(e) => handlePlacementChange(e.target.value as 'main' | 'sidebar' | 'full')}
-                className="text-[11px] font-semibold px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border-none outline-hidden cursor-pointer"
-                title="Column placement on resume"
-              >
-                <option value="main">Main Column</option>
-                <option value="sidebar">Sidebar</option>
-                <option value="full">Full Width</option>
-              </select>
-
-              {/* Page break toggle */}
-              <button
-                type="button"
-                onClick={() => toggleSectionPageBreak(section.id)}
-                className={`p-1.5 rounded-lg transition-colors ${
-                  section.pageBreakBefore
-                    ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
-                    : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
-                }`}
-                title={section.pageBreakBefore ? 'Remove page break before section' : 'Force page break before this section'}
-              >
-                <Scissors className="w-3.5 h-3.5" />
-              </button>
-
-              {/* Duplicate Section */}
-              <button
-                type="button"
-                onClick={() => duplicateSection(section.id)}
-                className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors"
-                title="Duplicate section"
-              >
-                <Copy className="w-3.5 h-3.5" />
-              </button>
-
-              {/* Delete section */}
-              <button
-                type="button"
-                onClick={() => removeSection(section.id)}
-                className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-slate-100 rounded-lg transition-colors"
-                title="Delete section"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Section Items Dnd List */}
-          <DndContext
-            sensors={itemSensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleItemDragEnd}
-          >
-            <SortableContext
-              items={section.items.map((i) => i.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              {section.items.map((item) => (
-                <SectionItemCard
-                  key={item.id}
-                  item={item}
-                  sectionType={section.type}
-                  onUpdate={(data) => updateItem(section.id, item.id, data)}
-                  onDuplicate={() => duplicateItem(section.id, item.id)}
-                  onRemove={() => removeItem(section.id, item.id)}
-                  onAddBullet={() => addBullet(section.id, item.id)}
-                  onRemoveBullet={(bId) => removeBullet(section.id, item.id, bId)}
-                  onUpdateBullet={(bId, patch) => updateBullet(section.id, item.id, bId, patch)}
-                  onReorderBullets={(oIdx, nIdx) =>
-                    reorderBullets(section.id, item.id, oIdx, nIdx)
+              <textarea
+                rows={4}
+                value={summaryText}
+                onChange={(e) => {
+                  const newText = e.target.value;
+                  if (summaryItem) {
+                    if (summaryItem.bullets && summaryItem.bullets.length > 0) {
+                      updateBullet(section.id, summaryItem.id, summaryItem.bullets[0].id, {
+                        text: newText,
+                      });
+                    } else {
+                      addBullet(section.id, summaryItem.id);
+                    }
+                  } else {
+                    addItem(section.id);
                   }
-                />
-              ))}
-            </SortableContext>
-          </DndContext>
+                }}
+                placeholder="Write a concise professional summary highlighting your key achievements and core competencies..."
+                className="w-full p-3 bg-slate-50/70 rounded-md border border-slate-200 text-slate-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#181824] transition-all leading-relaxed resize-none"
+              />
 
-          <button
-            type="button"
-            onClick={() => addItem(section.id)}
-            className="w-full py-2.5 border-2 border-dashed border-slate-300 hover:border-slate-400 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 transition-colors flex items-center justify-center space-x-1.5 shadow-2xs cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add Item to {section.title}</span>
-          </button>
+              <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
+                <span>
+                  Word count: {wordCount} words · {charCount} characters
+                </span>
+                <span className="text-emerald-700 font-medium flex items-center gap-1">
+                  <Check className="w-3 h-3 text-emerald-600" />
+                  <span>Strong executive tone</span>
+                </span>
+              </div>
+            </div>
+          ) : (
+            /* Standard Section Items Dnd List */
+            <div className="p-3 sm:p-4 space-y-3">
+              <DndContext
+                sensors={itemSensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleItemDragEnd}
+              >
+                <SortableContext
+                  items={section.items.map((i) => i.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {section.items.map((item) => (
+                    <SectionItemCard
+                      key={item.id}
+                      item={item}
+                      sectionType={section.type}
+                      onUpdate={(data) => updateItem(section.id, item.id, data)}
+                      onDuplicate={() => duplicateItem(section.id, item.id)}
+                      onRemove={() => removeItem(section.id, item.id)}
+                      onAddBullet={() => addBullet(section.id, item.id)}
+                      onRemoveBullet={(bId) => removeBullet(section.id, item.id, bId)}
+                      onUpdateBullet={(bId, patch) => updateBullet(section.id, item.id, bId, patch)}
+                      onReorderBullets={(oIdx, nIdx) =>
+                        reorderBullets(section.id, item.id, oIdx, nIdx)
+                      }
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+            </div>
+          )}
+
+          {/* Bottom Action Toolbar matching FlowCV & Stitch pattern */}
+          <div className="p-3.5 bg-slate-50/60 border-t border-slate-100 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              {/* Primary Add Button */}
+              <button
+                type="button"
+                onClick={() => addItem(section.id)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{getAddButtonLabel(section.type)}</span>
+              </button>
+
+              {/* AI Suggestions Button (Vibrant Purple FlowCV styling #5A32EA) */}
+              <button
+                type="button"
+                onClick={() => {
+                  // Trigger smart assistance or open AI tools
+                  alert(`AI assistant generating tailored suggestions for ${section.title}...`);
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5A32EA] hover:bg-[#4C28CF] text-white text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+              >
+                <Bot className="w-4 h-4" />
+                <span>{getAiButtonLabel(section.type)}</span>
+              </button>
+            </div>
+
+            {/* Delete Section Button */}
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm(`Are you sure you want to delete the "${section.title}" section?`)) {
+                  removeSection(section.id);
+                }
+              }}
+              className="w-9 h-9 rounded-lg border border-slate-200 bg-white hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-slate-500 flex items-center justify-center transition-colors cursor-pointer"
+              title="Delete Section"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -349,6 +474,8 @@ export const SectionList: React.FC = () => {
     useResume();
 
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [allCollapsed, setAllCollapsed] = useState(false);
+  const [personalExpanded, setPersonalExpanded] = useState(true);
 
   const sectionSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -377,14 +504,64 @@ export const SectionList: React.FC = () => {
     setShowAddMenu(false);
   };
 
-  return (
-    <div className="relative flex flex-col h-full">
-      {/* Scrollable Stage Cards Area */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-5 pb-28">
-        {/* 1. Personal Details Stage Card */}
-        <HeaderForm />
+  const handleToggleCollapseAll = () => {
+    if (allCollapsed) {
+      // Expand
+      setPersonalExpanded(true);
+      if (content.sections.length > 0) {
+        setActiveSectionId(content.sections[0].id);
+      }
+      setAllCollapsed(false);
+    } else {
+      // Collapse all
+      setPersonalExpanded(false);
+      setActiveSectionId(null);
+      setAllCollapsed(true);
+    }
+  };
 
-        {/* 2. Drag-and-Drop Dropdown Stage Cards */}
+  // Count active/visible sections including personal details
+  const activeSectionsCount =
+    content.sections.filter((s) => s.visible !== false).length + (content.header ? 1 : 0);
+
+  return (
+    <div className="relative flex flex-col h-full bg-[#F8F9FA]">
+      {/* Top Sub-bar / Stage Controls Filter Header */}
+      <div className="px-5 py-3 border-b border-slate-200/90 flex items-center justify-between bg-[#F8F9FA]/90 backdrop-blur-xs sticky top-0 z-20">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-sm text-slate-900">Resume Sections</span>
+          <span className="px-2 py-0.5 rounded-full bg-white border border-slate-200 font-mono text-[11px] text-slate-600 font-medium">
+            {activeSectionsCount} Active
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={handleToggleCollapseAll}
+            className="text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors cursor-pointer px-2 py-1 rounded hover:bg-white"
+            title={allCollapsed ? 'Expand all sections' : 'Collapse all sections'}
+          >
+            {allCollapsed ? 'Expand All' : 'Collapse All'}
+          </button>
+          <button
+            type="button"
+            className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-white transition-colors cursor-pointer"
+            title="Reorder sections"
+          >
+            <ArrowUpDown className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Scrollable Stage Cards Container */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-5 pb-28">
+        {/* STAGE 1: Personal Details */}
+        <HeaderForm
+          isExpanded={personalExpanded}
+          onToggleExpand={() => setPersonalExpanded((prev) => !prev)}
+        />
+
+        {/* STAGES 2+: Sortable Section Cards */}
         <DndContext
           sensors={sectionSensors}
           collisionDetection={closestCenter}
@@ -399,129 +576,122 @@ export const SectionList: React.FC = () => {
                 key={section.id}
                 section={section}
                 isExpanded={activeSectionId === section.id}
-                onToggleExpand={() =>
-                  setActiveSectionId(activeSectionId === section.id ? null : section.id)
-                }
+                onToggleExpand={() => {
+                  setActiveSectionId(activeSectionId === section.id ? null : section.id);
+                  if (allCollapsed) setAllCollapsed(false);
+                }}
               />
             ))}
           </SortableContext>
         </DndContext>
       </div>
 
-      {/* 3. Floating Bottom "+ Add Content" Button & Menu */}
-      <div className="sticky bottom-0 left-0 right-0 py-4 bg-gradient-to-t from-[#F8F9FA] via-[#F8F9FA]/90 to-transparent flex flex-col items-center justify-center z-20 px-4">
-        {showAddMenu && (
-          <div className="w-full max-w-md mb-3 bg-white border border-slate-200/90 rounded-2xl shadow-2xl p-3 z-30 grid grid-cols-2 gap-2 text-xs max-h-80 overflow-y-auto animate-in fade-in zoom-in-95">
-            <button
-              onClick={() => handleAdd('summary')}
-              className="px-3 py-2 text-left rounded-xl hover:bg-slate-100 font-semibold text-slate-800 flex items-center space-x-2.5 transition-colors"
-            >
-              <FileText className="w-4 h-4 text-slate-800" />
-              <span>Summary</span>
-            </button>
-            <button
-              onClick={() => handleAdd('skills')}
-              className="px-3 py-2 text-left rounded-xl hover:bg-slate-100 font-semibold text-slate-800 flex items-center space-x-2.5 transition-colors"
-            >
-              <Lightbulb className="w-4 h-4 text-slate-800" />
-              <span>Technical Skills</span>
-            </button>
-            <button
-              onClick={() => handleAdd('experience')}
-              className="px-3 py-2 text-left rounded-xl hover:bg-slate-100 font-semibold text-slate-800 flex items-center space-x-2.5 transition-colors"
-            >
-              <Briefcase className="w-4 h-4 text-slate-800" />
-              <span>Experience</span>
-            </button>
-            <button
-              onClick={() => handleAdd('projects')}
-              className="px-3 py-2 text-left rounded-xl hover:bg-slate-100 font-semibold text-slate-800 flex items-center space-x-2.5 transition-colors"
-            >
-              <Folder className="w-4 h-4 text-slate-800" />
-              <span>Projects</span>
-            </button>
-            <button
-              onClick={() => handleAdd('education')}
-              className="px-3 py-2 text-left rounded-xl hover:bg-slate-100 font-semibold text-slate-800 flex items-center space-x-2.5 transition-colors"
-            >
-              <GraduationCap className="w-4 h-4 text-slate-800" />
-              <span>Education</span>
-            </button>
-            <button
-              onClick={() => handleAdd('certifications')}
-              className="px-3 py-2 text-left rounded-xl hover:bg-slate-100 font-semibold text-slate-800 flex items-center space-x-2.5 transition-colors"
-            >
-              <Award className="w-4 h-4 text-slate-800" />
-              <span>Certifications</span>
-            </button>
-            <button
-              onClick={() => handleAdd('languages')}
-              className="px-3 py-2 text-left rounded-xl hover:bg-slate-100 font-semibold text-slate-800 flex items-center space-x-2.5 transition-colors"
-            >
-              <Languages className="w-4 h-4 text-slate-800" />
-              <span>Languages</span>
-            </button>
-            <button
-              onClick={() => handleAdd('awards')}
-              className="px-3 py-2 text-left rounded-xl hover:bg-slate-100 font-semibold text-slate-800 flex items-center space-x-2.5 transition-colors"
-            >
-              <Award className="w-4 h-4 text-slate-800" />
-              <span>Honors & Awards</span>
-            </button>
-            <button
-              onClick={() => handleAdd('publications')}
-              className="px-3 py-2 text-left rounded-xl hover:bg-slate-100 font-semibold text-slate-800 flex items-center space-x-2.5 transition-colors"
-            >
-              <BookOpen className="w-4 h-4 text-slate-800" />
-              <span>Publications</span>
-            </button>
-            <button
-              onClick={() => handleAdd('volunteering')}
-              className="px-3 py-2 text-left rounded-xl hover:bg-slate-100 font-semibold text-slate-800 flex items-center space-x-2.5 transition-colors"
-            >
-              <HeartHandshake className="w-4 h-4 text-slate-800" />
-              <span>Volunteering</span>
-            </button>
-            <button
-              onClick={() => handleAdd('interests')}
-              className="px-3 py-2 text-left rounded-xl hover:bg-slate-100 font-semibold text-slate-800 flex items-center space-x-2.5 transition-colors"
-            >
-              <Compass className="w-4 h-4 text-slate-800" />
-              <span>Interests</span>
-            </button>
-            <button
-              onClick={() => handleAdd('references')}
-              className="px-3 py-2 text-left rounded-xl hover:bg-slate-100 font-semibold text-slate-800 flex items-center space-x-2.5 transition-colors"
-            >
-              <Users className="w-4 h-4 text-slate-800" />
-              <span>References</span>
-            </button>
-            <button
-              onClick={() => handleAdd('custom', 'Declaration')}
-              className="px-3 py-2 text-left rounded-xl hover:bg-slate-100 font-semibold text-slate-800 flex items-center space-x-2.5 transition-colors"
-            >
-              <CheckSquare className="w-4 h-4 text-slate-800" />
-              <span>Declaration</span>
-            </button>
-            <button
-              onClick={() => handleAdd('custom')}
-              className="px-3 py-2 text-left rounded-xl bg-pink-50 hover:bg-pink-100 font-semibold text-[#FF2D6C] flex items-center space-x-2.5 transition-colors"
-            >
-              <Plus className="w-4 h-4 text-[#FF2D6C]" />
-              <span>+ Custom Section</span>
-            </button>
-          </div>
-        )}
-
+      {/* Floating Bottom Sticky CTA: "+ Add Content" Capsule Button */}
+      <div className="absolute bottom-5 left-0 right-0 flex justify-center px-5 pointer-events-none z-30">
         <button
           type="button"
           onClick={() => setShowAddMenu((v) => !v)}
-          className="bg-gradient-to-r from-[#FF2D6C] to-[#FF5E62] hover:opacity-95 text-white font-bold text-sm px-8 py-3 rounded-full shadow-lg shadow-pink-500/25 hover:shadow-pink-500/35 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer select-none"
+          className="pointer-events-auto inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#FF2D6C] to-[#FF5E62] text-white font-bold text-sm shadow-lg shadow-pink-500/25 hover:brightness-105 active:scale-95 transition-all cursor-pointer select-none"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Add Content</span>
         </button>
       </div>
+
+      {/* Popup 2-Column Menu for Adding Sections */}
+      {showAddMenu && (
+        <div className="absolute bottom-20 left-6 right-6 bg-white rounded-xl border border-slate-200 shadow-2xl p-4 z-40 animate-in fade-in zoom-in-95">
+          <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-200">
+            <div>
+              <span className="font-bold text-sm text-slate-900 block">Add Resume Section</span>
+              <span className="text-xs text-slate-500">
+                Choose a module to append to your resume
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowAddMenu(false)}
+              className="w-6 h-6 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-800 cursor-pointer"
+            >
+              ×
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-left">
+            <button
+              type="button"
+              onClick={() => handleAdd('summary')}
+              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
+            >
+              <FileText className="w-4 h-4 text-slate-800" />
+              <span>Summary</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAdd('experience')}
+              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
+            >
+              <Briefcase className="w-4 h-4 text-slate-800" />
+              <span>Work Experience</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAdd('skills')}
+              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
+            >
+              <Lightbulb className="w-4 h-4 text-slate-800" />
+              <span>Skills</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAdd('education')}
+              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
+            >
+              <GraduationCap className="w-4 h-4 text-slate-800" />
+              <span>Education</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAdd('projects')}
+              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
+            >
+              <Folder className="w-4 h-4 text-slate-800" />
+              <span>Projects</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAdd('certifications')}
+              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
+            >
+              <Award className="w-4 h-4 text-slate-800" />
+              <span>Certifications</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAdd('languages')}
+              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
+            >
+              <Languages className="w-4 h-4 text-slate-800" />
+              <span>Languages</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAdd('awards')}
+              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
+            >
+              <Award className="w-4 h-4 text-slate-800" />
+              <span>Awards &amp; Honors</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAdd('custom')}
+              className="col-span-2 flex items-center justify-center gap-2 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-200 transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>+ Custom Section</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
