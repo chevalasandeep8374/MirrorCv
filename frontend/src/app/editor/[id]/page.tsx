@@ -97,7 +97,7 @@ function EditorLayout() {
       <main className="flex-1 flex overflow-hidden relative">
         {activeTab === 'overview' ? (
           /* Full Overview Dashboard Tab */
-          <div className="flex-1 overflow-y-auto bg-slate-50">
+          <div className="flex-1 overflow-y-auto bg-[#F8F9FA]">
             <OverviewTab
               onOpenAts={() => setAtsOpen(true)}
               onOpenTailor={() => setTailorOpen(true)}

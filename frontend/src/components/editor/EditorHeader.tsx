@@ -6,6 +6,7 @@ import { useResume, EditorTab } from '@/context/ResumeContext';
 import { ResumeSelectorDropdown } from './header/ResumeSelectorDropdown';
 import { DownloadDropdown } from './header/DownloadDropdown';
 import { EditorOverflowMenu } from './header/EditorOverflowMenu';
+import { getActiveRepository } from '@/repositories';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -17,6 +18,7 @@ import {
   Sliders,
   FileText,
   LayoutGrid,
+  Plus,
 } from 'lucide-react';
 
 interface EditorHeaderProps {
@@ -69,6 +71,16 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
         >
           <ArrowLeft className="w-4 h-4" />
         </Link>
+
+        {/* Brand Mark */}
+        <div className="flex items-center gap-2 pr-2.5 sm:pr-3 border-r border-slate-200">
+          <div className="w-6 h-6 rounded-md bg-[#181824] flex items-center justify-center text-white text-[11px] font-bold">
+            M
+          </div>
+          <span className="font-bold text-xs sm:text-sm text-slate-900 hidden md:inline">
+            MirrorCV
+          </span>
+        </div>
 
         {/* 4-Tab Navigation Shell */}
         <nav className="flex items-center space-x-1 sm:space-x-1.5">
@@ -128,6 +140,22 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
 
       {/* 2. Right: Save Status, Switcher Dropdown, Undo/Redo, Unified Download, Overflow Menu */}
       <div className="flex items-center space-x-2 sm:space-x-2.5">
+        {/* Global New Resume Action when in Overview */}
+        {activeTab === 'overview' && (
+          <button
+            type="button"
+            onClick={async () => {
+              const repo = await getActiveRepository();
+              const newResume = await repo.create({ title: 'New Targeted Resume' });
+              window.location.href = `/editor/${newResume.id}`;
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#FF2D6C] to-[#FF5E62] text-white font-bold text-xs shadow-xs hover:opacity-95 transition-opacity cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>+ New Resume</span>
+          </button>
+        )}
+
         {/* Subtle Save Status Indicator */}
         <div className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-50 border border-slate-200/80">
           {saveStatus === 'saved' && (
