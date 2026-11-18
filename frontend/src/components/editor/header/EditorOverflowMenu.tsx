@@ -90,7 +90,7 @@ export const EditorOverflowMenu: React.FC<EditorOverflowMenuProps> = ({
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 top-full mt-1.5 w-52 glass-2 rounded-card shadow-card border border-border-subtle z-50 p-1.5 space-y-0.5 animate-in fade-in zoom-in-95">
+          <div className="absolute right-0 top-full mt-1.5 w-52 glass-2 rounded-xl shadow-xl border border-slate-200/90 z-50 p-1.5 space-y-0.5 animate-dropdown-fade">
             <button
               type="button"
               onClick={handleRename}

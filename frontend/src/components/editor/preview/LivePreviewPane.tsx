@@ -52,12 +52,12 @@ export const LivePreviewPane: React.FC = () => {
   return (
     <div
       ref={containerRef}
-      className="flex-1 bg-[#ECEEF2] overflow-auto p-6 sm:p-8 flex flex-col items-center justify-start min-h-full relative select-none"
+      className="flex-1 bg-[#ECEEF2] overflow-auto custom-scrollbar scroll-smooth p-6 sm:p-8 flex flex-col items-center justify-start min-h-full relative select-none"
     >
       {/* Center Glassmorphic Indicator for AI Mode */}
       {activeTab === 'ai' && (
         <div className="sticky top-2 z-40 mb-3 pointer-events-none">
-          <div className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 border border-pink-200 shadow-md text-slate-900 text-xs font-semibold animate-in fade-in zoom-in-95">
+          <div className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 border border-pink-200 shadow-md text-slate-900 text-xs font-semibold animate-dropdown-fade">
             <span className="w-2 h-2 rounded-full bg-[#FF2D6C] animate-pulse" />
             <span className="text-[#FF2D6C] font-semibold">AI Diff Mode: 3 Optimizations Highlighted</span>
           </div>
@@ -65,7 +65,7 @@ export const LivePreviewPane: React.FC = () => {
       )}
 
       {/* Floating Preview Controls Toolbar (Glassmorphic Centered Capsule) */}
-      <div className="sticky top-4 z-30 mb-6 bg-white/95 backdrop-blur-md border border-slate-200 shadow-md rounded-full px-3.5 py-1.5 flex items-center gap-2 text-xs text-slate-800">
+      <div className="sticky top-4 z-30 mb-6 bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md hover:shadow-lg rounded-full px-3.5 py-1.5 flex items-center gap-2.5 text-xs text-slate-800 transition-all duration-200">
         {/* Zoom Controls: [-] 100% [+] */}
         <div className="flex items-center gap-1">
           <button
@@ -122,8 +122,8 @@ export const LivePreviewPane: React.FC = () => {
         <div className="h-3.5 border-r border-slate-200" />
 
         {/* Page Format & Count Indicator */}
-        <div className="flex items-center gap-1 px-2 py-0.5 rounded text-slate-500 font-mono text-[11px] font-medium">
-          <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 font-semibold">
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded text-slate-500 font-mono text-[11px] font-medium">
+          <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs tracking-wider">
             {style.pageSize || 'A4'}
           </span>
           <span>Page 1 of 1</span>

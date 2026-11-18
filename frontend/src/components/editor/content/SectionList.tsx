@@ -110,49 +110,49 @@ const SortableSection: React.FC<SortableSectionProps> = ({
     switch (type) {
       case 'summary':
         return (
-          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
             <FileText className="w-4 h-4" />
           </div>
         );
       case 'experience':
         return (
-          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
             <Briefcase className="w-4 h-4" />
           </div>
         );
       case 'skills':
         return (
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
             <Lightbulb className="w-4 h-4" />
           </div>
         );
       case 'education':
         return (
-          <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
             <GraduationCap className="w-4 h-4" />
           </div>
         );
       case 'projects':
         return (
-          <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
             <Folder className="w-4 h-4" />
           </div>
         );
       case 'certifications':
         return (
-          <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
             <Award className="w-4 h-4" />
           </div>
         );
       case 'languages':
         return (
-          <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
             <Languages className="w-4 h-4" />
           </div>
         );
       default:
         return (
-          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
             <FileText className="w-4 h-4" />
           </div>
         );
@@ -207,10 +207,10 @@ const SortableSection: React.FC<SortableSectionProps> = ({
     <div
       ref={setNodeRef}
       style={sortableStyle}
-      className={`border rounded-xl mb-3.5 overflow-hidden transition-all bg-white group shadow-sm ${
+      className={`border rounded-xl mb-3.5 overflow-hidden transition-all duration-300 bg-white group ${
         isExpanded
-          ? 'border-slate-300 ring-1 ring-slate-100'
-          : 'border-slate-200/90 hover:border-slate-300'
+          ? 'border-slate-300 shadow-md ring-2 ring-slate-900/5'
+          : 'border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-sm hover:-translate-y-0.5 cursor-pointer'
       } ${!section.visible ? 'opacity-65 bg-slate-50/70' : ''}`}
     >
       {/* Forced Page Break Indicator */}
@@ -233,7 +233,7 @@ const SortableSection: React.FC<SortableSectionProps> = ({
       {/* Stage Summary Trigger Header */}
       <div
         onClick={onToggleExpand}
-        className="p-3.5 sm:p-4 flex items-center justify-between cursor-pointer select-none bg-white hover:bg-slate-50/60 transition-colors"
+        className="p-3.5 sm:p-4 flex items-center justify-between cursor-pointer select-none bg-white hover:bg-slate-50/70 transition-colors duration-150 group"
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <button
@@ -247,9 +247,11 @@ const SortableSection: React.FC<SortableSectionProps> = ({
             <GripVertical className="w-4 h-4" />
           </button>
 
-          {getSectionIcon(section.type)}
+          <div className="transition-transform duration-200 group-hover:scale-105">
+            {getSectionIcon(section.type)}
+          </div>
 
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0">
             {isEditingTitle ? (
               <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                 <input
@@ -261,7 +263,7 @@ const SortableSection: React.FC<SortableSectionProps> = ({
                     if (e.key === 'Escape') setIsEditingTitle(false);
                   }}
                   autoFocus
-                  className="font-bold text-[16px] text-slate-900 border border-blue-400 rounded px-2 py-0.5 focus:outline-none"
+                  className="font-bold text-[15px] sm:text-[16px] text-slate-900 border border-blue-400 rounded px-2 py-0.5 focus:outline-none"
                 />
                 <button
                   type="button"
@@ -273,7 +275,7 @@ const SortableSection: React.FC<SortableSectionProps> = ({
               </div>
             ) : (
               <>
-                <h3 className="font-bold text-[16px] text-slate-900 tracking-tight truncate">
+                <h3 className="font-bold text-[15px] sm:text-[16px] text-slate-900 tracking-tight truncate group-hover:text-blue-900 transition-colors">
                   {section.title}
                 </h3>
                 <button
@@ -283,11 +285,10 @@ const SortableSection: React.FC<SortableSectionProps> = ({
                     setEditedTitle(section.title);
                     setIsEditingTitle(true);
                   }}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 text-xs font-medium transition-colors shadow-2xs ml-1 cursor-pointer"
-                  title="Edit Heading Name"
+                  className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all cursor-pointer"
+                  title="Rename section"
                 >
-                  <Edit2 className="w-3 h-3 text-slate-400" />
-                  <span>Edit Heading</span>
+                  <Edit2 className="w-3.5 h-3.5" />
                 </button>
               </>
             )}
@@ -295,14 +296,20 @@ const SortableSection: React.FC<SortableSectionProps> = ({
         </div>
 
         {/* Right Actions & Chevron */}
-        <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+          {!section.visible && (
+            <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200/80">
+              Hidden
+            </span>
+          )}
+
           <button
             type="button"
             onClick={() => toggleSectionVisibility(section.id)}
             aria-label={section.visible ? 'Hide section on resume' : 'Show section on resume'}
-            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+            className={`p-1.5 rounded-lg transition-all duration-150 cursor-pointer active:scale-95 ${
               section.visible
-                ? 'text-slate-400 hover:text-slate-800 hover:bg-slate-100'
+                ? 'opacity-0 group-hover:opacity-100 text-slate-400 hover:text-slate-800 hover:bg-slate-100'
                 : 'text-amber-500 bg-amber-50 hover:bg-amber-100'
             }`}
             title={section.visible ? 'Toggle visibility in resume' : 'Show section'}
@@ -314,10 +321,10 @@ const SortableSection: React.FC<SortableSectionProps> = ({
             type="button"
             onClick={onToggleExpand}
             aria-label={isExpanded ? 'Collapse section' : 'Expand section'}
-            className="p-1 text-slate-400 hover:text-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-all duration-150 cursor-pointer active:scale-95"
           >
             <ChevronDown
-              className={`w-4 h-4 transition-transform duration-200 ${
+              className={`w-4 h-4 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                 isExpanded ? 'rotate-180' : ''
               }`}
             />
@@ -325,9 +332,14 @@ const SortableSection: React.FC<SortableSectionProps> = ({
         </div>
       </div>
 
-      {/* Expanded Stage Body */}
-      {isExpanded && (
-        <div className="border-t border-slate-100">
+      {/* Smooth Animated Stage Body */}
+      <div
+        className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="border-t border-slate-100">
           {/* Summary Section Special View */}
           {isSummarySection ? (
             <div className="px-4 pb-4 pt-3 space-y-3">
@@ -457,16 +469,17 @@ const SortableSection: React.FC<SortableSectionProps> = ({
                   removeSection(section.id);
                 }
               }}
-              className="w-9 h-9 rounded-lg border border-slate-200 bg-white hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-slate-500 flex items-center justify-center transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-lg border border-slate-200 bg-white hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-slate-500 flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-95"
               title="Delete Section"
             >
               <Trash2 className="w-4 h-4" />
             </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
-  );
+  </div>
+);
 };
 
 export const SectionList: React.FC = () => {
@@ -526,11 +539,12 @@ export const SectionList: React.FC = () => {
 
   return (
     <div className="relative flex flex-col h-full bg-[#F8F9FA]">
-      {/* Top Sub-bar / Stage Controls Filter Header */}
-      <div className="px-5 py-3 border-b border-slate-200/90 flex items-center justify-between bg-[#F8F9FA]/90 backdrop-blur-xs sticky top-0 z-20">
+      {/* Top Sub-bar / Stage Controls Filter Header with Glassmorphic Blur */}
+      <div className="px-5 py-3 border-b border-slate-200/80 flex items-center justify-between bg-[#F8F9FA]/90 backdrop-blur-md sticky top-0 z-20 transition-all">
         <div className="flex items-center gap-2">
           <span className="font-bold text-sm text-slate-900">Resume Sections</span>
-          <span className="px-2 py-0.5 rounded-full bg-white border border-slate-200 font-mono text-[11px] text-slate-600 font-medium">
+          <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200/90 font-mono text-[11px] text-slate-700 font-semibold shadow-2xs flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             {activeSectionsCount} Active
           </span>
         </div>
@@ -538,14 +552,14 @@ export const SectionList: React.FC = () => {
           <button
             type="button"
             onClick={handleToggleCollapseAll}
-            className="text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors cursor-pointer px-2 py-1 rounded hover:bg-white"
+            className="text-xs font-medium text-slate-600 hover:text-slate-900 transition-all cursor-pointer px-2.5 py-1 rounded-md hover:bg-white hover:shadow-2xs active:scale-95"
             title={allCollapsed ? 'Expand all sections' : 'Collapse all sections'}
           >
             {allCollapsed ? 'Expand All' : 'Collapse All'}
           </button>
           <button
             type="button"
-            className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-white transition-colors cursor-pointer"
+            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-white hover:shadow-2xs active:scale-95 transition-all cursor-pointer"
             title="Reorder sections"
           >
             <ArrowUpDown className="w-4 h-4" />
@@ -553,8 +567,11 @@ export const SectionList: React.FC = () => {
         </div>
       </div>
 
-      {/* Scrollable Stage Cards Container */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-5 pb-28">
+      {/* Subtle top scroll gradient shadow */}
+      <div className="h-4 bg-gradient-to-b from-slate-200/30 to-transparent sticky top-[49px] z-10 -mb-4 pointer-events-none" />
+
+      {/* Scrollable Stage Cards Container with Smooth Scroll */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar scroll-smooth p-4 sm:p-5 pb-28">
         {/* STAGE 1: Personal Details */}
         <HeaderForm
           isExpanded={personalExpanded}
@@ -586,12 +603,12 @@ export const SectionList: React.FC = () => {
         </DndContext>
       </div>
 
-      {/* Floating Bottom Sticky CTA: "+ Add Content" Capsule Button */}
-      <div className="absolute bottom-5 left-0 right-0 flex justify-center px-5 pointer-events-none z-30">
+      {/* Bottom Floating Bar with Gradient Dissolve & Breathing CTA */}
+      <div className="absolute bottom-0 left-0 right-0 pt-8 pb-4 px-5 bg-gradient-to-t from-[#F8F9FA] via-[#F8F9FA]/90 to-transparent pointer-events-none z-30 flex items-center justify-start">
         <button
           type="button"
           onClick={() => setShowAddMenu((v) => !v)}
-          className="pointer-events-auto inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#FF2D6C] to-[#FF5E62] text-white font-bold text-sm shadow-lg shadow-pink-500/25 hover:brightness-105 active:scale-95 transition-all cursor-pointer select-none"
+          className="pointer-events-auto inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF2D6C] to-[#FF5E62] text-white font-bold text-sm shadow-[0_4px_16px_rgba(255,45,108,0.35)] animate-cta-breath hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 cursor-pointer select-none"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Add Content</span>
@@ -600,97 +617,103 @@ export const SectionList: React.FC = () => {
 
       {/* Popup 2-Column Menu for Adding Sections */}
       {showAddMenu && (
-        <div className="absolute bottom-20 left-6 right-6 bg-white rounded-xl border border-slate-200 shadow-2xl p-4 z-40 animate-in fade-in zoom-in-95">
-          <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-200">
-            <div>
-              <span className="font-bold text-sm text-slate-900 block">Add Resume Section</span>
-              <span className="text-xs text-slate-500">
-                Choose a module to append to your resume
-              </span>
+        <>
+          <div
+            className="fixed inset-0 z-35"
+            onClick={() => setShowAddMenu(false)}
+          />
+          <div className="absolute bottom-20 left-4 right-4 sm:left-5 sm:right-5 bg-white/98 backdrop-blur-md rounded-2xl border border-slate-200 shadow-2xl p-4 z-40 animate-modal-pop">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-200/80">
+              <div>
+                <span className="font-bold text-sm text-slate-900 block">Add Resume Section</span>
+                <span className="text-xs text-slate-500">
+                  Choose a module to append to your resume
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddMenu(false)}
+                className="w-6 h-6 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-800 transition-colors cursor-pointer"
+              >
+                ×
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setShowAddMenu(false)}
-              className="w-6 h-6 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-800 cursor-pointer"
-            >
-              ×
-            </button>
+            <div className="grid grid-cols-2 gap-2 text-left">
+              <button
+                type="button"
+                onClick={() => handleAdd('summary')}
+                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
+              >
+                <FileText className="w-4 h-4 text-slate-800" />
+                <span>Summary</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAdd('experience')}
+                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
+              >
+                <Briefcase className="w-4 h-4 text-slate-800" />
+                <span>Work Experience</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAdd('skills')}
+                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
+              >
+                <Lightbulb className="w-4 h-4 text-slate-800" />
+                <span>Skills</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAdd('education')}
+                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
+              >
+                <GraduationCap className="w-4 h-4 text-slate-800" />
+                <span>Education</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAdd('projects')}
+                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
+              >
+                <Folder className="w-4 h-4 text-slate-800" />
+                <span>Projects</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAdd('certifications')}
+                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
+              >
+                <Award className="w-4 h-4 text-slate-800" />
+                <span>Certifications</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAdd('languages')}
+                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
+              >
+                <Languages className="w-4 h-4 text-slate-800" />
+                <span>Languages</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAdd('awards')}
+                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100/80 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 hover:translate-x-0.5 active:scale-[0.99] transition-all cursor-pointer"
+              >
+                <Award className="w-4 h-4 text-slate-800" />
+                <span>Awards &amp; Honors</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAdd('custom')}
+                className="col-span-2 flex items-center justify-center gap-2 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-200 active:scale-[0.99] transition-all cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>+ Custom Section</span>
+              </button>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-2 text-left">
-            <button
-              type="button"
-              onClick={() => handleAdd('summary')}
-              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
-            >
-              <FileText className="w-4 h-4 text-slate-800" />
-              <span>Summary</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAdd('experience')}
-              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
-            >
-              <Briefcase className="w-4 h-4 text-slate-800" />
-              <span>Work Experience</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAdd('skills')}
-              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
-            >
-              <Lightbulb className="w-4 h-4 text-slate-800" />
-              <span>Skills</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAdd('education')}
-              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
-            >
-              <GraduationCap className="w-4 h-4 text-slate-800" />
-              <span>Education</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAdd('projects')}
-              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
-            >
-              <Folder className="w-4 h-4 text-slate-800" />
-              <span>Projects</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAdd('certifications')}
-              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
-            >
-              <Award className="w-4 h-4 text-slate-800" />
-              <span>Certifications</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAdd('languages')}
-              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
-            >
-              <Languages className="w-4 h-4 text-slate-800" />
-              <span>Languages</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAdd('awards')}
-              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-medium border border-transparent hover:border-slate-200 transition-all cursor-pointer"
-            >
-              <Award className="w-4 h-4 text-slate-800" />
-              <span>Awards &amp; Honors</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAdd('custom')}
-              className="col-span-2 flex items-center justify-center gap-2 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-200 transition-all cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>+ Custom Section</span>
-            </button>
-          </div>
-        </div>
+        </>
       )}
     </div>
   );

@@ -141,10 +141,12 @@ export const SectionItemCard: React.FC<SectionItemCardProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`border rounded-xl p-3 shadow-2xs mb-2.5 group/item transition-all ${
+      className={`border rounded-xl p-3 mb-2.5 group/item transition-all duration-200 ${
         isHidden
           ? 'bg-slate-50 border-dashed border-amber-300 opacity-60'
-          : 'bg-white border-slate-200/90 hover:border-slate-300'
+          : isExpanded
+          ? 'bg-white border-slate-300 shadow-sm ring-1 ring-slate-900/5'
+          : 'bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-2xs'
       }`}
     >
       {/* Top Bar with Drag Handle, Summary, Collapse, Duplicate, Eye, and Delete */}
@@ -154,7 +156,7 @@ export const SectionItemCard: React.FC<SectionItemCardProps> = ({
             type="button"
             {...attributes}
             {...listeners}
-            className="p-1 text-slate-300 hover:text-slate-600 cursor-grab active:cursor-grabbing shrink-0"
+            className="p-1 text-slate-300 hover:text-slate-600 cursor-grab active:cursor-grabbing shrink-0 transition-colors"
             title="Drag to reorder item"
           >
             <GripVertical className="w-4 h-4" />
@@ -163,13 +165,13 @@ export const SectionItemCard: React.FC<SectionItemCardProps> = ({
           <button
             type="button"
             onClick={() => setIsExpanded((prev) => !prev)}
-            className="p-0.5 text-slate-400 hover:text-slate-700 transition-colors"
+            className="p-1 text-slate-400 hover:text-slate-700 transition-colors rounded hover:bg-slate-50"
           >
-            {isExpanded ? (
-              <ChevronDown className="w-3.5 h-3.5" />
-            ) : (
-              <ChevronRight className="w-3.5 h-3.5" />
-            )}
+            <ChevronDown
+              className={`w-3.5 h-3.5 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                isExpanded ? 'rotate-0' : '-rotate-90'
+              }`}
+            />
           </button>
 
           <span
@@ -199,10 +201,10 @@ export const SectionItemCard: React.FC<SectionItemCardProps> = ({
           <button
             type="button"
             onClick={() => onUpdate({ visible: isHidden ? true : false })}
-            className={`p-1 rounded transition-colors ${
+            className={`p-1.5 rounded-md transition-all duration-150 active:scale-95 ${
               isHidden
                 ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
-                : 'text-slate-400 hover:text-slate-700'
+                : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
             }`}
             title={isHidden ? 'Click to show item on resume' : 'Hide this item on current version'}
           >
@@ -214,7 +216,7 @@ export const SectionItemCard: React.FC<SectionItemCardProps> = ({
             <button
               type="button"
               onClick={onDuplicate}
-              className="p-1 text-slate-400 hover:text-blue-600 transition-colors"
+              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-slate-100 rounded-md transition-all duration-150 active:scale-95"
               title="Duplicate entry"
             >
               <Copy className="w-3.5 h-3.5" />
@@ -225,7 +227,7 @@ export const SectionItemCard: React.FC<SectionItemCardProps> = ({
           <button
             type="button"
             onClick={onRemove}
-            className="p-1 text-slate-400 hover:text-rose-600 transition-colors"
+            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all duration-150 active:scale-95"
             title="Delete item"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -233,9 +235,14 @@ export const SectionItemCard: React.FC<SectionItemCardProps> = ({
         </div>
       </div>
 
-      {/* Expanded Item Body */}
-      {isExpanded && (
-        <div className="space-y-3 pt-1">
+      {/* Smooth Animated Item Body */}
+      <div
+        className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="space-y-3 pt-1">
           {/* Skills Specific Editor */}
           {sectionType === 'skills' ? (
             <SkillsSectionEditor
@@ -377,7 +384,8 @@ export const SectionItemCard: React.FC<SectionItemCardProps> = ({
             </>
           )}
         </div>
-      )}
+      </div>
     </div>
-  );
+  </div>
+);
 };

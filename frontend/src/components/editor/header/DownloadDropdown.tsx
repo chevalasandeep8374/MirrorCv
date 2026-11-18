@@ -182,7 +182,7 @@ export const DownloadDropdown: React.FC = () => {
       </div>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 glass-2 rounded-card shadow-card border border-border-subtle z-50 p-2 space-y-1 animate-in fade-in zoom-in-95">
+        <div className="absolute right-0 top-full mt-2 w-80 glass-2 rounded-xl shadow-xl border border-slate-200/90 z-50 p-2 space-y-1 animate-dropdown-fade">
           {/* Faithful PDF Download */}
           <button
             type="button"

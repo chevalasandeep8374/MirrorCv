@@ -115,7 +115,7 @@ export const ResumeSelectorDropdown: React.FC<ResumeSelectorDropdownProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1.5 w-72 glass-2 rounded-card shadow-card border border-border-subtle z-50 overflow-hidden animate-in fade-in zoom-in-95">
+        <div className="absolute top-full left-0 mt-1.5 w-72 glass-2 rounded-xl shadow-xl border border-slate-200/90 z-50 overflow-hidden animate-dropdown-fade">
           {/* Search Box */}
           <div className="p-2.5 border-b border-slate-100 bg-slate-50">
             <div className="relative">

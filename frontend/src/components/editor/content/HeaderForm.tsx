@@ -210,27 +210,29 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
 
   return (
     <div
-      className={`bg-white rounded-xl border transition-all mb-3.5 overflow-hidden group shadow-sm ${
-        isExpanded ? 'border-slate-300 ring-1 ring-slate-100' : 'border-slate-200/90 hover:border-slate-300'
+      className={`bg-white rounded-xl border mb-3.5 overflow-hidden transition-all duration-300 ${
+        isExpanded
+          ? 'border-slate-300 shadow-md ring-2 ring-slate-900/5'
+          : 'border-slate-200/90 hover:border-slate-300 shadow-xs hover:shadow-sm hover:-translate-y-0.5 cursor-pointer'
       }`}
     >
       {/* Stage Summary Trigger Header */}
       <div
         onClick={toggleExpand}
-        className="p-3.5 flex items-center justify-between cursor-pointer select-none hover:bg-slate-50/60 transition-colors"
+        className="p-3.5 sm:p-4 flex items-center justify-between cursor-pointer select-none hover:bg-slate-50/70 transition-colors duration-150 group"
       >
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-[#181824] shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-800 shrink-0 transition-colors duration-200 group-hover:bg-slate-200/80">
             <User className="w-4 h-4" />
           </div>
           <div className="min-w-0 leading-tight">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-[15px] sm:text-[16px] text-slate-900 tracking-tight">
+              <span className="font-bold text-[15px] sm:text-[16px] text-slate-900 tracking-tight group-hover:text-blue-900 transition-colors">
                 Personal Details
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Active section" />
             </div>
-            <span className="text-xs text-slate-400 block truncate">
+            <span className="text-xs text-slate-400 block truncate mt-0.5">
               {header.name || 'Alex Mercer'} · {header.title || 'Senior Staff Software Engineer'}
             </span>
           </div>
@@ -240,7 +242,7 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
           <button
             type="button"
             onClick={toggleExpand}
-            className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-all duration-150 cursor-pointer active:scale-95"
             title="Customize Section"
           >
             <SlidersHorizontal className="w-4 h-4" />
@@ -248,7 +250,11 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
           <button
             type="button"
             onClick={() => toggleFieldVisibility('name')}
-            className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+            className={`p-1.5 rounded-lg transition-all duration-150 cursor-pointer active:scale-95 ${
+              isVisible('name')
+                ? 'opacity-0 group-hover:opacity-100 text-slate-400 hover:text-slate-800 hover:bg-slate-100'
+                : 'text-amber-500 bg-amber-50 hover:bg-amber-100'
+            }`}
             title="Toggle visibility in preview"
           >
             {isVisible('name') ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -256,18 +262,25 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
           <button
             type="button"
             onClick={toggleExpand}
-            className="p-1 rounded text-slate-400 hover:text-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 transition-all duration-150 cursor-pointer active:scale-95"
           >
             <ChevronDown
-              className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+              className={`w-4 h-4 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                isExpanded ? 'rotate-180' : ''
+              }`}
             />
           </button>
         </div>
       </div>
 
-      {/* Expanded Content: Personal Details */}
-      {isExpanded && (
-        <div className="px-4 pb-4 pt-2 border-t border-slate-100 space-y-3">
+      {/* Smooth Animated Content */}
+      <div
+        className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="px-4 pb-4 pt-2 border-t border-slate-100 space-y-3">
           {/* Avatar / Photo Upload Row */}
           <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50/80 border border-slate-200">
             <div className="flex items-center gap-3">
@@ -590,7 +603,8 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
-  );
+  </div>
+);
 };
