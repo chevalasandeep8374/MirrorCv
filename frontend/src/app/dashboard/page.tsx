@@ -289,11 +289,11 @@ export default function DashboardPage() {
 
           <button
             onClick={() => setImportModalOpen(true)}
-            className="btn-secondary !text-xs !py-1.5 !px-3.5 hidden sm:inline-flex"
-            title="Import Resume (JSON or DOCX)"
+            className="btn-secondary !text-xs !py-1.5 !px-3.5 inline-flex items-center gap-1.5"
+            title="Import Existing Resume (PDF, DOCX, JSON, etc.)"
           >
-            <Upload className="w-3.5 h-3.5" />
-            <span>Import</span>
+            <Upload className="w-3.5 h-3.5 text-primary" />
+            <span>Import Existing Resume</span>
           </button>
 
           <button
@@ -352,7 +352,14 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setImportModalOpen(true)}
+              className="px-3.5 py-2 text-xs font-bold rounded-full bg-white text-slate-700 border border-border-subtle hover:border-slate-300 hover:text-slate-900 shadow-xs flex items-center gap-1.5 transition-all"
+            >
+              <Upload className="w-3.5 h-3.5 text-primary" />
+              <span>Import Existing Resume</span>
+            </button>
             <button
               onClick={() => setActiveTab('all')}
               className={`px-4 py-2 text-xs font-bold rounded-full transition-all ${
@@ -457,10 +464,19 @@ export default function DashboardPage() {
                   : 'Start composing your first precision resume.'}
               </p>
             </div>
-            <button onClick={handleCreate} disabled={creating} className="btn-primary !text-xs !py-2 !px-5 shadow-btn">
-              <Plus className="w-3.5 h-3.5" />
-              <span>Create New Resume</span>
-            </button>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <button onClick={handleCreate} disabled={creating} className="btn-primary !text-xs !py-2 !px-5 shadow-btn flex items-center gap-1.5">
+                <Plus className="w-3.5 h-3.5" />
+                <span>Create New Resume</span>
+              </button>
+              <button
+                onClick={() => setImportModalOpen(true)}
+                className="btn-secondary !text-xs !py-2 !px-5 flex items-center gap-1.5"
+              >
+                <Upload className="w-3.5 h-3.5 text-primary" />
+                <span>Import Existing Resume</span>
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
