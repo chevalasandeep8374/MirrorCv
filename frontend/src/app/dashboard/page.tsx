@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
+import { MirrorCvLogo } from '@/components/brand/MirrorCvLogo';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getActiveRepository, localRepo, supabaseRepo } from '@/repositories';
@@ -260,12 +261,7 @@ export default function DashboardPage() {
       {/* MirrorCV Glass-1 Navigation Bar */}
       <header className="sticky top-0 z-40 glass-1 border-b border-border-subtle px-6 md:px-12 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="font-heading font-extrabold text-xl text-slate-950 tracking-tight">
-              MirrorCV
-            </span>
-            <span className="w-2 h-2 rounded-full bg-primary inline-block"></span>
-          </Link>
+          <MirrorCvLogo size="md" asLink href="/" />
           <span className="hidden sm:inline-block text-[11px] font-bold uppercase tracking-wider text-primary bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
             Workspace
           </span>

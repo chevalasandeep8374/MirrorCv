@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { MirrorCvLogo } from '@/components/brand/MirrorCvLogo';
 import { ArrowLeft, Sparkles, Check, FileCheck, Layers, Cpu, ShieldCheck } from 'lucide-react';
 
 export default function ChangelogPage() {
@@ -67,12 +68,7 @@ export default function ChangelogPage() {
       {/* Top Header */}
       <header className="sticky top-0 z-50 glass-1 h-16 px-6 md:px-12 flex items-center justify-between border-b border-border-subtle">
         <div className="w-full max-w-5xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="font-heading font-extrabold text-2xl tracking-tight text-slate-950">
-              MirrorCV
-            </span>
-            <span className="w-2 h-2 rounded-full bg-primary inline-block" />
-          </Link>
+          <MirrorCvLogo size="lg" asLink href="/" />
 
           <Link
             href="/"

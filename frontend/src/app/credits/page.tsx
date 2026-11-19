@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { MirrorCvLogo } from '@/components/brand/MirrorCvLogo';
 import { ArrowLeft, ExternalLink, ShieldCheck, FileText, Database, Code, BookOpen, Type } from 'lucide-react';
 
 export default function CreditsPage() {
@@ -18,10 +19,8 @@ export default function CreditsPage() {
             </Link>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold shadow-xs">
-              <FileText className="w-4 h-4" />
-            </div>
-            <span className="text-base font-bold text-slate-900">MirrorCV Legal & Credits</span>
+            <MirrorCvLogo size="sm" asLink href="/dashboard" />
+            <span className="text-sm font-semibold text-slate-500 pl-2 border-l border-slate-200">Legal & Credits</span>
           </div>
         </div>
       </header>

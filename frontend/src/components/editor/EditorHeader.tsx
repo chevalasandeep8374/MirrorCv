@@ -7,6 +7,7 @@ import { ResumeSelectorDropdown } from './header/ResumeSelectorDropdown';
 import { DownloadDropdown } from './header/DownloadDropdown';
 import { EditorOverflowMenu } from './header/EditorOverflowMenu';
 import { getActiveRepository } from '@/repositories';
+import { MirrorCvLogo } from '@/components/brand/MirrorCvLogo';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -72,14 +73,9 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           <ArrowLeft className="w-4 h-4" />
         </Link>
 
-        {/* Brand Mark */}
-        <div className="flex items-center gap-2 pr-2.5 sm:pr-3 border-r border-slate-200">
-          <div className="w-6 h-6 rounded-md bg-[#181824] flex items-center justify-center text-white text-[11px] font-bold">
-            M
-          </div>
-          <span className="font-bold text-xs sm:text-sm text-slate-900 hidden md:inline">
-            MirrorCV
-          </span>
+        {/* Brand Mark with Official Figma Symbol & Typography */}
+        <div className="flex items-center pr-2 sm:pr-3 border-r border-slate-200">
+          <MirrorCvLogo size="sm" asLink href="/dashboard" />
         </div>
 
         {/* 4-Tab Navigation Shell */}

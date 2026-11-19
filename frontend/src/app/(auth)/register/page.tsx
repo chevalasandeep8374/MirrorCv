@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { MirrorCvLogo } from '@/components/brand/MirrorCvLogo';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { FileText, Loader2, ArrowRight, CheckCircle2 } from 'lucide-react';
@@ -88,12 +89,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md bg-white border border-border-subtle rounded-card p-8 shadow-card">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center mb-8">
-          <Link href="/" className="flex items-center gap-2 mb-3 group">
-            <span className="font-heading font-extrabold text-2xl tracking-tight text-slate-950">
-              MirrorCV
-            </span>
-            <span className="w-2 h-2 rounded-full bg-primary inline-block" />
-          </Link>
+          <MirrorCvLogo size="lg" asLink href="/" className="mb-4" />
           <h1 className="font-heading font-extrabold text-xl text-slate-900 tracking-tight">
             Create Your Account
           </h1>

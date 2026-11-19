@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { MirrorCvLogo } from '@/components/brand/MirrorCvLogo';
 import {
   ArrowRight,
   CheckCircle2,
@@ -48,12 +49,7 @@ export default function LandingPage() {
         <div className="w-full max-w-7xl mx-auto flex items-center justify-between">
           {/* Left: Wordmark */}
           <div className="flex items-center gap-10">
-            <Link href="/" className="flex items-center gap-2 group">
-              <span className="font-heading font-extrabold text-2xl tracking-tight text-slate-950">
-                MirrorCV
-              </span>
-              <span className="w-2 h-2 rounded-full bg-primary inline-block group-hover:scale-125 transition-transform" />
-            </Link>
+            <MirrorCvLogo size="lg" asLink href="/" />
 
             {/* Desktop Navigation Links */}
             <nav className="hidden lg:flex items-center gap-8 text-sm font-semibold text-slate-600">
@@ -987,12 +983,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
           {/* Col 1: Wordmark & Mission */}
           <div className="col-span-2 space-y-3">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="font-heading font-extrabold text-xl tracking-tight text-slate-950">
-                MirrorCV
-              </span>
-              <span className="w-2 h-2 rounded-full bg-primary inline-block" />
-            </Link>
+            <MirrorCvLogo size="md" asLink href="/" />
             <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
               FlowCV-class dual-pane editor with byte-exact template preservation and adversarial fact verification.
             </p>

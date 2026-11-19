@@ -58,8 +58,11 @@ import '@fontsource/noto-sans-devanagari/700.css';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'MirrorCV - Modern Resume Builder',
+  title: 'MirrorCv - Modern Resume Builder',
   description: 'FlowCV-style resume builder with strict content & style separation.',
+  icons: {
+    icon: '/logo-symbol.svg',
+  },
 };
 
 export default function RootLayout({
