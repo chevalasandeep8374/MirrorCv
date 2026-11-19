@@ -18,12 +18,12 @@ export const SectionCustomizersCard: React.FC = () => {
   const { style, updateStyle } = useResume();
 
   const secCust = style.sectionCustomizations || {};
-  const currentSkillsStyle = secCust.skills?.style || 'compact';
+  const currentSkillsStyle = secCust.skills?.style || 'rows';
   const currentExpOrder = secCust.experience?.titleSubtitleOrder || 'title_first';
   const currentBulletStyle = style.bulletStyle || 'disc';
   const groupPromotions = secCust.experience?.groupPromotions ?? true;
 
-  const handleSkillsStyleChange = (val: 'grid' | 'rows' | 'compact' | 'bubble' | 'level') => {
+  const handleSkillsStyleChange = (val: 'rows' | 'stacked' | 'compact' | 'bubble' | 'grid' | 'level') => {
     updateStyle({
       ...style,
       sectionCustomizations: {
@@ -31,6 +31,32 @@ export const SectionCustomizersCard: React.FC = () => {
         skills: {
           ...(secCust.skills || {}),
           style: val,
+        },
+      },
+    });
+  };
+
+  const handleSubInfoStyleChange = (sep: 'colon' | 'dash' | 'bracket') => {
+    updateStyle({
+      ...style,
+      sectionCustomizations: {
+        ...secCust,
+        skills: {
+          ...(secCust.skills || {}),
+          subInfoStyle: sep,
+        },
+      },
+    });
+  };
+
+  const handleToggleBullets = (enabled: boolean) => {
+    updateStyle({
+      ...style,
+      sectionCustomizations: {
+        ...secCust,
+        skills: {
+          ...(secCust.skills || {}),
+          startRowsWithBullets: enabled,
         },
       },
     });
@@ -86,10 +112,15 @@ export const SectionCustomizersCard: React.FC = () => {
       </div>
 
       {/* 1. Skills Display Mode */}
-      <div className="space-y-2">
-        <label className="text-xs font-semibold text-slate-700">Skills & Badges Presentation</label>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-semibold text-slate-700">Skills Presentation</label>
+          <span className="text-[10px] text-slate-400">Preview & PDF layout</span>
+        </div>
         <div className="grid grid-cols-2 gap-2">
           {[
+            { id: 'rows', label: 'Normal Text (Inline)', desc: 'Standard resume text: Category: Skills' },
+            { id: 'stacked', label: 'Normal Text (Stacked)', desc: 'Category header with plain skills below' },
             { id: 'compact', label: 'Compact Chips', desc: 'Standard boxed badges' },
             { id: 'bubble', label: 'Bubble Pills', desc: 'Rounded pill shape with accent border' },
             { id: 'grid', label: 'Grid Columns', desc: '2 or 3-column aligned grid' },
@@ -100,7 +131,7 @@ export const SectionCustomizersCard: React.FC = () => {
               type="button"
               onClick={() => handleSkillsStyleChange(item.id as any)}
               className={`p-3 rounded-xl border text-left transition-all ${
-                currentSkillsStyle === item.id
+                (currentSkillsStyle === item.id || (item.id === 'rows' && currentSkillsStyle === 'normal'))
                   ? 'border-violet-600 bg-violet-50/50 text-violet-950 font-bold shadow-xs'
                   : 'border-slate-200 hover:border-slate-300 text-slate-700'
               }`}
@@ -110,6 +141,53 @@ export const SectionCustomizersCard: React.FC = () => {
             </button>
           ))}
         </div>
+
+        {/* Sub-controls when Normal Text (Inline) is active */}
+        {(currentSkillsStyle === 'rows' || currentSkillsStyle === 'normal') && (
+          <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-2.5 mt-2">
+            <div className="text-[11px] font-semibold text-slate-700">Normal Text Formatting Options</div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-600">Separator Style:</span>
+              <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5">
+                {[
+                  { id: 'colon', label: 'Colon ( : )' },
+                  { id: 'dash', label: 'Dash ( – )' },
+                  { id: 'bracket', label: 'Bracket ( ... )' },
+                ].map((sep) => (
+                  <button
+                    key={sep.id}
+                    type="button"
+                    onClick={() => handleSubInfoStyleChange(sep.id as any)}
+                    className={`px-2 py-0.5 text-[11px] rounded-md transition-all ${
+                      (secCust.skills?.subInfoStyle || 'colon') === sep.id
+                        ? 'bg-violet-600 text-white font-medium shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    {sep.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-xs pt-1.5 border-t border-slate-200/60">
+              <span className="text-slate-600">Start rows with bullet ( • ):</span>
+              <button
+                type="button"
+                onClick={() => handleToggleBullets(!secCust.skills?.startRowsWithBullets)}
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                  secCust.skills?.startRowsWithBullets ? 'bg-violet-600' : 'bg-slate-200'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                    secCust.skills?.startRowsWithBullets ? 'translate-x-4' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 2. Experience & Education Order */}

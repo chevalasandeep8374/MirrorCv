@@ -245,7 +245,7 @@
         "skills": {
           "type": "object",
           "properties": {
-            "style": { "type": "string", "enum": ["grid", "rows", "compact", "bubble", "level"], "default": "compact" },
+            "style": { "type": "string", "enum": ["grid", "rows", "compact", "bubble", "level", "stacked", "normal"], "default": "rows" },
             "rowSpacing": { "type": "string", "enum": ["tight", "spacious"], "default": "tight" },
             "startRowsWithBullets": { "type": "boolean", "default": false },
             "subInfoStyle": { "type": "string", "enum": ["colon", "dash", "bracket"], "default": "colon" }

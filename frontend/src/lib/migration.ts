@@ -235,7 +235,7 @@ export function normalizeResumeTokens(
   style.sectionCustomizations = {
     summary: { inHeader: false, showHeading: true, ...(style.sectionCustomizations?.summary || {}) },
     skills: {
-      style: 'compact',
+      style: 'rows',
       rowSpacing: 'tight',
       startRowsWithBullets: false,
       subInfoStyle: 'colon',

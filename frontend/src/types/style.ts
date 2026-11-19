@@ -151,7 +151,7 @@ export interface SummaryCustomization {
 }
 
 export interface SkillsCustomization {
-  style?: 'grid' | 'rows' | 'compact' | 'bubble' | 'level';
+  style?: 'grid' | 'rows' | 'compact' | 'bubble' | 'level' | 'stacked' | 'normal';
   rowSpacing?: 'tight' | 'spacious';
   startRowsWithBullets?: boolean;
   subInfoStyle?: 'colon' | 'dash' | 'bracket';

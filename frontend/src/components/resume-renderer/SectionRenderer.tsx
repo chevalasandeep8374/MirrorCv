@@ -146,7 +146,14 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
     section.type === 'languages' ||
     section.items.some((i) => i.itemType === 'tags');
 
-  const skillsMode = sectionCustomizations?.skills?.style || 'compact';
+  const skillsCust = sectionCustomizations?.skills;
+  const rawSkillsMode = skillsCust?.style || 'rows';
+  const skillsMode = rawSkillsMode === 'normal' ? 'rows' : rawSkillsMode;
+  const isSkillsNormalText = skillsMode === 'rows';
+  const isSkillsStackedText = skillsMode === 'stacked';
+  const startRowsWithBullets = skillsCust?.startRowsWithBullets ?? false;
+  const subInfoStyle = skillsCust?.subInfoStyle || 'colon';
+  const rowSpacing = skillsCust?.rowSpacing || 'tight';
 
   // Section specific ordering: experience or education title/subtitle inversion
   const isSubtitleFirst =
@@ -201,6 +208,124 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
           // Header fields: first & second based on order setting
           const firstField = isSubtitleFirst ? item.subtitle : item.title;
           const secondField = isSubtitleFirst ? item.title : item.subtitle;
+
+          // Extract clean skill list for normal text formatting
+          const skillsList = (item.bullets || []).flatMap((bullet) =>
+            bullet.text
+              .split(/,\s*/)
+              .map((s) => s.trim())
+              .filter(Boolean)
+          );
+
+          // Skills: Normal Text (Inline Category: Skills)
+          if (section.type === 'skills' && isSkillsNormalText) {
+            return (
+              <div
+                key={item.id || itemIdx}
+                className="resume-item leading-relaxed"
+                style={{
+                  marginBottom:
+                    itemIdx === visibleItems.length - 1
+                      ? 0
+                      : rowSpacing === 'spacious'
+                      ? 'var(--spacing-item)'
+                      : 'calc(var(--spacing-item) * 0.55)',
+                }}
+              >
+                <div
+                  className="flex items-baseline flex-wrap gap-x-1.5 text-[var(--color-text)]"
+                  style={{ fontSize: 'var(--font-size-body)' }}
+                >
+                  {startRowsWithBullets && (
+                    <span className="text-[var(--accent-bullets,var(--color-accent))] select-none mr-0.5 font-bold">
+                      {renderBulletMarker() || '•'}
+                    </span>
+                  )}
+                  {firstField && (
+                    <span
+                      className="font-bold text-[var(--accent-entry-title,var(--color-text))] shrink-0"
+                      style={{ fontSize: 'var(--font-size-item-title, var(--font-size-body))' }}
+                    >
+                      {renderInlineMarkup(firstField)}
+                      {subInfoStyle === 'dash'
+                        ? ' –'
+                        : subInfoStyle === 'bracket'
+                        ? ' ('
+                        : ':'}
+                    </span>
+                  )}
+                  <span className="text-[var(--color-text)]">
+                    {skillsList.map((skill, sIdx) => (
+                      <React.Fragment key={sIdx}>
+                        {sIdx > 0 && ', '}
+                        <span>{renderInlineMarkup(skill)}</span>
+                      </React.Fragment>
+                    ))}
+                    {firstField && subInfoStyle === 'bracket' ? ')' : ''}
+                  </span>
+
+                  {(secondField || displayDate || item.location) && (
+                    <span
+                      className="text-[var(--accent-dates,var(--color-muted))] text-xs ms-auto whitespace-nowrap"
+                      style={{ fontSize: 'var(--font-size-meta)' }}
+                    >
+                      {secondField && <span>{secondField} </span>}
+                      {displayDate && <span>{displayDate} </span>}
+                      {item.location && <span>({item.location})</span>}
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          }
+
+          // Skills: Normal Text (Stacked: Category on top, comma-separated plain text below)
+          if (section.type === 'skills' && isSkillsStackedText) {
+            return (
+              <div
+                key={item.id || itemIdx}
+                className="resume-item"
+                style={{
+                  marginBottom:
+                    itemIdx === visibleItems.length - 1
+                      ? 0
+                      : 'var(--spacing-item)',
+                }}
+              >
+                <div className="leading-tight flex justify-between items-baseline flex-wrap gap-x-2">
+                  {firstField && (
+                    <span
+                      className="font-bold text-[var(--accent-entry-title,var(--color-text))]"
+                      style={{ fontSize: 'var(--font-size-item-title)' }}
+                    >
+                      {renderInlineMarkup(firstField)}
+                    </span>
+                  )}
+                  {(displayDate || item.location) && (
+                    <span
+                      className="text-[var(--accent-dates,var(--color-muted))] text-xs ms-auto whitespace-nowrap"
+                      style={{ fontSize: 'var(--font-size-meta)' }}
+                    >
+                      {displayDate && <span>{displayDate}</span>}
+                      {displayDate && item.location && <span>, </span>}
+                      {item.location && <span>{item.location}</span>}
+                    </span>
+                  )}
+                </div>
+                <div
+                  className="mt-0.5 text-[var(--color-text)] leading-relaxed"
+                  style={{ fontSize: 'var(--font-size-body)' }}
+                >
+                  {skillsList.map((skill, sIdx) => (
+                    <React.Fragment key={sIdx}>
+                      {sIdx > 0 && ', '}
+                      <span>{renderInlineMarkup(skill)}</span>
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
+            );
+          }
 
           return (
             <div
