@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { useResume } from '@/context/ResumeContext';
 import { ResumeDocument } from '@/components/resume-renderer/ResumeDocument';
+import { paginateResume } from '@/lib/pagination';
 import {
   ZoomIn,
   ZoomOut,
@@ -26,6 +27,8 @@ export const LivePreviewPane: React.FC = () => {
   } = useResume();
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const pages = useMemo(() => paginateResume(content, style), [content, style]);
+  const totalPages = pages.length;
 
   const handleFitToWidth = () => {
     if (!containerRef.current) return;
@@ -126,7 +129,7 @@ export const LivePreviewPane: React.FC = () => {
           <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs tracking-wider">
             {style.pageSize || 'A4'}
           </span>
-          <span>Page 1 of 1</span>
+          <span>{totalPages > 1 ? `${totalPages} Pages` : '1 Page'}</span>
         </div>
       </div>
 

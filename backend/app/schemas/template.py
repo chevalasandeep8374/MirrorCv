@@ -24,6 +24,9 @@ class DocumentMetadata(BaseModel):
     page_size: PageSizePt = Field(default_factory=PageSizePt)
     margins: MarginsPt = Field(default_factory=MarginsPt)
     default_font: DefaultFont = Field(default_factory=DefaultFont)
+    page_count: int = 1
+    has_horizontal_dividers: bool = False
+    header_alignment: Optional[str] = "left"
     total_paragraphs: int = 0
     total_tables: int = 0
     has_text_boxes: bool = False

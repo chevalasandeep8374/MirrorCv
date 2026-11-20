@@ -168,7 +168,7 @@ export const ResumeDocument: React.FC<ResumeDocumentProps> = ({
               <div className="flex-1 flex flex-col">
                 {fullSections.map((section) => (
                   <SectionRenderer
-                    key={section.id}
+                    key={`${section.id}-full-${pageIdx}`}
                     section={section}
                     headingStyle={style.headingStyle}
                     bulletStyle={style.bulletStyle}
@@ -189,7 +189,7 @@ export const ResumeDocument: React.FC<ResumeDocumentProps> = ({
                   >
                     {sidebarSections.map((section) => (
                       <SectionRenderer
-                        key={section.id}
+                        key={`${section.id}-sidebar-${pageIdx}`}
                         section={section}
                         headingStyle={style.headingStyle}
                         bulletStyle={style.bulletStyle}
@@ -204,7 +204,7 @@ export const ResumeDocument: React.FC<ResumeDocumentProps> = ({
                   <main className="flex-1 flex flex-col">
                     {mainSections.map((section) => (
                       <SectionRenderer
-                        key={section.id}
+                        key={`${section.id}-main-${pageIdx}`}
                         section={section}
                         headingStyle={style.headingStyle}
                         bulletStyle={style.bulletStyle}
@@ -222,7 +222,7 @@ export const ResumeDocument: React.FC<ResumeDocumentProps> = ({
               <div className="flex-1 flex flex-col">
                 {pageSlice.mainSections.map((section) => (
                   <SectionRenderer
-                    key={section.id}
+                    key={`${section.id}-single-${pageIdx}`}
                     section={section}
                     headingStyle={style.headingStyle}
                     bulletStyle={style.bulletStyle}
@@ -246,7 +246,7 @@ export const ResumeDocument: React.FC<ResumeDocumentProps> = ({
                   >
                     {pageSlice.sidebarSections.map((section) => (
                       <SectionRenderer
-                        key={section.id}
+                        key={`${section.id}-sidebar-${pageIdx}`}
                         section={section}
                         headingStyle={style.headingStyle}
                         bulletStyle={style.bulletStyle}
@@ -262,7 +262,7 @@ export const ResumeDocument: React.FC<ResumeDocumentProps> = ({
                 <main className="flex-1 flex flex-col">
                   {pageSlice.mainSections.map((section) => (
                     <SectionRenderer
-                      key={section.id}
+                      key={`${section.id}-main-${pageIdx}`}
                       section={section}
                       headingStyle={style.headingStyle}
                       bulletStyle={style.bulletStyle}
@@ -284,7 +284,7 @@ export const ResumeDocument: React.FC<ResumeDocumentProps> = ({
                   >
                     {pageSlice.sidebarSections.map((section) => (
                       <SectionRenderer
-                        key={section.id}
+                        key={`${section.id}-sidebar-${pageIdx}`}
                         section={section}
                         headingStyle={style.headingStyle}
                         bulletStyle={style.bulletStyle}

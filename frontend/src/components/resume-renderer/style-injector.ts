@@ -20,17 +20,27 @@ export function getStyleCssVariables(style: ResumeStyle): CSSProperties {
   let fontSizeBody: number;
   let fontSizeMeta: number;
 
+  const base = typography.baseFontSize ?? typography.fontSizes?.body ?? 9.5;
+
   if (typography.fontSizeOffsets) {
-    const base = typography.baseFontSize ?? 9.5;
     const offsets = typography.fontSizeOffsets;
-    fontSizeName = base + (offsets.name ?? 12.5);
-    fontSizeHeaderTitle = base + (offsets.headerTitle ?? 1.5);
-    fontSizeContact = base + (offsets.contact ?? -0.5);
-    fontSizeSectionHeading = base + (offsets.sectionHeading ?? 3.0);
-    fontSizeItemTitle = base + (offsets.itemTitle ?? 1.0);
-    fontSizeItemSubtitle = base + (offsets.itemSubtitle ?? 0.0);
-    fontSizeBody = base + (offsets.body ?? 0.0);
-    fontSizeMeta = base + (offsets.meta ?? -1.0);
+    fontSizeName = (base + (offsets.name ?? 12.5)) * scale;
+    fontSizeHeaderTitle = (base + (offsets.headerTitle ?? 1.5)) * scale;
+    fontSizeContact = (base + (offsets.contact ?? -0.5)) * scale;
+    fontSizeSectionHeading = (base + (offsets.sectionHeading ?? 3.0)) * scale;
+    fontSizeItemTitle = (base + (offsets.itemTitle ?? 1.0)) * scale;
+    fontSizeItemSubtitle = (base + (offsets.itemSubtitle ?? 0.0)) * scale;
+    fontSizeBody = (base + (offsets.body ?? 0.0)) * scale;
+    fontSizeMeta = (base + (offsets.meta ?? -1.0)) * scale;
+  } else if (typography.baseFontSize !== undefined) {
+    fontSizeName = (base + 12.5) * scale;
+    fontSizeHeaderTitle = (base + 1.5) * scale;
+    fontSizeContact = (base - 0.5) * scale;
+    fontSizeSectionHeading = (base + 3.0) * scale;
+    fontSizeItemTitle = (base + 1.0) * scale;
+    fontSizeItemSubtitle = base * scale;
+    fontSizeBody = base * scale;
+    fontSizeMeta = (base - 1.0) * scale;
   } else if (typography.fontSizes) {
     fontSizeName = (typography.fontSizes.name ?? 22) * scale;
     fontSizeHeaderTitle = (typography.fontSizes.headerTitle ?? 12) * scale;
@@ -41,15 +51,14 @@ export function getStyleCssVariables(style: ResumeStyle): CSSProperties {
     fontSizeBody = (typography.fontSizes.body ?? 9.5) * scale;
     fontSizeMeta = (typography.fontSizes.meta ?? 8.5) * scale;
   } else {
-    const base = typography.baseFontSize ?? 9.5;
-    fontSizeName = base + 12.5;
-    fontSizeHeaderTitle = base + 1.5;
-    fontSizeContact = base - 0.5;
-    fontSizeSectionHeading = base + 3.0;
-    fontSizeItemTitle = base + 1.0;
-    fontSizeItemSubtitle = base;
-    fontSizeBody = base;
-    fontSizeMeta = base - 1.0;
+    fontSizeName = (base + 12.5) * scale;
+    fontSizeHeaderTitle = (base + 1.5) * scale;
+    fontSizeContact = (base - 0.5) * scale;
+    fontSizeSectionHeading = (base + 3.0) * scale;
+    fontSizeItemTitle = (base + 1.0) * scale;
+    fontSizeItemSubtitle = base * scale;
+    fontSizeBody = base * scale;
+    fontSizeMeta = (base - 1.0) * scale;
   }
 
   const accents = colors.accentToggles;

@@ -151,11 +151,31 @@ def pdf_layout_to_fingerprint(
         )
         paragraphs.append(p_fp)
 
+    # Detect horizontal divider lines under section headings
+    has_dividers = False
+    if layout.vector_drawings:
+        for d in layout.vector_drawings:
+            r = getattr(d, "rect", None) or getattr(d, "bbox", [])
+            w = abs(r[2] - r[0]) if len(r) >= 4 else 0
+            h = abs(r[3] - r[1]) if len(r) >= 4 else 0
+            if w > 150 and h < 8:
+                has_dividers = True
+                break
+
+    # Detect header alignment from first few blocks (name, headline, contacts)
+    detected_header_align = "left"
+    for b in layout.blocks[:4]:
+        if len(b.bbox) >= 4:
+            b_center = (b.bbox[0] + b.bbox[2]) / 2
+            if abs(b_center - (page_w / 2)) < 30.0 and (b.bbox[2] - b.bbox[0]) < (page_w * 0.85):
+                detected_header_align = "center"
+                break
+
     # Margins fallback
-    margin_top = max(20.0, min_y) if min_y < page_h else 36.0
-    margin_left = max(20.0, min_x) if min_x < page_w else 36.0
-    margin_right = max(20.0, page_w - max_x) if max_x > 0 else 36.0
-    margin_bottom = max(20.0, page_h - max_y) if max_y > 0 else 36.0
+    margin_top = max(18.0, min_y) if min_y < page_h else 36.0
+    margin_left = max(24.0, min_x) if min_x < page_w else 36.0
+    margin_right = max(24.0, page_w - max_x) if max_x > 0 else 36.0
+    margin_bottom = max(18.0, page_h - max_y) if max_y > 0 else 36.0
 
     metadata = DocumentMetadata(
         page_size=PageSizePt(
@@ -173,6 +193,9 @@ def pdf_layout_to_fingerprint(
             family="Helvetica",
             size_pt=10.0,
         ),
+        page_count=layout.document_metadata.page_count,
+        has_horizontal_dividers=has_dividers,
+        header_alignment=detected_header_align,
         total_paragraphs=len(paragraphs),
         total_tables=0,
         has_text_boxes=any(p.location.type == "text_box" for p in paragraphs),

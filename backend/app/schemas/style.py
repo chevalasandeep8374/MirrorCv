@@ -38,9 +38,11 @@ class FontSizes(BaseModel):
 
 
 class Typography(BaseModel):
+    fontFamily: Optional[str] = "Inter"
     baseFontFamily: str = "Inter"
     headingFontFamily: str = "Inter"
     nameFontFamily: Optional[str] = None
+    baseFontSize: Optional[float] = None
     fontSizeScale: float = 1.0
     fontSizes: FontSizes = Field(default_factory=FontSizes)
     lineHeight: float = 1.45
@@ -81,6 +83,22 @@ class Decorations(BaseModel):
     avatarUrl: Optional[str] = None
 
 
+class HeaderConfig(BaseModel):
+    alignment: Literal["left", "center"] = "left"
+    arrangement: Literal["bullet", "pipe", "bar", "icon"] = "bullet"
+
+
+class SkillsCustomization(BaseModel):
+    style: Optional[str] = "rows"
+    rowSpacing: Optional[str] = "tight"
+    startRowsWithBullets: Optional[bool] = True
+    subInfoStyle: Optional[str] = "dash"
+
+
+class SectionCustomizations(BaseModel):
+    skills: Optional[SkillsCustomization] = None
+
+
 class ResumeStyle(BaseModel):
     templateId: str = "classic-single-column"
     pageSize: PageSize = "A4"
@@ -90,6 +108,8 @@ class ResumeStyle(BaseModel):
     colors: Colors = Field(default_factory=Colors)
     bulletStyle: BulletStyle = "disc"
     headingStyle: HeadingStyle = "bar"
+    header: HeaderConfig = Field(default_factory=HeaderConfig)
     layout: ColumnLayout = Field(default_factory=ColumnLayout)
     decorations: Decorations = Field(default_factory=Decorations)
     dateFormat: str = "MMM YYYY"
+    sectionCustomizations: Optional[SectionCustomizations] = None

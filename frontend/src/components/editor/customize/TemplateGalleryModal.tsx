@@ -18,6 +18,9 @@ export const TemplateGalleryModal: React.FC<TemplateGalleryModalProps> = ({
   const { style, applyPreset } = useResume();
   const [activeCategory, setActiveCategory] = useState<'all' | 'single' | 'sidebar' | 'creative'>('all');
   const [pendingPreset, setPendingPreset] = useState<{ id: string; name: string; style: any } | null>(null);
+  const [preserveSpacing, setPreserveSpacing] = useState(true);
+  const [preserveColors, setPreserveColors] = useState(true);
+  const [preserveFonts, setPreserveFonts] = useState(true);
 
   if (!isOpen) return null;
 
@@ -45,13 +48,31 @@ export const TemplateGalleryModal: React.FC<TemplateGalleryModalProps> = ({
 
   const handleConfirmApply = () => {
     if (!pendingPreset) return;
-    // Apply tokens only with undo support, preserving content
-    applyPreset({
+    // Apply new template layout while preserving user's spacing, colors, and typography choices
+    const nextStyle = {
       ...pendingPreset.style,
       pageSize: style.pageSize, // Retain user's current pageSize preference
       locale: style.locale,     // Retain user's current locale
       direction: style.direction,
-    });
+      ...(preserveSpacing
+        ? {
+            spacing: style.spacing,
+            margins: style.margins,
+          }
+        : {}),
+      ...(preserveColors
+        ? {
+            colors: style.colors,
+          }
+        : {}),
+      ...(preserveFonts
+        ? {
+            typography: style.typography,
+          }
+        : {}),
+    };
+
+    applyPreset(nextStyle);
     setPendingPreset(null);
     onClose();
   };
@@ -173,8 +194,40 @@ export const TemplateGalleryModal: React.FC<TemplateGalleryModalProps> = ({
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
             <h4 className="font-bold text-base text-slate-900">Apply Template &quot;{pendingPreset.name}&quot;?</h4>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Applying this design preset will update your layout and styling tokens while keeping your resume content intact. You can restore your previous styling anytime by pressing <strong>Ctrl+Z</strong> (Undo).
+              Applying this design preset will update your layout while keeping your resume content intact. You can restore your previous styling anytime by pressing <strong>Ctrl+Z</strong> (Undo).
             </p>
+
+            {/* Fidelity Preservation Controls */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2 text-xs">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={preserveSpacing}
+                  onChange={(e) => setPreserveSpacing(e.target.checked)}
+                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-slate-800 font-medium">Preserve compact gaps &amp; 1-Page fit</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={preserveFonts}
+                  onChange={(e) => setPreserveFonts(e.target.checked)}
+                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-slate-800 font-medium">Preserve typography &amp; font sizes</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={preserveColors}
+                  onChange={(e) => setPreserveColors(e.target.checked)}
+                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-slate-800 font-medium">Preserve color pattern &amp; accents</span>
+              </label>
+            </div>
+
             <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"

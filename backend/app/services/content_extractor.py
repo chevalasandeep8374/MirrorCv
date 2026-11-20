@@ -23,8 +23,15 @@ from app.schemas.style import (
     Spacing,
     Colors,
     ColumnLayout,
+    SectionCustomizations,
+    SkillsCustomization,
 )
 from app.schemas.template import DocxFingerprint, RoleMap, ParagraphFingerprint
+
+DATE_REGEX = re.compile(
+    r"(\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*|\d{1,2}/\d{2,4}|\d{4})\s*[-–—to]+\s*(\b(?:Present|Current|Now)|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*|\d{1,2}/\d{2,4}|\d{4})",
+    re.IGNORECASE,
+)
 
 
 def _clean_bullet_text(text: str) -> str:
@@ -89,10 +96,17 @@ def extract_content_and_style(
     header = HeaderContent()
     name_paras = [idx for idx, r in roles.items() if r.role == "name"]
     if name_paras:
-        header.name = para_dict[name_paras[0]].text.strip()
+        raw_name = para_dict[name_paras[0]].text.strip()
+        if "\n" in raw_name:
+            n_lines = [ln.strip() for ln in raw_name.split("\n") if ln.strip()]
+            header.name = n_lines[0]
+            if len(n_lines) > 1 and not header.title:
+                header.title = " ".join(n_lines[1:])
+        else:
+            header.name = raw_name
 
     title_paras = [idx for idx, r in roles.items() if r.role in ("headline", "title")]
-    if title_paras:
+    if title_paras and not header.title:
         header.title = para_dict[title_paras[0]].text.strip()
 
     contact_paras = [idx for idx, r in roles.items() if r.role == "contact"]
@@ -115,9 +129,17 @@ def extract_content_and_style(
             header.location = loc_m.group(1).strip()
 
         # Extract URLs / Links
-        urls = re.findall(r"(https?://\S+|www\.\S+|[a-zA-Z0-9-]+\.(?:com|dev|io|org|net|me)\S*)", c_text)
+        urls = re.findall(r"(https?://\S+|www\.\S+|[a-zA-Z0-9-]+\.(?:com|dev|io|org|net|me|app)\S*)", c_text)
+        email_domain = header.email.split("@")[1].lower() if header.email and "@" in header.email else ""
         for u in urls:
             clean_url = u.strip().rstrip("|,;")
+            # Ignore email addresses or email domain names (e.g. gmail.com)
+            if "@" in clean_url:
+                continue
+            cleaned_domain = clean_url.replace("https://", "").replace("http://", "").replace("www.", "").strip("/")
+            if email_domain and (cleaned_domain == email_domain or cleaned_domain.startswith(email_domain)):
+                continue
+
             if not clean_url.startswith("http"):
                 clean_url = "https://" + clean_url
             label = "Website"
@@ -170,26 +192,65 @@ def extract_content_and_style(
             for idx, item in enumerate(sec_h.items):
                 for p_idx in item.body_para_indices:
                     raw_text = para_dict[p_idx].text.strip()
-                    parts = raw_text.split(":", 1)
-                    if len(parts) == 2:
-                        cat_title = parts[0].strip()
-                        cat_skills = parts[1].strip()
-                    else:
-                        cat_title = f"Skill Group {idx + 1}"
-                        cat_skills = raw_text
+                    lines = [ln.strip() for ln in raw_text.split("\n") if ln.strip()]
+                    current_cat_title = ""
+                    current_cat_skills = ""
 
-                    sk_item_id = f"item-{sec_h.section_id}-{p_idx}"
-                    b_id = f"b-{sec_h.section_id}-{p_idx}"
-                    is_word_bullet = para_dict[p_idx].bullet_info.num_id is not None
-                    bullet_text = _clean_bullet_text(cat_skills) if is_word_bullet else cat_skills
+                    def _commit_skill_item(cat_title: str, cat_skills: str, p_index: int):
+                        if not cat_title:
+                            return
+                        sk_id = f"item-{sec_h.section_id}-{p_index}-{len(items_list)}"
+                        skill_names = [s.strip() for s in re.split(r",\s*(?![^()]*\))", cat_skills) if s.strip()]
+                        if not skill_names:
+                            skill_names = [cat_skills]
+                        bullets = [
+                            BulletItem(id=f"b-{sec_h.section_id}-{p_index}-{len(items_list)}-{b_idx}", text=s)
+                            for b_idx, s in enumerate(skill_names)
+                        ]
+                        items_list.append(
+                            SectionItem(
+                                id=sk_id,
+                                title=cat_title,
+                                bullets=bullets,
+                            )
+                        )
+                        content_to_paragraphs[f"{sec_h.section_id}.{sk_id}.skills"] = [p_index]
+
+                    for line in lines:
+                        clean_line = line.lstrip("•-*▪◦ ")
+                        parts = re.split(r"\s*[—:–]\s*", clean_line, maxsplit=1)
+                        if len(parts) == 2 and len(parts[0]) < 45:
+                            _commit_skill_item(current_cat_title, current_cat_skills, p_idx)
+                            current_cat_title = parts[0].strip()
+                            current_cat_skills = parts[1].strip()
+                        else:
+                            if current_cat_title:
+                                current_cat_skills += " " + line
+                            else:
+                                current_cat_title = f"Skill Group {len(items_list) + 1}"
+                                current_cat_skills = line
+
+                    _commit_skill_item(current_cat_title, current_cat_skills, p_idx)
+
+        elif valid_type == "certifications":
+            # For certifications, each line or bullet is an individual certification item
+            sec_paras = [p_idx for p_idx, r in roles.items() if r.section_id == sec_h.section_id and r.role != "section_heading"]
+            for p_idx in sec_paras:
+                p_text = para_dict[p_idx].text.strip()
+                lines = [ln.strip().lstrip("•-*▪◦ ") for ln in p_text.split("\n") if ln.strip()]
+                for ln in lines:
+                    c_id = f"item-{sec_h.section_id}-{len(items_list) + 1}"
                     items_list.append(
                         SectionItem(
-                            id=sk_item_id,
-                            title=cat_title,
-                            bullets=[BulletItem(id=b_id, text=bullet_text)],
+                            id=c_id,
+                            title=ln,
+                            subtitle="",
+                            dateRange="",
+                            location="",
+                            bullets=[],
                         )
                     )
-                    content_to_paragraphs[f"{sec_h.section_id}.{sk_item_id}.{b_id}"] = [p_idx]
+                    content_to_paragraphs[f"{sec_h.section_id}.{c_id}.title"] = [p_idx]
 
         else:
             # Experience, Education, Projects, Custom, Certifications
@@ -201,7 +262,17 @@ def extract_content_and_style(
 
                 if item_h.title_para_index is not None and item_h.title_para_index in para_dict:
                     raw_title = para_dict[item_h.title_para_index].text.strip()
-                    if "—" in raw_title:
+                    if "\n" in raw_title:
+                        lines = [ln.strip() for ln in raw_title.split("\n") if ln.strip()]
+                        title = lines[0]
+                        for extra_ln in lines[1:]:
+                            if DATE_REGEX.search(extra_ln) and not date_range:
+                                date_range = extra_ln
+                            elif not subtitle:
+                                subtitle = extra_ln
+                            else:
+                                subtitle += ", " + extra_ln
+                    elif "—" in raw_title:
                         t_parts = raw_title.split("—", 1)
                         title = t_parts[0].strip()
                         subtitle = t_parts[1].strip()
@@ -213,7 +284,23 @@ def extract_content_and_style(
                         title = raw_title
 
                 if item_h.subtitle_para_index is not None and item_h.subtitle_para_index in para_dict:
-                    subtitle = para_dict[item_h.subtitle_para_index].text.strip()
+                    raw_sub = para_dict[item_h.subtitle_para_index].text.strip()
+                    if "\n" in raw_sub:
+                        s_lines = [l.strip() for l in raw_sub.split("\n") if l.strip()]
+                        for s_l in s_lines:
+                            if DATE_REGEX.search(s_l) and not date_range:
+                                date_range = s_l
+                            elif not location and ("," in s_l or len(s_l) < 25):
+                                location = s_l
+                            elif not subtitle:
+                                subtitle = s_l
+                            else:
+                                subtitle += " | " + s_l
+                    else:
+                        if not subtitle:
+                            subtitle = raw_sub
+                        else:
+                            subtitle += " | " + raw_sub
 
                 if item_h.meta_para_indices:
                     for m_idx in item_h.meta_para_indices:
@@ -232,6 +319,12 @@ def extract_content_and_style(
                     b_id = f"b-{sec_h.section_id}-{b_idx}"
                     bullets.append(BulletItem(id=b_id, text=b_md))
                     content_to_paragraphs[f"{sec_h.section_id}.{item_h.item_id}.{b_id}"] = [b_idx]
+
+                if "|" in date_range:
+                    dp = date_range.split("|", 1)
+                    date_range = dp[0].strip()
+                    if not location:
+                        location = dp[1].strip()
 
                 items_list.append(
                     SectionItem(
@@ -271,6 +364,7 @@ def extract_content_and_style(
     body_fonts: Dict[str, int] = {}
     heading_fonts: Dict[str, int] = {}
     accent_colors: Dict[str, int] = {}
+    body_sizes: List[float] = []
 
     for p in fingerprint.paragraphs:
         r_role = roles.get(p.index)
@@ -284,10 +378,13 @@ def extract_content_and_style(
                     accent_colors[f_col] = accent_colors.get(f_col, 0) + 2
             else:
                 body_fonts[f_fam] = body_fonts.get(f_fam, 0) + 1
+                if run.formatting.font_size_pt and run.formatting.font_size_pt > 0:
+                    body_sizes.append(run.formatting.font_size_pt)
 
     base_font = max(body_fonts, key=body_fonts.get) if body_fonts else "Calibri"
     heading_font = max(heading_fonts, key=heading_fonts.get) if heading_fonts else base_font
-    accent_color = max(accent_colors, key=accent_colors.get) if accent_colors else "#2563eb"
+    # If the document is monochrome/black, preserve pure black; do not force blue #2563eb
+    accent_color = max(accent_colors, key=accent_colors.get) if accent_colors else "#000000"
 
     name_size = 22.0
     for idx, r in roles.items():
@@ -331,48 +428,97 @@ def extract_content_and_style(
 
     template_id_str = f"uploaded:{template_profile_id}" if template_profile_id else "extracted-template"
 
+    is_one_page = getattr(meta, "page_count", 1) == 1
+    has_dividers = getattr(meta, "has_horizontal_dividers", False)
+    header_align = getattr(meta, "header_alignment", "left") or "left"
+
+    # Precise style calibration to match source document page count and density
+    if is_one_page:
+        detected_body = round(sorted(body_sizes)[len(body_sizes) // 2], 1) if body_sizes else 7.8
+        chosen_body = min(max(detected_body, 7.8), 7.8)
+        chosen_line_height = 1.18
+        chosen_sec_spacing = 5.5
+        chosen_it_spacing = 3.0
+        chosen_bullet_spacing = 1.0
+        chosen_header_bottom = 6.0
+        margins.top = min(margins.top, 18.0)
+        margins.bottom = min(margins.bottom, 18.0)
+        margins.left = min(margins.left, 24.0)
+        margins.right = min(margins.right, 24.0)
+        heading_size = 10.0
+        name_size = 15.0
+    else:
+        chosen_body = 9.5
+        chosen_line_height = 1.35
+        chosen_sec_spacing = 12.0
+        chosen_it_spacing = 6.0
+        chosen_bullet_spacing = 2.0
+        chosen_header_bottom = 14.0
+
+    # Heading style fidelity: horizontal dividers indicate underline headings
+    if has_dividers or layout_type == "single":
+        chosen_heading_style: HeadingStyle = "underline"
+    else:
+        chosen_heading_style = "plain"
+
+    from app.schemas.style import HeaderConfig
+
     style = ResumeStyle(
         templateId=template_id_str,
         pageSize=page_size,
         margins=margins,
         typography=Typography(
+            fontFamily=base_font,
             baseFontFamily=base_font,
             headingFontFamily=heading_font,
+            baseFontSize=chosen_body,
             fontSizes=FontSizes(
                 name=name_size,
-                headerTitle=11.0,
-                contact=9.0,
+                headerTitle=chosen_body + 1.5,
+                contact=chosen_body - 0.5,
                 sectionHeading=heading_size,
-                itemTitle=10.5,
-                itemSubtitle=9.5,
-                body=9.5,
-                meta=8.5,
+                itemTitle=chosen_body + 0.5,
+                itemSubtitle=chosen_body,
+                body=chosen_body,
+                meta=chosen_body - 0.5,
                 unit="pt",
             ),
-            lineHeight=1.4,
+            lineHeight=chosen_line_height,
         ),
         spacing=Spacing(
-            sectionSpacing=14.0,
-            itemSpacing=8.0,
-            bulletSpacing=3.0,
-            headerBottomSpacing=16.0,
+            sectionSpacing=chosen_sec_spacing,
+            itemSpacing=chosen_it_spacing,
+            bulletSpacing=chosen_bullet_spacing,
+            headerBottomSpacing=chosen_header_bottom,
             unit="pt",
         ),
         colors=Colors(
             accent=accent_color,
-            text="#111827",
-            muted="#4b5563",
+            text="#000000" if accent_color == "#000000" else "#111827",
+            muted="#1f2937" if accent_color == "#000000" else "#4b5563",
             background="#ffffff",
             sidebarBackground="#f8fafc",
-            divider="#e5e7eb",
+            divider="#000000" if accent_color == "#000000" else "#e5e7eb",
         ),
         bulletStyle="disc",
-        headingStyle="bar" if layout_type == "single" else "plain",
+        headingStyle=chosen_heading_style,
+        header=HeaderConfig(
+            alignment="center" if header_align == "center" else "left",
+            arrangement="pipe" if header_align == "center" else "bullet",
+        ),
         layout=ColumnLayout(
             type=layout_type,
             sidebarWidthPercent=sidebar_width,
             sidebarSectionIds=sidebar_ids,
             mainSectionIds=main_ids,
+        ),
+        sectionCustomizations=SectionCustomizations(
+            skills=SkillsCustomization(
+                style="rows",
+                startRowsWithBullets=True,
+                subInfoStyle="dash",
+                rowSpacing="tight",
+            )
         ),
     )
 

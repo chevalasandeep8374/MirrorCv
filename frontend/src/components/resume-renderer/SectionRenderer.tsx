@@ -194,9 +194,27 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
       </h2>
 
       {/* Section Items */}
-      <div className="flex flex-col">
-        {visibleItems.map((item, itemIdx) => {
-          const isItemTags = item.itemType === 'tags' || isTagsSection;
+      {section.type === 'certifications' &&
+      visibleItems.every(
+        (it) => !it.dateRange && !it.subtitle && !it.location && (!it.bullets || it.bullets.length === 0)
+      ) ? (
+        <div
+          className="grid grid-cols-2 gap-x-6 gap-y-1 text-[var(--color-text)]"
+          style={{ fontSize: 'var(--font-size-body)' }}
+        >
+          {visibleItems.map((item, itemIdx) => (
+            <div key={item.id || itemIdx} className="resume-item flex items-baseline leading-snug">
+              <span className="text-[var(--accent-bullets,var(--color-accent))] mr-2 select-none font-bold">•</span>
+              <span className="text-[var(--color-text)]">
+                {renderInlineMarkup(item.title)}
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col">
+          {visibleItems.map((item, itemIdx) => {
+            const isItemTags = item.itemType === 'tags' || isTagsSection;
           const isParagraph = item.itemType === 'paragraph' || section.type === 'summary';
 
           // Format structured dates or fallback to dateRange
@@ -248,10 +266,10 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
                     >
                       {renderInlineMarkup(firstField)}
                       {subInfoStyle === 'dash'
-                        ? ' –'
+                        ? ' — '
                         : subInfoStyle === 'bracket'
                         ? ' ('
-                        : ':'}
+                        : ': '}
                     </span>
                   )}
                   <span className="text-[var(--color-text)]">
@@ -456,7 +474,8 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
             </div>
           );
         })}
-      </div>
+        </div>
+      )}
     </section>
   );
 };
