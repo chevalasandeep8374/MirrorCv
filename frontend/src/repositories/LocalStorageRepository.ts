@@ -69,26 +69,7 @@ export class LocalStorageRepository implements ResumeRepository {
     const data = this.readStorage();
     const resume = data[id];
     if (resume) return resume;
-
-    // If demo or empty, return default seeded resume
-    const now = new Date().toISOString();
-    const demo: Resume = {
-      id: id || 'local_demo',
-      userId: 'demo_local_user',
-      title: 'Demo Resume',
-      content: defaultResumeContent,
-      style: classicSingleColumnPreset,
-      templateId: 'classic_single_column',
-      version: 1,
-      sourceType: 'editor',
-      isArchived: false,
-      tags: ['demo'],
-      createdAt: now,
-      updatedAt: now,
-    };
-    data[demo.id] = demo;
-    this.writeStorage(data);
-    return demo;
+    throw new Error(`Resume '${id}' not found`);
   }
 
   async create(initial?: Partial<Resume>): Promise<Resume> {
@@ -227,11 +208,16 @@ export class LocalStorageRepository implements ResumeRepository {
   }
 
   /**
-   * Helper to retrieve all locally stored resumes for migration
+   * Helper to retrieve all locally stored resumes for migration (excluding demo/sample seeds)
    */
   getAll(): Resume[] {
     const data = this.readStorage();
-    return Object.values(data);
+    return Object.values(data).filter(
+      (r) =>
+        r.id !== 'local_demo' &&
+        r.title !== 'Demo Resume' &&
+        !(Array.isArray(r.tags) && r.tags.includes('demo'))
+    );
   }
 
   /**

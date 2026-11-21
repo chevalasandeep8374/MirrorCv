@@ -23,7 +23,7 @@ from app.services.pdf_layout_analyzer import analyze_pdf_layout
 from app.services.pdf_role_adapter import process_pdf_roles_and_content
 
 # DOCX extraction
-from app.services.docx_validator import validate_docx_bytes
+from app.services.docx_validator import validate_docx_bytes, enforce_valid_docx
 from app.services.docx_fingerprint import fingerprint_docx
 from app.services.role_classifier import classify_paragraphs
 from app.services.content_extractor import extract_content_and_style
@@ -108,7 +108,7 @@ async def import_universal_resume(
             tmp_path = tmp.name
 
         try:
-            validate_docx_bytes(file_bytes, file.filename)
+            enforce_valid_docx(file_bytes, file.filename)
             fp = fingerprint_docx(tmp_path)
             role_map = classify_paragraphs(fp)
             content_model, style_model, c_to_p = extract_content_and_style(fp, role_map)
@@ -257,15 +257,49 @@ async def export_resume_docx(
     db: AsyncSession = Depends(get_db),
 ):
     """Generates an editable Word (.docx) document matching content and style tokens."""
-    stmt = select(Document).where(Document.id == id)
-    result = await db.execute(stmt)
-    doc = result.scalar_one_or_none()
+    from app.config import settings
+    import httpx
 
-    if not doc or doc.user_id != current_user.id:
+    content = None
+    style = None
+    title = "resume"
+
+    # 1. Lookup in Supabase
+    if settings.SUPABASE_URL and settings.SUPABASE_KEY:
+        try:
+            headers = {"apikey": settings.SUPABASE_KEY}
+            if settings.SUPABASE_SERVICE_ROLE_KEY:
+                headers["Authorization"] = f"Bearer {settings.SUPABASE_SERVICE_ROLE_KEY}"
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.get(
+                    f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/resumes?id=eq.{id}&select=*",
+                    headers=headers,
+                )
+                if resp.status_code == 200 and resp.json():
+                    row = resp.json()[0]
+                    # Enforce ownership from verified user
+                    if row.get("user_id") == str(current_user.id):
+                        content = row.get("content") or {}
+                        style = row.get("style") or {}
+                        title = row.get("title") or "resume"
+        except Exception as e:
+            logger.debug(f"Supabase docx lookup error: {e}")
+
+    # 2. Fallback to SQLite if not found in Supabase
+    if not content:
+        stmt = select(Document).where(Document.id == id, Document.user_id == current_user.id)
+        result = await db.execute(stmt)
+        doc = result.scalar_one_or_none()
+        if doc:
+            content = doc.content
+            style = doc.style
+            title = doc.title
+
+    if not content:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Resume not found")
 
-    docx_bytes = export_resume_to_docx(doc.content, doc.style)
-    safe_title = "".join(c for c in doc.title if c.isalnum() or c in (" ", "_", "-")).rstrip() or "resume"
+    docx_bytes = export_resume_to_docx(content, style or {})
+    safe_title = "".join(c for c in title if c.isalnum() or c in (" ", "_", "-")).rstrip() or "resume"
     filename = f"{safe_title.replace(' ', '_')}.docx"
 
     return Response(

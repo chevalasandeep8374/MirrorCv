@@ -6,6 +6,109 @@ import { Palette, AlertCircle, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { Colors, AccentToggles } from '@/types/style';
 import { getContrastRatio, evaluateWcag } from '@/lib/contrast';
 
+export interface ColorPatternPreset {
+  id: string;
+  name: string;
+  category: string;
+  accent: string;
+  text: string;
+  muted: string;
+  background: string;
+  sidebarBackground: string;
+  divider: string;
+}
+
+export const COLOR_PATTERNS: ColorPatternPreset[] = [
+  {
+    id: 'modern-indigo',
+    name: 'Modern Tech Indigo',
+    category: 'AI & Engineering',
+    accent: '#4F46E5',
+    text: '#0F172A',
+    muted: '#64748B',
+    background: '#FFFFFF',
+    sidebarBackground: '#F8FAFC',
+    divider: '#E2E8F0',
+  },
+  {
+    id: 'executive-navy',
+    name: 'Classic Executive Navy',
+    category: 'Corporate & Finance',
+    accent: '#1E3A8A',
+    text: '#111827',
+    muted: '#4B5563',
+    background: '#FFFFFF',
+    sidebarBackground: '#F9FAFB',
+    divider: '#E5E7EB',
+  },
+  {
+    id: 'deep-teal',
+    name: 'Deep Ocean Teal',
+    category: 'Modern Tech',
+    accent: '#0D9488',
+    text: '#0F172A',
+    muted: '#64748B',
+    background: '#FFFFFF',
+    sidebarBackground: '#F0FDFA',
+    divider: '#CCFBF1',
+  },
+  {
+    id: 'forest-emerald',
+    name: 'Forest Emerald',
+    category: 'Fresh & Balanced',
+    accent: '#059669',
+    text: '#0F172A',
+    muted: '#475569',
+    background: '#FFFFFF',
+    sidebarBackground: '#F0FDF4',
+    divider: '#E2E8F0',
+  },
+  {
+    id: 'executive-crimson',
+    name: 'Executive Crimson',
+    category: 'Leadership & Bold',
+    accent: '#BE123C',
+    text: '#18181B',
+    muted: '#71717A',
+    background: '#FFFFFF',
+    sidebarBackground: '#FFF1F2',
+    divider: '#FECDD3',
+  },
+  {
+    id: 'slate-monochrome',
+    name: 'Minimalist Slate Monochrome',
+    category: 'High ATS & Clean Print',
+    accent: '#334155',
+    text: '#0F172A',
+    muted: '#64748B',
+    background: '#FFFFFF',
+    sidebarBackground: '#F8FAFC',
+    divider: '#E2E8F0',
+  },
+  {
+    id: 'royal-blue',
+    name: 'Royal Blue Standard',
+    category: 'Classic Tech',
+    accent: '#2563EB',
+    text: '#111827',
+    muted: '#4B5563',
+    background: '#FFFFFF',
+    sidebarBackground: '#F8FAFC',
+    divider: '#E5E7EB',
+  },
+  {
+    id: 'imperial-violet',
+    name: 'Imperial Violet',
+    category: 'Creative Tech',
+    accent: '#7C3AED',
+    text: '#1E1B4B',
+    muted: '#6B7280',
+    background: '#FFFFFF',
+    sidebarBackground: '#F5F3FF',
+    divider: '#EDE9FE',
+  },
+];
+
 const CURATED_PALETTE = [
   { name: 'Royal Blue', hex: '#2563eb' },
   { name: 'Deep Teal', hex: '#0f766e' },
@@ -44,6 +147,21 @@ export const ColorsCard: React.FC = () => {
     });
   };
 
+  const applyColorPattern = (preset: ColorPatternPreset) => {
+    updateStyle({
+      ...style,
+      colors: {
+        ...colors,
+        accent: preset.accent,
+        text: preset.text,
+        muted: preset.muted,
+        background: preset.background,
+        sidebarBackground: preset.sidebarBackground,
+        divider: preset.divider,
+      },
+    });
+  };
+
   const handleToggleAccent = (key: keyof AccentToggles, value: boolean) => {
     updateStyle({
       ...style,
@@ -75,9 +193,59 @@ export const ColorsCard: React.FC = () => {
         </div>
       </div>
 
-      {/* 1. Curated Quick Palettes */}
-      <div className="space-y-2">
-        <label className="text-xs font-semibold text-slate-700">Quick Palette</label>
+      {/* 1. Complete Color Theme Patterns */}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-800">Curated Color Patterns</label>
+          <span className="text-[10px] text-slate-400 font-medium">1-Click Apply</span>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {COLOR_PATTERNS.map((p) => {
+            const isSelected =
+              colors.accent.toLowerCase() === p.accent.toLowerCase() &&
+              colors.text.toLowerCase() === p.text.toLowerCase();
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => applyColorPattern(p)}
+                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1.5 ${
+                  isSelected
+                    ? 'border-blue-600 bg-blue-50/50 shadow-2xs ring-1 ring-blue-600'
+                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-900 truncate">{p.name}</span>
+                  {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0" />}
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className="w-4 h-4 rounded-full border border-slate-200 shadow-2xs shrink-0"
+                    style={{ backgroundColor: p.accent }}
+                    title={`Accent: ${p.accent}`}
+                  />
+                  <div
+                    className="w-4 h-4 rounded-full border border-slate-200 shadow-2xs shrink-0"
+                    style={{ backgroundColor: p.text }}
+                    title={`Text: ${p.text}`}
+                  />
+                  <div
+                    className="w-4 h-4 rounded-full border border-slate-200 shadow-2xs shrink-0"
+                    style={{ backgroundColor: p.muted }}
+                    title={`Muted: ${p.muted}`}
+                  />
+                  <span className="text-[10px] text-slate-400 truncate ml-auto">{p.category}</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 2. Curated Quick Single Color Accents */}
+      <div className="space-y-2 pt-2 border-t border-slate-100">
+        <label className="text-xs font-semibold text-slate-700">Quick Single Accent</label>
         <div className="flex flex-wrap gap-2">
           {CURATED_PALETTE.map((c) => (
             <button

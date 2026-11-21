@@ -117,3 +117,16 @@ def validate_docx_bytes(data: bytes, filename: str = "resume.docx") -> Tuple[boo
         return False, f"Failed to validate DOCX package: {str(exc)}"
 
     return True, None
+
+
+def enforce_valid_docx(data: bytes, filename: str = "resume.docx") -> None:
+    """Enforces DOCX validation rules. Raises HTTPException(400) if validation fails."""
+    from fastapi import HTTPException, status
+
+    is_valid, err_msg = validate_docx_bytes(data, filename)
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=err_msg or "Invalid Word document",
+        )
+

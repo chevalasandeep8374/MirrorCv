@@ -29,6 +29,7 @@ interface ResumeContextType {
   zoom: number;
   activeTab: EditorTab;
   activeSectionId: string | null;
+  activeEditingItem: { sectionId: string; itemId: string } | null;
   loading: boolean;
   hasLocalResumes: boolean;
 
@@ -40,6 +41,7 @@ interface ResumeContextType {
   setZoom: (zoom: number | ((prev: number) => number)) => void;
   setActiveTab: (tab: EditorTab) => void;
   setActiveSectionId: (id: string | null) => void;
+  setActiveEditingItem: (item: { sectionId: string; itemId: string } | null) => void;
   setTitle: (title: string) => void;
 
   // Content Actions
@@ -52,7 +54,7 @@ interface ResumeContextType {
   duplicateSection: (sectionId: string) => void;
   addSection: (type: SectionType, title?: string) => void;
   updateSectionTitle: (sectionId: string, title: string) => void;
-  addItem: (sectionId: string) => void;
+  addItem: (sectionId: string, initialData?: Partial<SectionItem>) => string;
   duplicateItem: (sectionId: string, itemId: string) => void;
   removeItem: (sectionId: string, itemId: string) => void;
   reorderItems: (sectionId: string, oldIndex: number, newIndex: number) => void;
@@ -116,6 +118,10 @@ export const ResumeProvider: React.FC<{
   const [zoom, setZoom] = useState(1);
   const [activeTab, setActiveTab] = useState<EditorTab>('content');
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+  const [activeEditingItem, setActiveEditingItem] = useState<{
+    sectionId: string;
+    itemId: string;
+  } | null>(null);
 
   // Undo / Redo history
   interface HistorySnapshot {
@@ -155,7 +161,23 @@ export const ResumeProvider: React.FC<{
   const [onePageFitActive, setOnePageFitActive] = useState(false);
   const [onePageFitWarning, setOnePageFitWarning] = useState<string | null>(null);
 
-  const isInitialMount = useRef(true);
+  const versionRef = useRef<number>(initialResume?.version ?? 1);
+  const isLoadedRef = useRef<boolean>(Boolean(initialResume));
+  const lastSavedSnapshotRef = useRef<string>(
+    initialResume
+      ? JSON.stringify({
+          title: initialResume.title,
+          content: initialResume.content,
+          style: initialResume.style,
+        })
+      : ''
+  );
+  const isSavingRef = useRef<boolean>(false);
+  const pendingSaveRef = useRef<{
+    title: string;
+    content: ResumeContent;
+    style: ResumeStyle;
+  } | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Helper to push history
@@ -233,7 +255,17 @@ export const ResumeProvider: React.FC<{
 
   // Fetch resume if not provided as initial prop
   useEffect(() => {
-    if (initialResume) return;
+    if (initialResume) {
+      isLoadedRef.current = true;
+      const v = initialResume.version ?? 1;
+      versionRef.current = v;
+      lastSavedSnapshotRef.current = JSON.stringify({
+        title: initialResume.title || 'Untitled Resume',
+        content: initialResume.content || defaultResumeContent,
+        style: initialResume.style || classicSingleColumnPreset,
+      });
+      return;
+    }
 
     async function fetchResume() {
       try {
@@ -244,13 +276,22 @@ export const ResumeProvider: React.FC<{
           setTitleState(data.title || 'Untitled Resume');
           setContentState(data.content || defaultResumeContent);
           setStyleState(data.style || classicSingleColumnPreset);
-          setVersion(data.version ?? 1);
+          const v = data.version ?? 1;
+          versionRef.current = v;
+          setVersion(v);
+          lastSavedSnapshotRef.current = JSON.stringify({
+            title: data.title || 'Untitled Resume',
+            content: data.content || defaultResumeContent,
+            style: data.style || classicSingleColumnPreset,
+          });
+          setSaveStatus('saved');
         }
       } catch (err) {
         console.error('Failed to load resume:', err);
         setSaveStatus('error');
       } finally {
         setLoading(false);
+        isLoadedRef.current = true;
       }
     }
 
@@ -265,35 +306,67 @@ export const ResumeProvider: React.FC<{
       curStyle: ResumeStyle,
       forceOverwrite = false
     ) => {
+      if (isSavingRef.current) {
+        pendingSaveRef.current = {
+          title: curTitle,
+          content: curContent,
+          style: curStyle,
+        };
+        return;
+      }
+
+      isSavingRef.current = true;
       setSaveStatus('saving');
       try {
         const repo = await getActiveRepository();
+        const expectedVer = forceOverwrite ? undefined : versionRef.current;
         const updated = await repo.update(resumeId, {
           title: curTitle,
           content: curContent,
           style: curStyle,
-          expected_version: forceOverwrite ? undefined : version,
+          expected_version: expectedVer,
         });
-        setVersion(updated.version ?? version + 1);
+        const newVersion = updated.version ?? versionRef.current + 1;
+        versionRef.current = newVersion;
+        setVersion(newVersion);
+        lastSavedSnapshotRef.current = JSON.stringify({
+          title: curTitle,
+          content: curContent,
+          style: curStyle,
+        });
         setSaveStatus('saved');
         setLastSaved(new Date());
       } catch (err: unknown) {
-        if (err instanceof VersionConflictError || (err as { code?: string })?.code === 'VERSION_CONFLICT') {
+        if (
+          err instanceof VersionConflictError ||
+          (err as { code?: string })?.code === 'VERSION_CONFLICT'
+        ) {
           console.warn('Optimistic lock conflict detected for resume:', resumeId);
           setSaveStatus('conflict');
         } else {
           console.error('Autosave error:', err);
           setSaveStatus('error');
         }
+      } finally {
+        isSavingRef.current = false;
+        if (pendingSaveRef.current) {
+          const next = pendingSaveRef.current;
+          pendingSaveRef.current = null;
+          executeSave(next.title, next.content, next.style);
+        }
       }
     },
-    [resumeId, version]
+    [resumeId]
   );
 
   // Trigger debounced autosave when title, content, or style changes
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
+    if (!isLoadedRef.current) {
+      return;
+    }
+
+    const currentSnapshot = JSON.stringify({ title, content, style });
+    if (currentSnapshot === lastSavedSnapshotRef.current) {
       return;
     }
 
@@ -329,7 +402,14 @@ export const ResumeProvider: React.FC<{
             setTitleState(latest.title);
             setContentState(latest.content);
             setStyleState(latest.style);
-            setVersion(latest.version ?? 1);
+            const v = latest.version ?? 1;
+            versionRef.current = v;
+            setVersion(v);
+            lastSavedSnapshotRef.current = JSON.stringify({
+              title: latest.title,
+              content: latest.content,
+              style: latest.style,
+            });
             setSaveStatus('saved');
           }
         } catch (e) {
@@ -578,14 +658,19 @@ export const ResumeProvider: React.FC<{
   };
 
   // Item actions
-  const addItem = (sectionId: string) => {
+  const addItem = (sectionId: string, initialData?: Partial<SectionItem>): string => {
+    const section = content.sections.find((s) => s.id === sectionId);
+    const isSkills = section?.type === 'skills';
+
+    const newItemId = `item-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const newItem: SectionItem = {
-      id: `item-${Date.now()}`,
-      title: 'New Position / Project',
-      subtitle: 'Company / Institution',
+      id: newItemId,
+      title: isSkills ? 'New Skill' : 'New Position / Project',
+      subtitle: isSkills ? '' : 'Company / Institution',
       location: '',
-      dateRange: 'Year - Present',
-      bullets: [{ id: `b-${Date.now()}`, text: 'Key contribution or achievement' }],
+      dateRange: isSkills ? '' : 'Year - Present',
+      bullets: [{ id: `b-${Date.now()}`, text: isSkills ? '' : 'Key contribution or achievement' }],
+      ...initialData,
     };
 
     pushContentWithHistory((prev) => ({
@@ -594,6 +679,8 @@ export const ResumeProvider: React.FC<{
         s.id === sectionId ? { ...s, items: [...(s.items || []), newItem] } : s
       ),
     }));
+
+    return newItemId;
   };
 
   const removeItem = (sectionId: string, itemId: string) => {
@@ -605,6 +692,9 @@ export const ResumeProvider: React.FC<{
           : s
       ),
     }));
+    if (activeEditingItem?.sectionId === sectionId && activeEditingItem?.itemId === itemId) {
+      setActiveEditingItem(null);
+    }
   };
 
   const duplicateItem = (sectionId: string, itemId: string) => {
@@ -803,12 +893,14 @@ export const ResumeProvider: React.FC<{
         zoom,
         activeTab,
         activeSectionId,
+        activeEditingItem,
         loading,
         resolveConflict,
         importLocalResumes,
         setZoom,
         setActiveTab,
         setActiveSectionId,
+        setActiveEditingItem,
         setTitle,
         updateContent,
         updateHeader,

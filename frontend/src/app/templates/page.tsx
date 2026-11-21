@@ -9,6 +9,8 @@ import { apiClient } from '@/lib/api';
 import { ArrowLeft, Sparkles, Plus, Layers, Filter } from 'lucide-react';
 import Link from 'next/link';
 
+import { getActiveRepository } from '@/repositories';
+
 interface UserPresetItem {
   id: string;
   name: string;
@@ -50,12 +52,12 @@ export default function TemplateGalleryPage() {
     if (creating) return;
     setCreating(true);
     try {
-      // Create a new resume preloaded with this template preset
-      const res = await apiClient.post<{ id: string }>('/resumes', {
-        title: `Resume – ${style.templateId}`,
+      const repo = await getActiveRepository();
+      const newResume = await repo.create({
+        title: `Resume – ${style.templateId || 'Template'}`,
         style,
       });
-      router.push(`/editor/${res.data.id}`);
+      router.push(`/editor/${newResume.id}`);
     } catch (err) {
       console.error('Failed to create resume from template:', err);
       alert('Failed to initialize resume. Please log in or try again.');

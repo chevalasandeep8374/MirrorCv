@@ -76,6 +76,7 @@ const SortableSection: React.FC<SortableSectionProps> = ({
     toggleSectionPageBreak,
     removeSection,
     updateSectionTitle,
+    setActiveEditingItem,
   } = useResume();
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -107,53 +108,56 @@ const SortableSection: React.FC<SortableSectionProps> = ({
   };
 
   const getSectionIcon = (type: SectionType) => {
+    const iconClass = 'w-4.5 h-4.5 text-black stroke-[2.2]';
+    const wrapperClass =
+      'w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors';
     switch (type) {
       case 'summary':
         return (
-          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
-            <FileText className="w-4 h-4" />
+          <div className={wrapperClass}>
+            <FileText className={iconClass} />
           </div>
         );
       case 'experience':
         return (
-          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
-            <Briefcase className="w-4 h-4" />
+          <div className={wrapperClass}>
+            <Briefcase className={iconClass} />
           </div>
         );
       case 'skills':
         return (
-          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
-            <Lightbulb className="w-4 h-4" />
+          <div className={wrapperClass}>
+            <Lightbulb className={iconClass} />
           </div>
         );
       case 'education':
         return (
-          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
-            <GraduationCap className="w-4 h-4" />
+          <div className={wrapperClass}>
+            <GraduationCap className={iconClass} />
           </div>
         );
       case 'projects':
         return (
-          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
-            <Folder className="w-4 h-4" />
+          <div className={wrapperClass}>
+            <Folder className={iconClass} />
           </div>
         );
       case 'certifications':
         return (
-          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
-            <Award className="w-4 h-4" />
+          <div className={wrapperClass}>
+            <Award className={iconClass} />
           </div>
         );
       case 'languages':
         return (
-          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
-            <Languages className="w-4 h-4" />
+          <div className={wrapperClass}>
+            <Languages className={iconClass} />
           </div>
         );
       default:
         return (
-          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 group-hover:bg-slate-200/80 transition-colors">
-            <FileText className="w-4 h-4" />
+          <div className={wrapperClass}>
+            <FileText className={iconClass} />
           </div>
         );
     }
@@ -275,7 +279,7 @@ const SortableSection: React.FC<SortableSectionProps> = ({
               </div>
             ) : (
               <>
-                <h3 className="font-bold text-[15px] sm:text-[16px] text-slate-900 tracking-tight truncate group-hover:text-blue-900 transition-colors">
+                <h3 className="font-black text-[17px] sm:text-[18px] text-black tracking-tight truncate group-hover:text-blue-900 transition-colors">
                   {section.title}
                 </h3>
                 <button
@@ -285,7 +289,7 @@ const SortableSection: React.FC<SortableSectionProps> = ({
                     setEditedTitle(section.title);
                     setIsEditingTitle(true);
                   }}
-                  className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all cursor-pointer"
+                  className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-500 hover:text-black hover:bg-slate-100 transition-all cursor-pointer"
                   title="Rename section"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
@@ -345,7 +349,7 @@ const SortableSection: React.FC<SortableSectionProps> = ({
             <div className="px-4 pb-4 pt-3 space-y-3">
               <div className="flex items-center justify-between pb-1">
                 <span className="text-xs font-medium text-slate-400">Editorial Rich Text</span>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => {
@@ -353,7 +357,7 @@ const SortableSection: React.FC<SortableSectionProps> = ({
                         addItem(section.id);
                       }
                     }}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#FFF0F5] border border-[#FFD5DF] text-[#FF2D6C] text-xs font-semibold hover:bg-pink-100 transition-colors cursor-pointer"
+                    className="h-9 inline-flex items-center gap-1.5 px-3.5 rounded-xl bg-[#FFF0F5] border border-[#FFD5DF] text-[#FF2D6C] text-xs font-bold hover:bg-pink-100 transition-colors cursor-pointer shadow-2xs"
                     title="Improve phrasing and impact with AI"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
@@ -361,10 +365,10 @@ const SortableSection: React.FC<SortableSectionProps> = ({
                   </button>
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition-colors cursor-pointer"
+                    className="h-9 inline-flex items-center gap-1.5 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-black text-xs font-bold transition-colors cursor-pointer shadow-2xs"
                     title="Highlight tailored job keywords"
                   >
-                    <SlidersHorizontal className="w-3 h-3 text-slate-400" />
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
                     <span>Match JD</span>
                   </button>
                 </div>
@@ -418,15 +422,11 @@ const SortableSection: React.FC<SortableSectionProps> = ({
                       key={item.id}
                       item={item}
                       sectionType={section.type}
-                      onUpdate={(data) => updateItem(section.id, item.id, data)}
-                      onDuplicate={() => duplicateItem(section.id, item.id)}
-                      onRemove={() => removeItem(section.id, item.id)}
-                      onAddBullet={() => addBullet(section.id, item.id)}
-                      onRemoveBullet={(bId) => removeBullet(section.id, item.id, bId)}
-                      onUpdateBullet={(bId, patch) => updateBullet(section.id, item.id, bId, patch)}
-                      onReorderBullets={(oIdx, nIdx) =>
-                        reorderBullets(section.id, item.id, oIdx, nIdx)
+                      onEdit={() =>
+                        setActiveEditingItem({ sectionId: section.id, itemId: item.id })
                       }
+                      onUpdate={(data) => updateItem(section.id, item.id, data)}
+                      onRemove={() => removeItem(section.id, item.id)}
                     />
                   ))}
                 </SortableContext>
@@ -440,10 +440,13 @@ const SortableSection: React.FC<SortableSectionProps> = ({
               {/* Primary Add Button */}
               <button
                 type="button"
-                onClick={() => addItem(section.id)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+                onClick={() => {
+                  const newId = addItem(section.id);
+                  setActiveEditingItem({ sectionId: section.id, itemId: newId });
+                }}
+                className="h-10 inline-flex items-center gap-2 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-black text-xs sm:text-sm font-bold transition-all cursor-pointer shadow-2xs active:scale-95"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 stroke-[2.5]" />
                 <span>{getAddButtonLabel(section.type)}</span>
               </button>
 
@@ -454,7 +457,7 @@ const SortableSection: React.FC<SortableSectionProps> = ({
                   // Trigger smart assistance or open AI tools
                   alert(`AI assistant generating tailored suggestions for ${section.title}...`);
                 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5A32EA] hover:bg-[#4C28CF] text-white text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+                className="h-10 inline-flex items-center gap-2 px-4 rounded-xl bg-[#5A32EA] hover:bg-[#4C28CF] text-white text-xs sm:text-sm font-bold transition-all cursor-pointer shadow-xs active:scale-95"
               >
                 <Bot className="w-4 h-4" />
                 <span>{getAiButtonLabel(section.type)}</span>
@@ -469,7 +472,7 @@ const SortableSection: React.FC<SortableSectionProps> = ({
                   removeSection(section.id);
                 }
               }}
-              className="w-9 h-9 rounded-lg border border-slate-200 bg-white hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-slate-500 flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-95"
+              className="h-10 w-10 rounded-xl border border-slate-200 bg-white hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-slate-500 flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-2xs"
               title="Delete Section"
             >
               <Trash2 className="w-4 h-4" />
@@ -568,34 +571,34 @@ export const SectionList: React.FC = () => {
     <div className="relative flex flex-col h-full bg-[#F8F9FA]">
       {/* Top Sub-bar / Stage Controls Filter Header with Glassmorphic Blur */}
       <div className="px-5 py-3 border-b border-slate-200/80 flex items-center justify-between bg-[#F8F9FA]/90 backdrop-blur-md sticky top-0 z-20 transition-all">
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-sm text-slate-900">Resume Sections</span>
-          <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200/90 font-mono text-[11px] text-slate-700 font-semibold shadow-2xs flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        <div className="flex items-center gap-2.5">
+          <span className="font-black text-[16px] sm:text-[17px] text-black tracking-tight">Resume Sections</span>
+          <span className="px-3 py-1 rounded-full bg-white border border-slate-200/90 font-mono text-xs text-black font-bold shadow-2xs flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             {activeSectionsCount} Active
           </span>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setShowAddMenu((v) => !v)}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-[#FF2D6C] bg-pink-50 hover:bg-pink-100/80 border border-pink-200/80 transition-all cursor-pointer px-2.5 py-1 rounded-md active:scale-95 shadow-2xs"
+            className="h-9 inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#FF2D6C] bg-pink-50 hover:bg-pink-100 border border-pink-200/80 transition-all cursor-pointer px-4 rounded-xl active:scale-95 shadow-2xs"
             title="Add a new section"
           >
-            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Add Section</span>
           </button>
           <button
             type="button"
             onClick={handleToggleCollapseAll}
-            className="text-xs font-medium text-slate-600 hover:text-slate-900 transition-all cursor-pointer px-2.5 py-1 rounded-md hover:bg-white hover:shadow-2xs active:scale-95"
+            className="h-9 inline-flex items-center text-xs sm:text-sm font-bold text-black border border-slate-200 bg-white hover:bg-slate-50 transition-all cursor-pointer px-4 rounded-xl hover:shadow-2xs active:scale-95"
             title={allCollapsed ? 'Expand all sections' : 'Collapse all sections'}
           >
             {allCollapsed ? 'Expand All' : 'Collapse All'}
           </button>
           <button
             type="button"
-            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-white hover:shadow-2xs active:scale-95 transition-all cursor-pointer"
+            className="h-9 w-9 flex items-center justify-center rounded-xl border border-slate-200 bg-white text-black hover:bg-slate-50 hover:shadow-2xs active:scale-95 transition-all cursor-pointer"
             title="Reorder sections"
           >
             <ArrowUpDown className="w-4 h-4" />

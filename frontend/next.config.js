@@ -33,6 +33,14 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  async rewrites() {
+    return [
+      {
+        source: '/signup',
+        destination: '/register',
+      },
+    ];
+  },
   async headers() {
     return [
       {

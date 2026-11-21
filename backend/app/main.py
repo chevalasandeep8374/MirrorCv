@@ -7,7 +7,6 @@ from sqlalchemy.dialects import sqlite
 from app.config import settings
 from app.database import engine, Base
 from app.models import User, Resume, UploadedTemplate, TailoringJob
-from app.api.auth import router as auth_router
 from app.api.resumes import router as resumes_router
 from app.api.templates import router as templates_router
 from app.api.tailor import router as tailor_router
@@ -27,6 +26,9 @@ from app.api.compositions import router as compositions_router, tailoring_compos
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Production security configuration check
+    settings.validate_production_settings()
+
     # Ensure tables and missing columns exist on startup
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -88,7 +90,6 @@ app.add_middleware(
 )
 
 # Include API routers
-app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(resumes_router, prefix=settings.API_V1_STR)
 app.include_router(templates_router, prefix=settings.API_V1_STR)
 app.include_router(presets_router, prefix=settings.API_V1_STR)
@@ -109,7 +110,13 @@ app.include_router(master_profile_router, prefix=settings.API_V1_STR)
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok", "app": settings.PROJECT_NAME}
+    return {
+        "status": "ok",
+        "app": settings.PROJECT_NAME,
+        "service_key_configured": bool(
+            settings.SUPABASE_SERVICE_ROLE_KEY and settings.SUPABASE_SERVICE_ROLE_KEY.strip()
+        ),
+    }
 
 
 @app.get("/")

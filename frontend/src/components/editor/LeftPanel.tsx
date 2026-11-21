@@ -3,6 +3,7 @@
 import React from 'react';
 import { useResume } from '@/context/ResumeContext';
 import { SectionList } from './content/SectionList';
+import { EditEntryView } from './content/EditEntryView';
 import { CustomizeTab } from './customize/CustomizeTab';
 import { CoverLetterPanel } from './cover-letter/CoverLetterPanel';
 import { AiResumeCopilot } from './ai/AiResumeCopilot';
@@ -17,7 +18,14 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
   onOpenTailorModal,
   onOpenAtsModal,
 }) => {
-  const { content, activeTab, saveStatus, resolveConflict } = useResume();
+  const {
+    content,
+    activeTab,
+    activeEditingItem,
+    setActiveEditingItem,
+    saveStatus,
+    resolveConflict,
+  } = useResume();
   const isCoverLetter = Boolean(content.coverLetter);
 
   return (
@@ -56,6 +64,12 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
         {activeTab === 'content' ? (
           isCoverLetter ? (
             <CoverLetterPanel />
+          ) : activeEditingItem ? (
+            <EditEntryView
+              sectionId={activeEditingItem.sectionId}
+              itemId={activeEditingItem.itemId}
+              onClose={() => setActiveEditingItem(null)}
+            />
           ) : (
             <SectionList />
           )

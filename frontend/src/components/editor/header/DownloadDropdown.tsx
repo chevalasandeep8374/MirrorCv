@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useResume } from '@/context/ResumeContext';
 import { EXPORT_LABELS } from '@/lib/export-labels';
+import { supabase } from '@/lib/supabase';
 import {
   Download,
   ChevronDown,
@@ -12,15 +13,17 @@ import {
   Loader2,
   Check,
   AlertTriangle,
+  X,
 } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export const DownloadDropdown: React.FC = () => {
-  const { resumeId, title, content, style, exportContentJson, exportStyleJson } = useResume();
+  const { resumeId, title, content, style } = useResume();
   const [isOpen, setIsOpen] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [downloadingDocx, setDownloadingDocx] = useState(false);
+  const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,32 +40,60 @@ export const DownloadDropdown: React.FC = () => {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(null), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
+
+  const getAuthToken = async (): Promise<string> => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      return data?.session?.access_token || '';
+    } catch {
+      return '';
+    }
+  };
+
   const handleDownloadPdf = async () => {
     setDownloadingPdf(true);
     setIsOpen(false);
+    setToastMessage(null);
+
     try {
+      const token = await getAuthToken();
       const response = await fetch(`${API_BASE_URL}/api/resumes/${resumeId}/export/pdf`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('mirrorcv_token') || ''}`,
+          Authorization: token ? `Bearer ${token}` : '',
         },
       });
 
       if (!response.ok) {
-        throw new Error('PDF export failed on backend');
+        let errorDetail = 'PDF generation failed on server.';
+        try {
+          const errJson = await response.json();
+          errorDetail = errJson.detail || errorDetail;
+        } catch {
+          // non-json error
+        }
+        throw new Error(errorDetail);
       }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${title.toLowerCase().replace(/[^a-z0-9]/g, '_')}_resume.pdf`;
+      const cleanTitle = (title || 'resume').toLowerCase().replace(/[^a-z0-9]/g, '_');
+      a.download = `${cleanTitle}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.warn('Backend Playwright PDF error, falling back to window.print():', err);
-      window.open(`/render/${resumeId}`, '_blank');
+      setToastMessage({ type: 'success', text: 'PDF exported successfully.' });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'PDF export failed.';
+      setToastMessage({ type: 'error', text: msg });
     } finally {
       setDownloadingPdf(false);
     }
@@ -71,28 +102,41 @@ export const DownloadDropdown: React.FC = () => {
   const handleDownloadDocx = async () => {
     setDownloadingDocx(true);
     setIsOpen(false);
+    setToastMessage(null);
+
     try {
+      const token = await getAuthToken();
       const response = await fetch(`${API_BASE_URL}/api/resumes/${resumeId}/export/docx`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('mirrorcv_token') || ''}`,
+          Authorization: token ? `Bearer ${token}` : '',
         },
       });
 
       if (!response.ok) {
-        throw new Error('DOCX export failed on backend');
+        let errorDetail = 'Word export failed on server.';
+        try {
+          const errJson = await response.json();
+          errorDetail = errJson.detail || errorDetail;
+        } catch {
+          // non-json error
+        }
+        throw new Error(errorDetail);
       }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${title.toLowerCase().replace(/[^a-z0-9]/g, '_')}_resume.docx`;
+      const cleanTitle = (title || 'resume').toLowerCase().replace(/[^a-z0-9]/g, '_');
+      a.download = `${cleanTitle}.docx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-    } catch (err) {
-      alert('Failed to export Word document. Please try again.');
+      setToastMessage({ type: 'success', text: 'Word document exported successfully.' });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to export Word document.';
+      setToastMessage({ type: 'error', text: msg });
     } finally {
       setDownloadingDocx(false);
     }
@@ -100,73 +144,111 @@ export const DownloadDropdown: React.FC = () => {
 
   const handleDownloadTxt = () => {
     setIsOpen(false);
-    let text = `${content.header.name}\n${content.header.title}\n`;
-    text += `${content.header.email} | ${content.header.phone} | ${content.header.location}\n`;
-    if (content.header.website) text += `${content.header.website}\n`;
-    text += `\n${'='.repeat(40)}\n\n`;
+    setToastMessage(null);
+    try {
+      let text = `${content.header.name || ''}\n${content.header.title || ''}\n`;
+      text += `${content.header.email || ''} | ${content.header.phone || ''} | ${content.header.location || ''}\n`;
+      if (content.header.website) text += `${content.header.website}\n`;
+      text += `\n${'='.repeat(40)}\n\n`;
 
-    content.sections.forEach((sec) => {
-      if (sec.visible === false) return;
-      text += `--- ${sec.title.toUpperCase()} ---\n\n`;
-      sec.items.forEach((item) => {
-        if (item.visible === false) return;
-        if (item.title || item.subtitle) {
-          text += `${item.title}${item.subtitle ? ' - ' + item.subtitle : ''}${item.dateRange ? ' (' + item.dateRange + ')' : ''}\n`;
-        }
-        item.bullets?.forEach((b) => {
-          text += `  • ${b.text}\n`;
+      content.sections.forEach((sec) => {
+        if (sec.visible === false) return;
+        text += `--- ${(sec.title || '').toUpperCase()} ---\n\n`;
+        sec.items.forEach((item) => {
+          if (item.visible === false) return;
+          if (item.title || item.subtitle) {
+            text += `${item.title || ''}${item.subtitle ? ' - ' + item.subtitle : ''}${item.dateRange ? ' (' + item.dateRange + ')' : ''}\n`;
+          }
+          item.bullets?.forEach((b) => {
+            text += `  • ${b.text}\n`;
+          });
+          text += '\n';
         });
-        text += '\n';
       });
-    });
 
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${title.toLowerCase().replace(/[^a-z0-9]/g, '_')}_resume.txt`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const cleanTitle = (title || 'resume').toLowerCase().replace(/[^a-z0-9]/g, '_');
+      a.download = `${cleanTitle}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setToastMessage({ type: 'success', text: 'Plain text exported successfully.' });
+    } catch {
+      setToastMessage({ type: 'error', text: 'Failed to export plain text.' });
+    }
   };
 
   const handleDownloadFullJson = () => {
     setIsOpen(false);
-    const fullResume = {
-      id: resumeId,
-      title,
-      content,
-      style,
-      exportedAt: new Date().toISOString(),
-    };
-    const blob = new Blob([JSON.stringify(fullResume, null, 2)], {
-      type: 'application/json',
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${title.toLowerCase().replace(/[^a-z0-9]/g, '_')}_full_resume.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    setToastMessage(null);
+    try {
+      const fullResume = {
+        id: resumeId,
+        title,
+        content,
+        style,
+        exportedAt: new Date().toISOString(),
+      };
+      const blob = new Blob([JSON.stringify(fullResume, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const cleanTitle = (title || 'resume').toLowerCase().replace(/[^a-z0-9]/g, '_');
+      a.download = `${cleanTitle}_data.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setToastMessage({ type: 'success', text: 'JSON exported successfully.' });
+    } catch {
+      setToastMessage({ type: 'error', text: 'Failed to export JSON.' });
+    }
   };
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <div className="inline-flex items-center rounded-md bg-[#181824] hover:bg-black text-white shadow-xs transition-colors duration-150">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-xl text-xs font-medium border animate-slide-up ${
+            toastMessage.type === 'success'
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              : 'bg-rose-50 text-rose-800 border-rose-200'
+          }`}
+        >
+          {toastMessage.type === 'success' ? (
+            <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+          ) : (
+            <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+          )}
+          <span>{toastMessage.text}</span>
+          <button
+            onClick={() => setToastMessage(null)}
+            className="ml-2 text-slate-400 hover:text-slate-600"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      <div className="h-9 inline-flex items-center rounded-xl bg-[#181824] hover:bg-black text-white shadow-xs transition-colors duration-150">
         <button
           type="button"
           id="downloadMainBtn"
           onClick={handleDownloadPdf}
           disabled={downloadingPdf || downloadingDocx}
-          className="flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-white cursor-pointer hover:bg-white/10 rounded-l-md transition-colors"
+          className="h-full flex items-center gap-2 px-4 text-xs sm:text-sm font-bold text-white cursor-pointer hover:bg-white/10 rounded-l-xl transition-colors"
         >
           {downloadingPdf || downloadingDocx ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-4 h-4" />
           )}
           <span>Download</span>
         </button>
@@ -175,22 +257,23 @@ export const DownloadDropdown: React.FC = () => {
           type="button"
           aria-label="Download formats"
           onClick={() => setIsOpen((prev) => !prev)}
-          className="px-2 py-1.5 text-slate-300 hover:text-white cursor-pointer rounded-r-md transition-colors"
+          className="h-full px-2.5 text-slate-300 hover:text-white cursor-pointer rounded-r-xl transition-colors flex items-center justify-center"
         >
-          <ChevronDown className="w-3.5 h-3.5" />
+          <ChevronDown className="w-4 h-4" />
         </button>
       </div>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 glass-2 rounded-xl shadow-xl border border-slate-200/90 z-50 p-2 space-y-1 animate-dropdown-fade">
+        <div className="absolute right-0 top-full mt-2 w-80 glass-2 rounded-xl shadow-xl border border-slate-200/90 z-50 p-2 space-y-1 animate-dropdown-fade bg-white">
           {/* Faithful PDF Download */}
           <button
             type="button"
             onClick={handleDownloadPdf}
-            className="w-full p-2.5 rounded-xl hover:bg-blue-50/70 text-left transition-colors group flex items-start gap-3"
+            disabled={downloadingPdf}
+            className="w-full p-2.5 rounded-xl hover:bg-blue-50/70 text-left transition-colors group flex items-start gap-3 cursor-pointer"
           >
             <div className="p-2 bg-rose-50 text-rose-600 rounded-lg group-hover:bg-rose-100 transition-colors mt-0.5">
-              <FileDown className="w-4 h-4" />
+              {downloadingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
@@ -201,20 +284,21 @@ export const DownloadDropdown: React.FC = () => {
                   {EXPORT_LABELS.pdf.badge}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-tight">
                 {EXPORT_LABELS.pdf.description}
               </p>
             </div>
           </button>
 
-          {/* Simplified Word Export (.docx) */}
+          {/* Editable Word (.docx) */}
           <button
             type="button"
             onClick={handleDownloadDocx}
-            className="w-full p-2.5 rounded-xl hover:bg-slate-50 text-left transition-colors group flex items-start gap-3 border-t border-slate-100"
+            disabled={downloadingDocx}
+            className="w-full p-2.5 rounded-xl hover:bg-blue-50/70 text-left transition-colors group flex items-start gap-3 cursor-pointer"
           >
             <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-100 transition-colors mt-0.5">
-              <FileText className="w-4 h-4" />
+              {downloadingDocx ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
@@ -225,7 +309,7 @@ export const DownloadDropdown: React.FC = () => {
                   {EXPORT_LABELS.docx.badge}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-tight">
                 {EXPORT_LABELS.docx.description}
               </p>
             </div>
@@ -235,19 +319,22 @@ export const DownloadDropdown: React.FC = () => {
           <button
             type="button"
             onClick={handleDownloadTxt}
-            className="w-full p-2 rounded-xl hover:bg-slate-50 text-left transition-colors group flex items-start gap-3 border-t border-slate-100"
+            className="w-full p-2.5 rounded-xl hover:bg-slate-50 text-left transition-colors group flex items-start gap-3 cursor-pointer"
           >
-            <div className="p-2 bg-slate-100 text-slate-600 rounded-lg group-hover:bg-slate-200 transition-colors mt-0.5">
+            <div className="p-2 bg-slate-100 text-slate-700 rounded-lg group-hover:bg-slate-200 transition-colors mt-0.5">
               <FileText className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-xs text-slate-900">
-                  {EXPORT_LABELS.txt.title}
+                  Plain Text (.txt)
+                </span>
+                <span className="text-[10px] bg-slate-100 text-slate-700 font-bold px-1.5 py-0.2 rounded">
+                  ASCII
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 leading-snug">
-                {EXPORT_LABELS.txt.description}
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-tight">
+                Clean text for pasting into application portals
               </p>
             </div>
           </button>
@@ -256,19 +343,22 @@ export const DownloadDropdown: React.FC = () => {
           <button
             type="button"
             onClick={handleDownloadFullJson}
-            className="w-full p-2 rounded-xl hover:bg-slate-50 text-left transition-colors group flex items-start gap-3 border-t border-slate-100"
+            className="w-full p-2.5 rounded-xl hover:bg-amber-50/70 text-left transition-colors group flex items-start gap-3 cursor-pointer"
           >
-            <div className="p-2 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-100 transition-colors mt-0.5">
+            <div className="p-2 bg-amber-50 text-amber-600 rounded-lg group-hover:bg-amber-100 transition-colors mt-0.5">
               <FileCode className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-slate-900">
-                  {EXPORT_LABELS.json.title} (v1.1.0)
+                <span className="font-bold text-xs text-slate-900 group-hover:text-amber-600">
+                  Full Resume JSON
+                </span>
+                <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded">
+                  Raw Data
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 leading-snug">
-                {EXPORT_LABELS.json.description}
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-tight">
+                Complete data model including style tokens
               </p>
             </div>
           </button>

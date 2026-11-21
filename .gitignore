@@ -44,3 +44,5 @@ test-results/
 *.pdf
 tmp_output/
 uploads/
+backups/
+/backups/

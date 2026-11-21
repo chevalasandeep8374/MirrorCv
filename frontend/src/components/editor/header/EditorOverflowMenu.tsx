@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useResume } from '@/context/ResumeContext';
 import { getActiveRepository } from '@/repositories';
+import { supabase } from '@/lib/supabase';
 import {
   MoreVertical,
   Edit2,
@@ -13,6 +14,8 @@ import {
   Command,
   Trash2,
   Check,
+  LayoutDashboard,
+  LogOut,
 } from 'lucide-react';
 import { KeyboardShortcutsModal } from '../KeyboardShortcutsModal';
 
@@ -148,6 +151,33 @@ export const EditorOverflowMenu: React.FC<EditorOverflowMenuProps> = ({
                 <span>Shortcuts</span>
               </div>
               <span className="text-[10px] text-slate-400 font-mono">Ctrl+/</span>
+            </button>
+
+            <div className="h-px bg-slate-100 my-1" />
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false);
+                router.push('/dashboard');
+              }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors text-left"
+            >
+              <LayoutDashboard className="w-3.5 h-3.5 text-slate-400" />
+              <span>Back to Dashboard</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={async () => {
+                setIsOpen(false);
+                await supabase.auth.signOut();
+                router.push('/login');
+              }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors text-left"
+            >
+              <LogOut className="w-3.5 h-3.5 text-slate-400" />
+              <span>Sign Out</span>
             </button>
 
             <div className="h-px bg-slate-100 my-1" />

@@ -83,52 +83,52 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           <button
             type="button"
             onClick={() => handleTabClick('overview')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${
+            className={`h-9 flex items-center gap-2 px-4 rounded-full font-bold text-xs sm:text-sm transition-all cursor-pointer ${
               isTabActive('overview')
                 ? 'bg-[#FFF0F5] text-[#FF2D6C] border border-[#FFD5DF] shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                : 'text-slate-700 hover:text-black hover:bg-slate-100'
             }`}
           >
-            <LayoutGrid className="w-3.5 h-3.5" />
+            <LayoutGrid className="w-4 h-4" />
             <span className="hidden sm:inline">Overview</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleTabClick('content')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-bold text-xs transition-all ${
+            className={`h-9 flex items-center gap-2 px-4 rounded-full font-bold text-xs sm:text-sm transition-all cursor-pointer ${
               isTabActive('content')
                 ? 'bg-[#FFF0F5] text-[#FF2D6C] border border-[#FFD5DF] shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                : 'text-slate-700 hover:text-black hover:bg-slate-100'
             }`}
           >
-            <FileText className="w-3.5 h-3.5" />
+            <FileText className="w-4 h-4" />
             <span>Content</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleTabClick('customize')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-bold text-xs transition-all ${
+            className={`h-9 flex items-center gap-2 px-4 rounded-full font-bold text-xs sm:text-sm transition-all cursor-pointer ${
               isTabActive('customize')
                 ? 'bg-[#FFF0F5] text-[#FF2D6C] border border-[#FFD5DF] shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                : 'text-slate-700 hover:text-black hover:bg-slate-100'
             }`}
           >
-            <Sliders className="w-3.5 h-3.5" />
+            <Sliders className="w-4 h-4" />
             <span>Customize</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleTabClick('ai')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${
+            className={`h-9 flex items-center gap-2 px-4 rounded-full font-bold text-xs sm:text-sm transition-all cursor-pointer ${
               isTabActive('ai')
                 ? 'bg-[#FFF0F5] text-[#FF2D6C] border border-[#FFD5DF] shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                : 'text-slate-700 hover:text-black hover:bg-slate-100'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="w-4 h-4" />
             <span className="hidden sm:inline">AI Tools</span>
           </button>
         </nav>

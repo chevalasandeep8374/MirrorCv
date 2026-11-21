@@ -31,12 +31,12 @@ export const classicSingleColumnPreset: ResumeStyle = {
     unit: 'pt',
   },
   colors: {
-    accent: '#2563eb', // Royal Blue
-    text: '#111827',
-    muted: '#4b5563',
+    accent: '#4F46E5', // Modern Tech Indigo
+    text: '#0F172A',
+    muted: '#64748B',
     background: '#ffffff',
     sidebarBackground: '#f8fafc',
-    divider: '#e5e7eb',
+    divider: '#e2e8f0',
   },
   bulletStyle: 'disc',
   headingStyle: 'bar',

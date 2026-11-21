@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import PdfCompareSlider from '@/components/tailor/PdfCompareSlider';
 import { CompositionResult, CompositionStatus } from '@/types/composition';
+import { supabase } from '@/lib/supabase';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -239,7 +240,30 @@ export default function TailoredResultPage() {
   };
 
   if (loading && !composition && !tailoringData) {
-    return (
+    const handleDownloadFile = async (url: string, filename: string) => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data?.session?.access_token;
+      const res = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error(`Download failed with status ${res.status}`);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (e) {
+      console.error('Download error:', e);
+      alert('Failed to download file. Please try again.');
+    }
+  };
+
+  return (
       <div className="flex h-screen items-center justify-center bg-slate-50 text-slate-500 font-sans text-sm">
         <Loader2 className="w-6 h-6 animate-spin mr-2" />
         <span>Loading tailored resume results...</span>
@@ -267,6 +291,29 @@ export default function TailoredResultPage() {
   const isIntegrityFailed = composition?.integrity_report?.passed === false || status === 'failed';
   const isLayoutChanged = status === 'layout_changed';
   const isDocxDownloadDisabled = isIntegrityFailed || (isLayoutChanged && !userAcknowledged && !docxFile?.download_url);
+
+  const handleDownloadFile = async (url: string, filename: string) => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data?.session?.access_token;
+      const res = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error(`Download failed with status ${res.status}`);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (e) {
+      console.error('Download error:', e);
+      alert('Failed to download file. Please try again.');
+    }
+  };
 
   return (
     <div className="h-screen w-screen flex flex-col bg-slate-100 overflow-hidden select-none">
@@ -388,27 +435,23 @@ export default function TailoredResultPage() {
               </div>
             </div>
           ) : (
-            <a
-              href={docxDownloadUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-lg shadow-sm transition"
+            <button
+              onClick={() => handleDownloadFile(docxDownloadUrl, `tailored_resume_${jobId}.docx`)}
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-lg shadow-sm transition cursor-pointer"
             >
               <Download className="w-3.5 h-3.5 text-slate-500" />
               <span>Download DOCX</span>
-            </a>
+            </button>
           )}
 
           {/* Download PDF */}
-          <a
-            href={pdfDownloadUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-lg shadow-sm transition"
+          <button
+            onClick={() => handleDownloadFile(pdfDownloadUrl, `tailored_resume_${jobId}.pdf`)}
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-lg shadow-sm transition cursor-pointer"
           >
             <FileDown className="w-3.5 h-3.5 text-slate-500" />
             <span>Download PDF</span>
-          </a>
+          </button>
 
           {/* Open in Editor */}
           <button
@@ -598,7 +641,30 @@ export default function TailoredResultPage() {
               const isAccepted = chg.status === 'accepted' || (chg.status !== 'rejected' && chg.accepted !== false);
               const isToggling = togglingChangeId === chg.id;
 
-              return (
+              const handleDownloadFile = async (url: string, filename: string) => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data?.session?.access_token;
+      const res = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error(`Download failed with status ${res.status}`);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (e) {
+      console.error('Download error:', e);
+      alert('Failed to download file. Please try again.');
+    }
+  };
+
+  return (
                 <div
                   key={chg.id || i}
                   className={`p-3.5 rounded-xl border transition-all text-xs ${

@@ -20,7 +20,7 @@ from app.models.user import User
 from app.models.template import UploadedTemplate
 from app.config import settings
 from app.api.deps import get_current_user, CurrentUser
-from app.services.docx_validator import validate_docx_bytes
+from app.services.docx_validator import validate_docx_bytes, enforce_valid_docx
 from app.services.docx_fingerprint import fingerprint_docx
 from app.services.role_classifier import classify_paragraphs
 from app.services.content_extractor import extract_content_and_style
@@ -172,7 +172,7 @@ async def upload_template(
 
     # 1. Enforce DOCX-only validation with safety checks (Change #6: hardened parser, zip-bomb, macros)
     contents = await file.read()
-    validate_docx_bytes(contents, file.filename)
+    enforce_valid_docx(contents, file.filename)
 
     user_id = str(current_user.id)
     auth_header = request.headers.get("Authorization", "") if request else ""

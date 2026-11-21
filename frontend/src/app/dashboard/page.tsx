@@ -31,6 +31,7 @@ import {
   Mail,
   Upload,
   User,
+  LogOut,
   ArrowUpRight,
   ShieldCheck,
   CheckCircle2,
@@ -38,6 +39,7 @@ import {
 import { CoverLetterGenerateModal } from '@/components/editor/cover-letter/CoverLetterGenerateModal';
 import { ImportModal } from '@/components/dashboard/ImportModal';
 import { AccountSettingsModal } from '@/components/dashboard/AccountSettingsModal';
+import { supabase } from '@/lib/supabase';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -305,6 +307,17 @@ export default function DashboardPage() {
           </button>
 
           <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              router.push('/login');
+            }}
+            className="p-2 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-btn transition-colors border border-border-subtle bg-white"
+            title="Sign Out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+
+          <button
             onClick={handleCreate}
             disabled={creating}
             className="btn-primary !text-xs !py-1.5 !px-4 shadow-btn"
@@ -465,16 +478,19 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-              <button onClick={handleCreate} disabled={creating} className="btn-primary !text-xs !py-2 !px-5 shadow-btn flex items-center gap-1.5">
-                <Plus className="w-3.5 h-3.5" />
-                <span>Create New Resume</span>
-              </button>
+              <Link
+                href="/templates"
+                className="btn-primary !text-xs !py-2 !px-5 shadow-btn flex items-center gap-1.5"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Start from a template</span>
+              </Link>
               <button
                 onClick={() => setImportModalOpen(true)}
                 className="btn-secondary !text-xs !py-2 !px-5 flex items-center gap-1.5"
               >
                 <Upload className="w-3.5 h-3.5 text-primary" />
-                <span>Import Existing Resume</span>
+                <span>Import a Word resume</span>
               </button>
             </div>
           </div>

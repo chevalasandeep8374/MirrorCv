@@ -222,17 +222,17 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
         className="p-3.5 sm:p-4 flex items-center justify-between cursor-pointer select-none hover:bg-slate-50/70 transition-colors duration-150 group"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-800 shrink-0 transition-colors duration-200 group-hover:bg-slate-200/80">
-            <User className="w-4 h-4" />
+          <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-black shrink-0 transition-colors duration-200 group-hover:bg-slate-200">
+            <User className="w-4.5 h-4.5 text-black stroke-[2.2]" />
           </div>
           <div className="min-w-0 leading-tight">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-[15px] sm:text-[16px] text-slate-900 tracking-tight group-hover:text-blue-900 transition-colors">
+              <span className="font-black text-[17px] sm:text-[18px] text-black tracking-tight group-hover:text-blue-900 transition-colors">
                 Personal Details
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Active section" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Active section" />
             </div>
-            <span className="text-xs text-slate-400 block truncate mt-0.5">
+            <span className="text-xs text-slate-700 font-medium block truncate mt-0.5">
               {header.name || 'Alex Mercer'} · {header.title || 'Senior Staff Software Engineer'}
             </span>
           </div>
@@ -306,7 +306,7 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -317,7 +317,7 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-2.5 py-1 bg-white border border-slate-200 rounded-md text-[11px] font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
+                className="h-8 px-3.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-black hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer active:scale-95"
               >
                 {header.photoUrl ? 'Change' : 'Upload'}
               </button>
@@ -325,19 +325,19 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
                 <button
                   type="button"
                   onClick={handleRemovePhoto}
-                  className="text-[11px] text-rose-600 hover:underline font-medium px-1 cursor-pointer"
+                  className="h-8 px-2 text-xs text-rose-600 hover:underline font-bold cursor-pointer"
                 >
                   Remove
                 </button>
               )}
-              <div className="flex items-center bg-white p-0.5 rounded-md border border-slate-200 ml-1">
+              <div className="flex items-center bg-white p-1 rounded-lg border border-slate-200 ml-1">
                 <button
                   type="button"
                   onClick={() => setPhotoShape('circle')}
-                  className={`px-2 py-0.5 text-[11px] font-medium rounded transition-colors ${
+                  className={`h-7 px-3 text-xs font-bold rounded-md transition-colors ${
                     showPhoto && photoShape === 'circle'
-                      ? 'bg-slate-100 font-bold text-slate-900 shadow-2xs'
-                      : 'text-slate-400 hover:text-slate-700'
+                      ? 'bg-slate-900 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-black'
                   }`}
                 >
                   Circle
@@ -345,10 +345,10 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
                 <button
                   type="button"
                   onClick={() => setPhotoShape('square')}
-                  className={`px-2 py-0.5 text-[11px] font-medium rounded transition-colors ${
+                  className={`h-7 px-3 text-xs font-bold rounded-md transition-colors ${
                     showPhoto && photoShape === 'square'
-                      ? 'bg-slate-100 font-bold text-slate-900 shadow-2xs'
-                      : 'text-slate-400 hover:text-slate-700'
+                      ? 'bg-slate-900 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-black'
                   }`}
                 >
                   Square
@@ -356,10 +356,10 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
                 <button
                   type="button"
                   onClick={() => setPhotoShape('off')}
-                  className={`px-2 py-0.5 text-[11px] font-medium rounded transition-colors ${
+                  className={`h-7 px-3 text-xs font-bold rounded-md transition-colors ${
                     !showPhoto
-                      ? 'bg-slate-100 font-bold text-slate-900 shadow-2xs'
-                      : 'text-slate-400 hover:text-slate-700'
+                      ? 'bg-slate-900 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-black'
                   }`}
                 >
                   Off
@@ -559,13 +559,13 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
             </div>
 
             {/* Quick Preset Pills */}
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-2">
               {LINK_PRESETS.map((preset) => (
                 <button
                   key={preset.label}
                   type="button"
                   onClick={() => handleAddLink(preset)}
-                  className="px-2 py-0.5 text-[11px] font-medium rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
+                  className="h-8 px-3 text-xs font-bold rounded-lg bg-slate-100 hover:bg-slate-200 text-black border border-slate-200 transition-colors cursor-pointer active:scale-95 shadow-2xs"
                 >
                   + {preset.label}
                 </button>
